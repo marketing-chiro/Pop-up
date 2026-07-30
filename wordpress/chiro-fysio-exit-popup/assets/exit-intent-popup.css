@@ -1,0 +1,273 @@
+/*!
+ * Chiro-Fysio exit-intent pop-up - vormgeving
+ *
+ * De kleuren staan bovenaan als custom properties. Pas die aan naar de
+ * huisstijl en de rest volgt vanzelf.
+ */
+
+.cf-exit {
+  --cf-primary: #1b6a63;
+  --cf-primary-dark: #145049;
+  --cf-accent: #e8f3f1;
+  --cf-whatsapp: #25d366;
+  --cf-text: #17242b;
+  --cf-muted: #5c6f78;
+  --cf-surface: #ffffff;
+  --cf-radius: 14px;
+
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cf-exit[hidden] {
+  display: none;
+}
+
+/* --- Overlay -------------------------------------------------------------- */
+
+.cf-exit__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 26, 31, 0.55);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cf-exit.is-open .cf-exit__overlay {
+  opacity: 1;
+}
+
+/* --- Dialoog -------------------------------------------------------------- */
+
+.cf-exit__dialog {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 36px 32px 30px;
+  border-radius: var(--cf-radius);
+  background: var(--cf-surface);
+  color: var(--cf-text);
+  box-shadow: 0 24px 60px rgba(10, 25, 30, 0.28);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.cf-exit.is-open .cf-exit__dialog {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Sluitknop ------------------------------------------------------------ */
+
+.cf-exit__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cf-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cf-exit__close:hover,
+.cf-exit__close:focus-visible {
+  background: var(--cf-accent);
+  color: var(--cf-text);
+}
+
+/* --- Tekst ---------------------------------------------------------------- */
+
+.cf-exit__title {
+  margin: 0 0 10px;
+  font-size: 1.45rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--cf-text);
+}
+
+.cf-exit__body {
+  margin: 0 0 22px;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--cf-muted);
+}
+
+.cf-exit__note {
+  margin: 16px 0 0;
+  font-size: 0.85rem;
+  color: var(--cf-muted);
+}
+
+.cf-exit__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--cf-accent);
+  color: var(--cf-primary);
+}
+
+/* --- Knoppen -------------------------------------------------------------- */
+
+.cf-exit__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cf-exit__actions--stack {
+  flex-direction: column;
+}
+
+.cf-exit__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex: 1 1 auto;
+  min-height: 50px;
+  padding: 13px 20px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.cf-exit__btn:active {
+  transform: translateY(1px);
+}
+
+.cf-exit__btn--primary {
+  background: var(--cf-primary);
+  border-color: var(--cf-primary);
+  color: #fff;
+}
+
+.cf-exit__btn--primary:hover,
+.cf-exit__btn--primary:focus-visible {
+  background: var(--cf-primary-dark);
+  border-color: var(--cf-primary-dark);
+  color: #fff;
+}
+
+.cf-exit__btn--ghost {
+  background: transparent;
+  border-color: #d5dfe2;
+  color: var(--cf-text);
+}
+
+.cf-exit__btn--ghost:hover,
+.cf-exit__btn--ghost:focus-visible {
+  background: var(--cf-accent);
+  border-color: var(--cf-primary);
+  color: var(--cf-text);
+}
+
+.cf-exit__btn--call {
+  background: var(--cf-primary);
+  border-color: var(--cf-primary);
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.cf-exit__btn--call:hover,
+.cf-exit__btn--call:focus-visible {
+  background: var(--cf-primary-dark);
+  border-color: var(--cf-primary-dark);
+  color: #fff;
+}
+
+.cf-exit__btn--whatsapp {
+  background: var(--cf-whatsapp);
+  border-color: var(--cf-whatsapp);
+  color: #fff;
+}
+
+.cf-exit__btn--whatsapp:hover,
+.cf-exit__btn--whatsapp:focus-visible {
+  background: #1fb857;
+  border-color: #1fb857;
+  color: #fff;
+}
+
+.cf-exit__icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+/* Zichtbare focus voor toetsenbordgebruikers. */
+.cf-exit__btn:focus-visible,
+.cf-exit__close:focus-visible {
+  outline: 3px solid var(--cf-primary);
+  outline-offset: 2px;
+}
+
+/* --- Achtergrond niet mee laten scrollen ---------------------------------- */
+
+body.cf-exit-lock {
+  overflow: hidden;
+}
+
+/* --- Mobiel --------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .cf-exit {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .cf-exit__dialog {
+    padding: 30px 20px 24px;
+  }
+
+  .cf-exit__title {
+    font-size: 1.3rem;
+  }
+
+  /* Ja/nee onder elkaar: prettiger te raken met de duim. */
+  .cf-exit__actions {
+    flex-direction: column-reverse;
+  }
+}
+
+/* --- Toegankelijkheid ----------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-exit__overlay,
+  .cf-exit__dialog,
+  .cf-exit__btn {
+    transition: none;
+  }
+
+  .cf-exit__dialog {
+    transform: none;
+  }
+}

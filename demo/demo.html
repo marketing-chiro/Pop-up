@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testpagina exit-intent pop-up | Chiro-Fysio</title>
+<link rel="stylesheet" href="../src/exit-intent-popup.css">
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #17242b;
+    line-height: 1.6;
+  }
+  header {
+    background: #1b6a63;
+    color: #fff;
+    padding: 28px 24px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 1.4rem; }
+  header p { margin: 0; opacity: 0.85; font-size: 0.95rem; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 24px 120px; }
+  h2 { margin-top: 40px; }
+  .tip {
+    background: #e8f3f1;
+    border-left: 4px solid #1b6a63;
+    padding: 16px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 24px 0;
+  }
+  .tip ol { margin: 8px 0 0; padding-left: 20px; }
+  .tip li { margin-bottom: 6px; }
+  code {
+    background: #dfe9ec;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  button.reset {
+    background: #1b6a63;
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .filler { color: #5c6f78; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Testpagina exit-intent pop-up</h1>
+  <p>Deze pagina hoort niet op de live site - hij is er alleen om de pop-up te proberen.</p>
+</header>
+
+<main>
+  <div class="tip">
+    <strong>Zo test je de pop-up:</strong>
+    <ol>
+      <li><strong>Desktop:</strong> wacht 8 seconden en beweeg je muis dan snel naar boven, het browservenster uit (richting de adresbalk).</li>
+      <li><strong>Mobiel:</strong> wacht 8 seconden en doe daarna 45 seconden niets, of scroll heel snel omhoog.</li>
+      <li><strong>Direct zien:</strong> voeg <code>?cf-popup=test</code> toe aan de URL van deze pagina.</li>
+      <li>De pop-up verschijnt maar één keer per 7 dagen. Klik hieronder om dat geheugen te wissen.</li>
+    </ol>
+  </div>
+
+  <p><button class="reset" type="button" id="reset">Geheugen wissen en pagina herladen</button></p>
+
+  <h2>Chiropractie</h2>
+  <p class="filler">Deze tekst staat er alleen om de pagina lang genoeg te maken om te kunnen scrollen. Bij chiropractie ligt de nadruk op het herstellen van de beweeglijkheid van de gewrichten in de wervelkolom, waardoor klachten in rug, nek en schouders kunnen afnemen.</p>
+  <p class="filler">Tijdens een eerste afspraak wordt eerst uitgebreid naar de klachten en de voorgeschiedenis gevraagd, gevolgd door een lichamelijk onderzoek. Daarna volgt een behandelplan dat aansluit bij de situatie van de patiënt.</p>
+
+  <h2>Fysiotherapie</h2>
+  <p class="filler">Fysiotherapie richt zich op het herstellen en verbeteren van het bewegen. Denk aan revalidatie na een operatie, klachten door overbelasting bij het sporten, of houdingsklachten door lang zittend werk.</p>
+  <p class="filler">De behandeling bestaat vaak uit een combinatie van oefeningen, manuele technieken en advies over houding en belasting in het dagelijks leven.</p>
+
+  <h2>Openingstijden</h2>
+  <p class="filler">De praktijk is doordeweeks geopend. Voor de actuele tijden verwijzen we naar de openingstijdenpagina op de website.</p>
+  <p class="filler">Nog wat extra tekst zodat er genoeg te scrollen valt om de mobiele trigger te kunnen uitproberen. Scroll eerst een flink stuk naar beneden en veeg daarna in één snelle beweging terug naar boven.</p>
+  <p class="filler">Nog een alinea. En nog een. Zo heeft de pagina voldoende hoogte om het gedrag realistisch na te bootsen op een telefoon of in de responsive-modus van de browser.</p>
+  <p class="filler">Tot slot deze afsluitende alinea, puur als vulling voor de testpagina.</p>
+</main>
+
+<script>
+  document.getElementById('reset').addEventListener('click', function () {
+    localStorage.removeItem('cf_exit_popup_shown_at');
+    location.href = location.pathname;
+  });
+</script>
+<script src="../src/exit-intent-popup.js"></script>
+</body>
+</html>
