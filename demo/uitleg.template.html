@@ -556,7 +556,7 @@ code {
     </li>
     <li>
       <div>
-        <strong>De bezoeker is minstens 8 seconden op de pagina</strong>
+        <strong>De bezoeker is minstens 6 seconden op de pagina, en heeft iets gedaan</strong>
         <span>Wie per ongeluk klikt en meteen wegklikt, wordt met rust gelaten. Pas daarna gaat de herkenning aan.</span>
       </div>
     </li>
@@ -576,7 +576,7 @@ code {
       <span>Bezoeker opent een pagina. De pop-up doet nog niets en staat uit.</span>
     </li>
     <li>
-      <time>8 seconden</time>
+      <time>6 seconden</time>
       <span>De herkenning gaat aan. Vanaf nu luisteren we of de aanwijzer het venster verlaat.</span>
     </li>
     <li>
@@ -613,7 +613,7 @@ code {
     </li>
     <li>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
-      <span>Binnen de eerste 8 seconden van een bezoek</span>
+      <span>Binnen de eerste 6 seconden van een bezoek</span>
     </li>
     <li>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
@@ -627,17 +627,25 @@ code {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
       <span>Als de muis het venster via links, rechts of onder verlaat</span>
     </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span>
+        Als de bezoeker helemaal niets gedaan heeft — niet bewogen, niet
+        gescrold, niet getikt. Dat houdt geautomatiseerd verkeer uit de cijfers,
+        en dat is bij jullie ruim 30% van het totaal.
+      </span>
+    </li>
   </ul>
 
   <div class="closer">
     <p>
-      <strong class="hl">Alles is aan te passen.</strong> De 8 seconden, de 7
+      <strong class="hl">Alles is aan te passen.</strong> De 6 seconden, de 7
       dagen, de 45 seconden op mobiel en de lijst met uitgesloten pagina's staan
       bovenaan in <code>src/exit-intent-popup.js</code>, met uitleg erbij in
       gewoon Nederlands.
     </p>
     <p>
-      Vind je hem te snel komen? Zet de 8 seconden hoger. Te vaak? Zet de 7
+      Vind je hem te snel komen? Zet de 6 seconden hoger. Te vaak? Zet de 7
       dagen op 30. Te opdringerig op mobiel? Daar kun je hem helemaal
       uitzetten en alleen op desktop laten werken.
     </p>

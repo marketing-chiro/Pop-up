@@ -275,6 +275,7 @@ class CF_Exit_Popup_Admin {
 										'call'        => 'gebeld',
 										'whatsapp'    => 'WhatsApp',
 										'appointment' => 'afspraak',
+										'help'        => 'kosten bekeken',
 									);
 									echo isset( $labels[ $row['action_taken'] ] )
 										? '<span class="cf-pill cf-pill--good">' . esc_html( $labels[ $row['action_taken'] ] ) . '</span>'

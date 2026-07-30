@@ -36,9 +36,23 @@
     // Hoe lang de bezoeker minimaal op de site moet zijn voordat we de
     // pop-up scherp zetten (milliseconden). Voorkomt dat iemand die per
     // ongeluk klikt meteen een pop-up krijgt.
-    armAfterMs: 8000,
+    //
+    // Op 6 seconden gezet op basis van het Analytics-rapport van juli 2026:
+    // bezoekers zijn gemiddeld 38 seconden actief en bekijken 1,98 pagina's,
+    // dus grofweg 19 seconden per pagina. Met 8 seconden wachten was een
+    // ruime derde van dat venster al voorbij voordat we begonnen te kijken.
+    armAfterMs: 6000,
+
+    // Wacht met scherpzetten tot de bezoeker iets gedaan heeft: bewegen,
+    // scrollen, tikken of typen. Een echte bezoeker doet dat altijd binnen een
+    // paar seconden; een geautomatiseerde bezoeker laadt de pagina en blijft
+    // stilzitten. Dat scheelt vervuiling in het dashboard - in juli kwam 31%
+    // van het verkeer uit landen zonder plausibele patiëntrelatie.
+    requireInteraction: true,
 
     // Hoeveel dagen we iemand met rust laten nadat de pop-up getoond is.
+    // Blijft op 7: van de bezoekers is 92% nieuw en vrijwel niemand komt terug,
+    // dus deze grens raakt in de praktijk bijna niemand.
     cooldownDays: 7,
 
     // Pop-up ook op mobiel/tablet tonen? Daar bestaat geen muis, dus we
@@ -49,9 +63,36 @@
     // tonen. Zet op 0 om deze trigger uit te schakelen.
     mobileIdleMs: 45000,
 
-    // Pagina's waar de pop-up NOOIT moet verschijnen. Een pad hoeft maar
-    // gedeeltelijk te matchen: '/contact' dekt ook '/contact-2/'.
-    excludePaths: ['/contact', '/afspraak', '/uw-afspraak', '/bedankt', '/winkelwagen', '/checkout'],
+    // Pagina's waar de pop-up NOOIT moet verschijnen. Een term hoeft maar
+    // ergens in het pad voor te komen, dus 'afspraak' dekt in één keer
+    // '/uw-afspraak/', '/afspraak-chiro/', '/afspraak-fysio/' én
+    // '/je-1e-afspraak/'. Schrijf de termen zonder schuine streep: '/afspraak'
+    // zou '/je-1e-afspraak/' juist missen, omdat daar '-afspraak' staat.
+    //
+    // Deze lijst komt uit het Analytics-rapport. Weggehaald: 'winkelwagen' en
+    // 'checkout', want die pagina's bestaan niet (geen webshop, omzet 0).
+    // Toegevoegd: de screeningpagina omdat dat een aanmeldpagina is, en de
+    // vacature- en sollicitatiepagina's - wie naar werk zoekt heeft niets aan
+    // de vraag of die gevonden heeft wat die zocht.
+    //
+    // Let op: het online boekingssysteem (Crossuite) staat op een ander domein,
+    // dus daar draait dit script van zichzelf al niet.
+    excludePaths: [
+      'contact',
+      'afspraak',
+      'bedankt',
+      'screening',
+      'vacature',
+      'sollicitatie'
+    ],
+
+    // Optionele hulplink onderin het nee-scherm, voor de vraag die het vaakst
+    // onbeantwoord blijft. Uit het rapport: 18% van de zoekopdrachten op de
+    // site zelf gaat over kosten, tarieven of vergoeding, terwijl die
+    // informatie verspreid staat over zeven pagina's die samen maar 2,5% van
+    // alle weergaven halen. Laat leeg om de link te verbergen.
+    helpUrl: '/kosten-en-vergoedingen/',
+    helpLabel: 'Gaat uw vraag over kosten of vergoeding?',
 
     // Teksten. Pas gerust aan naar de toon van de praktijk.
     text: {
@@ -254,6 +295,10 @@
               '</svg><span>' + t.callLabel + ' ' + CONFIG.phoneDisplay + '</span></a>' +
             whatsappBtn +
           '</div>' +
+          (CONFIG.helpUrl
+            ? '<a class="cf-exit__help" data-cf="help" href="' + CONFIG.helpUrl + '">' +
+              CONFIG.helpLabel + '</a>'
+            : '') +
           '<p class="cf-exit__note">' + t.hours + '</p>' +
         '</div>' +
       '</div>';
@@ -387,6 +432,31 @@
     resetIdle();
   }
 
+  // Wacht op het eerste teken van leven en zet daarna scherp. Zonder enige
+  // interactie gebeurt er niets - zo blijven bezoekers die de pagina alleen
+  // ophalen en verder niets doen buiten de metingen.
+  var WAKE_EVENTS = ['mousemove', 'scroll', 'keydown', 'touchstart', 'click'];
+  var stopWaiting = null;
+
+  function armWhenInteracted() {
+    function go() {
+      stopWaiting();
+      if (shown) return;
+      arm();
+    }
+
+    stopWaiting = function () {
+      WAKE_EVENTS.forEach(function (evt) {
+        window.removeEventListener(evt, go, true);
+      });
+      stopWaiting = null;
+    };
+
+    WAKE_EVENTS.forEach(function (evt) {
+      window.addEventListener(evt, go, { passive: true, capture: true });
+    });
+  }
+
   function arm() {
     armed = true;
     if (isTouchDevice()) {
@@ -403,6 +473,7 @@
 
   function disarm() {
     armed = false;
+    if (stopWaiting) stopWaiting();
     window.clearTimeout(idleTimer);
     document.removeEventListener('mouseout', onMouseOut);
     window.removeEventListener('scroll', onScroll);
@@ -438,6 +509,9 @@
         case 'whatsapp':
           track('whatsapp', {});
           break;
+        case 'help':
+          track('help', {});
+          break;
         case 'appointment':
           track('appointment', {});
           break;
@@ -464,7 +538,10 @@
       return;
     }
 
-    window.setTimeout(arm, CONFIG.armAfterMs);
+    window.setTimeout(
+      CONFIG.requireInteraction ? armWhenInteracted : arm,
+      CONFIG.armAfterMs
+    );
   }
 
   if (document.readyState === 'loading') {

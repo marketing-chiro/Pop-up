@@ -79,12 +79,18 @@ Alles staat bovenaan `src/exit-intent-popup.js`.
 | `whatsapp` | `''` | WhatsApp-nummer, leeg = knop verbergen |
 | `whatsappText` | vraag over de website | Tekst die vast in het WhatsApp-bericht staat |
 | `appointmentUrl` | `/uw-afspraak/` | Afspraakknop in het ja-scherm, leeg = verbergen |
-| `armAfterMs` | `8000` | Hoe lang iemand op de site moet zijn voor de pop-up scherp staat |
+| `helpUrl` / `helpLabel` | `/kosten-en-vergoedingen/` | Hulplink in het nee-scherm, leeg = verbergen |
+| `armAfterMs` | `6000` | Hoe lang iemand op de site moet zijn voor de pop-up scherp staat |
+| `requireInteraction` | `true` | Pas scherpzetten nadat de bezoeker iets gedaan heeft |
 | `cooldownDays` | `7` | Hoeveel dagen iemand met rust wordt gelaten na het zien |
 | `enableMobile` | `true` | Pop-up ook op telefoon/tablet |
 | `mobileIdleMs` | `45000` | Mobiel: na hoeveel stilte de pop-up verschijnt (`0` = uit) |
-| `excludePaths` | contact-, afspraak- en bedanktpagina's | Pagina's waar hij nooit verschijnt |
+| `excludePaths` | contact, afspraak, bedankt, screening, vacature, sollicitatie | Pagina's waar hij nooit verschijnt |
 | `text` | Nederlandse teksten | Alle zinnen in de pop-up |
+
+Bij `excludePaths` schrijf je de termen **zonder schuine streep**. `'/afspraak'`
+zou `/je-1e-afspraak/` namelijk missen, omdat daar `-afspraak` staat; `'afspraak'`
+dekt alle vier de afspraakpagina's in één keer.
 
 De kleuren staan bovenaan `src/exit-intent-popup.css` als CSS-variabelen
 (`--cf-primary`, `--cf-accent`, …). Pas die aan naar de huisstijl en de rest
@@ -124,10 +130,43 @@ valt er één af, dan gebeurt er niets:
 1. De bezoeker is niet op een contact-, afspraak- of bedanktpagina
 2. De pop-up is deze bezoeker de afgelopen 7 dagen niet getoond
 3. Het is geen ingelogde beheerder
-4. De bezoeker is minstens 8 seconden op de pagina
+4. De bezoeker is minstens 6 seconden op de pagina én heeft iets gedaan
 5. Dán pas: de muis verlaat het venster aan de bovenkant
 
 Na één vertoning gaat de herkenning uit voor de rest van het bezoek.
+
+---
+
+## Waarom de instellingen zo staan
+
+De standaardwaarden zijn geen gok: ze komen uit het Analytics-rapport van
+**2 t/m 29 juli 2026** (1.277 actieve gebruikers, 1.513 sessies).
+
+| Wat het rapport zei | Wat we ermee deden |
+|---|---|
+| Gemiddeld 38,3 sec actief, 1,98 pagina's per sessie → ± 19 sec per pagina | `armAfterMs` van 8.000 naar **6.000**. Met 8 seconden was ruim een derde van het venster al voorbij voordat we begonnen te kijken. |
+| 31,6% van de gebruikers uit Singapore, de VS, China en Iran (404 van 1.277) | `requireInteraction` erbij: pas scherpzetten ná een echte beweging, scroll, tik of toetsaanslag. Wie een pagina alleen ophaalt en stilzit, komt niet in de metingen. |
+| 92,3% nieuwe bezoekers, retentie vrijwel nul (week 1: 2 tot 6 van 231–599) | `cooldownDays` blijft 7. Vrijwel niemand komt terug, dus die grens raakt in de praktijk bijna niemand — en je hebt precies één kans per bezoeker. |
+| Geen webshop, omzet € 0, en geen enkele pagina met die naam | `winkelwagen` en `checkout` uit `excludePaths` gehaald: dode instellingen. |
+| Screening (36 weergaven) is een aanmeldpagina; vacatures en sollicitatie trekken werkzoekenden | `screening`, `vacature` en `sollicitatie` toegevoegd aan `excludePaths`. Wie werk zoekt, heeft niets aan de vraag of die gevonden heeft wat die zocht. |
+| 18% van de zoekopdrachten op de site gaat over kosten, tarieven of vergoeding — verspreid over 7 pagina's met samen 2,5% van alle weergaven | `helpUrl` erbij: onder de belknop een rustige link naar *Kosten en vergoedingen*, voor de vraag die het vaakst onbeantwoord blijft. |
+
+### De nulmeting
+
+`tel` wordt al gemeten in GA4: **19 kliks in 28 dagen**, oftewel 1,26% van de
+sessies. Dat is het getal om straks tegen af te zetten. Ter vergelijking: 288
+sessies (19,0%) begonnen een online afspraak en 151 (10,0%) klikten door.
+Bezoekers boeken dus liever online dan dat ze bellen — maar wie een *vraag*
+heeft, heeft een mens nodig, en daar is de belknop voor.
+
+### Wat het rapport niet kon zeggen
+
+Het is een momentopname van één maand met alleen paginatitels, geen paden en geen
+uitstappercentages per pagina. Voor de vraag *op welke pagina's* de pop-up het
+meest oplevert, is het rapport "Pagina's en schermen" met de kolom
+betrokkenheidstijd nodig, plus de zoekopdrachten uit Search Console. De
+uitgesloten paden hierboven zijn afgeleid uit titels — controleer of ze
+overeenkomen met de echte URL's.
 
 ---
 
@@ -136,7 +175,7 @@ Na één vertoning gaat de herkenning uit voor de rest van het bezoek.
 Een pop-up die te vaak of te vroeg komt, kost bezoekers in plaats van dat hij ze
 oplevert. Daarom zit er het volgende in:
 
-- Pas actief **na 8 seconden** op de pagina.
+- Pas actief **na 6 seconden** op de pagina, en alleen na een echte interactie.
 - **Maximaal één keer per 7 dagen** per bezoeker.
 - **Nooit** op de contact-, afspraak- of bedanktpagina — daar is de bezoeker al
   aan het doen wat we willen.

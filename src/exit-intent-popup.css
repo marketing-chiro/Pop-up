@@ -117,6 +117,27 @@
   color: var(--cf-muted);
 }
 
+/* Hulplink voor de vraag die het vaakst onbeantwoord blijft. Bewust rustiger
+   dan de knoppen: bellen blijft het hoofdaanbod. */
+.cf-exit__help {
+  display: inline-block;
+  margin: 14px 0 0;
+  font-size: 0.9rem;
+  color: var(--cf-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cf-exit__help:hover,
+.cf-exit__help:focus-visible {
+  color: var(--cf-primary-dark);
+}
+
+.cf-exit__help:focus-visible {
+  outline: 3px solid var(--cf-primary);
+  outline-offset: 3px;
+}
+
 .cf-exit__check {
   display: flex;
   align-items: center;

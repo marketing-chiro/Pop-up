@@ -59,7 +59,7 @@ class CF_Exit_Popup_Rest {
 			return new WP_REST_Response( null, 400 );
 		}
 
-		$allowed_types = array( 'open', 'answer', 'call', 'whatsapp', 'appointment' );
+		$allowed_types = array( 'open', 'answer', 'call', 'whatsapp', 'appointment', 'help' );
 		if ( ! in_array( $type, $allowed_types, true ) ) {
 			return new WP_REST_Response( null, 400 );
 		}

@@ -95,7 +95,7 @@ class CF_Exit_Popup_Storage {
 			);
 		}
 
-		if ( in_array( $type, array( 'call', 'whatsapp', 'appointment' ), true ) ) {
+		if ( in_array( $type, array( 'call', 'whatsapp', 'appointment', 'help' ), true ) ) {
 			return (bool) $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$table,
 				array( 'action_taken' => $type ),
