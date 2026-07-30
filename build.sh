@@ -21,6 +21,8 @@ echo "==> Assets kopiëren naar de plugin"
 mkdir -p "$ASSETS"
 cp "$SRC/exit-intent-popup.css" "$ASSETS/"
 cp "$SRC/exit-intent-popup.js" "$ASSETS/"
+cp "$SRC/dashboard.css" "$ASSETS/"
+cp "$SRC/dashboard.js" "$ASSETS/"
 
 echo "==> Plugin-zip maken"
 mkdir -p "$DIST"
@@ -42,6 +44,33 @@ echo "==> Plak-snippet maken"
 	cat "$SRC/exit-intent-popup.js"
 	echo "</script>"
 } > "$DIST/wpcode-snippet.html"
+
+echo "==> Testpagina maken"
+# De testpagina krijgt exact dezelfde pop-upcode als de site, maar met een
+# afspraaklink die ook buiten de site werkt.
+TMP_JS="$(mktemp)"
+sed "s|appointmentUrl: '/uw-afspraak/'|appointmentUrl: 'https://www.chiro-fysio.nl/uw-afspraak/'|" \
+	"$SRC/exit-intent-popup.js" > "$TMP_JS"
+
+{
+	echo '<!DOCTYPE html>'
+	echo '<html lang="nl">'
+	echo '<head>'
+	echo '<meta charset="utf-8">'
+	echo '<meta name="viewport" content="width=device-width, initial-scale=1">'
+	echo '<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>'
+	echo '</head>'
+	echo '<body>'
+	awk -v cssfile="$SRC/exit-intent-popup.css" -v jsfile="$TMP_JS" '
+		/\/\*INJECT_CSS\*\// { while ((getline line < cssfile) > 0) print line; close(cssfile); next }
+		/\/\*INJECT_JS\*\//  { while ((getline line < jsfile) > 0) print line; close(jsfile); next }
+		{ print }
+	' demo/testpagina.template.html
+	echo '</body>'
+	echo '</html>'
+} > "$DIST/testpagina.html"
+
+rm -f "$TMP_JS"
 
 echo "==> Klaar"
 ls -lh "$DIST"

@@ -85,6 +85,23 @@
   var lastFocused = null;
   var root = null;
 
+  // Wordt door de WordPress-plugin gevuld met het adres van het meetpunt.
+  // Buiten WordPress (bijvoorbeeld op de demopagina) blijft dit leeg en slaan
+  // we simpelweg niets op.
+  var SETTINGS = window.CF_EXIT_POPUP || {};
+
+  // Willekeurige code per vertoning, zodat het dashboard de gebeurtenissen van
+  // één bezoek aan elkaar kan knopen. Bevat geen enkel persoonsgegeven en
+  // wordt nergens bewaard nadat het bezoek voorbij is.
+  var sessionId = (function () {
+    var s = '';
+    var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < 16; i++) {
+      s += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return s;
+  })();
+
   /* --- Hulpfuncties ------------------------------------------------------- */
 
   function isTouchDevice() {
@@ -122,10 +139,47 @@
     });
   }
 
-  // Meldt gebeurtenissen aan Google Analytics/Tag Manager als die aanwezig is,
-  // en aan de pagina zelf zodat je er eigen scripts op kunt hangen.
+  // Stuurt de gebeurtenis naar het eigen dashboard in WordPress.
+  //
+  // sendBeacon is hier belangrijk: die blijft ook werken als de bezoeker de
+  // pagina op datzelfde moment verlaat, en dat is precies het scenario waar
+  // deze pop-up voor gemaakt is. Waar sendBeacon ontbreekt vallen we terug op
+  // fetch met keepalive.
+  function report(action, detail) {
+    if (!SETTINGS.endpoint) return;
+
+    var body = JSON.stringify({
+      sid: sessionId,
+      type: action,
+      page: window.location.pathname,
+      device: isTouchDevice() ? 'mobiel' : 'desktop',
+      trigger: detail.trigger || '',
+      answer: detail.answer || ''
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(SETTINGS.endpoint, new Blob([body], { type: 'application/json' }));
+        return;
+      }
+      window.fetch(SETTINGS.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body,
+        keepalive: true
+      });
+    } catch (e) {
+      /* meten mag nooit de pagina stukmaken */
+    }
+  }
+
+  // Meldt gebeurtenissen aan het eigen dashboard, aan Google Analytics/Tag
+  // Manager als die aanwezig is, en aan de pagina zelf zodat je er eigen
+  // scripts op kunt hangen.
   function track(action, detail) {
     var payload = detail || {};
+    report(action, payload);
+
     if (window.dataLayer && typeof window.dataLayer.push === 'function') {
       window.dataLayer.push({ event: 'cf_exit_popup', cf_action: action, cf_detail: payload });
     }
@@ -258,6 +312,10 @@
     shown = true;
     disarm();
     storageSet(STORAGE_KEY, String(Date.now()));
+
+    // Altijd bij de vraag beginnen, ook als een vorige keer op een later
+    // scherm geëindigd is.
+    showStep('ask');
 
     lastFocused = document.activeElement;
     root.removeAttribute('hidden');
@@ -414,4 +472,35 @@
   } else {
     init();
   }
+
+  // Kleine publieke ingang, handig om te testen of om de pop-up aan een eigen
+  // knop te hangen:
+  //
+  //   cfExitPopup.toon();     - toon hem meteen
+  //   cfExitPopup.vergeet();  - wis het "al getoond"-geheugen
+  window.cfExitPopup = {
+    toon: function () {
+      if (!root) {
+        root = buildMarkup();
+        document.body.appendChild(root);
+        bindUi();
+      }
+      shown = false;
+      open('handmatig');
+    },
+    vergeet: function () {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        /* niets aan te doen */
+      }
+
+      // "Vergeten" betekent ook dat de pop-up weer mag verschijnen, dus zetten
+      // we de herkenning opnieuw scherp. Zonder dit blijft hij na één keer
+      // tonen definitief uit.
+      shown = false;
+      disarm();
+      arm();
+    }
+  };
 })();

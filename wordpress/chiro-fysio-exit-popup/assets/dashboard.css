@@ -1,0 +1,489 @@
+/*!
+ * Vormgeving van het exit-pop-up dashboard in het WordPress-beheer.
+ *
+ * De datakleuren zijn gecontroleerd op onderscheid bij kleurenblindheid
+ * (deuteranopie, protanopie, tritanopie). Elke kleur staat bovendien altijd
+ * naast een tekstlabel, zodat kleur nooit de enige drager van betekenis is.
+ */
+
+.cf-dash {
+	/* Datakleuren */
+	--cf-found: #0a9184;    /* teal - gevonden */
+	--cf-rescued: #eda100;  /* amber - alsnog contact */
+	--cf-lost: #d03b3b;     /* rood - zonder contact weg */
+	--cf-none: #c3c2b7;     /* grijs - geen antwoord */
+	--cf-notfound: #eb6834; /* oranje - lijn "niet gevonden" */
+
+	/* Vlakken en inkt */
+	--cf-surface: #ffffff;
+	--cf-plane: #f4f5f3;
+	--cf-ink: #14201f;
+	--cf-ink-2: #55635f;
+	--cf-muted: #82918c;
+	--cf-grid: #e6e8e4;
+	--cf-border: rgba(20, 32, 31, 0.11);
+
+	max-width: 1180px;
+	color: var(--cf-ink);
+}
+
+/* --- Kop ------------------------------------------------------------------ */
+
+.cf-dash__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 8px 0 24px;
+}
+
+.cf-dash__title {
+	margin: 0;
+	padding: 0;
+	font-size: 1.6rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.cf-dash__sub {
+	margin: 4px 0 0;
+	color: var(--cf-ink-2);
+	font-size: 0.95rem;
+}
+
+.cf-dash__periods {
+	display: flex;
+	gap: 2px;
+	padding: 3px;
+	border-radius: 9px;
+	background: var(--cf-plane);
+	border: 1px solid var(--cf-border);
+}
+
+.cf-dash__period {
+	padding: 6px 13px;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	font-weight: 500;
+	text-decoration: none;
+	color: var(--cf-ink-2);
+}
+
+.cf-dash__period:hover,
+.cf-dash__period:focus {
+	color: var(--cf-ink);
+	background: rgba(255, 255, 255, 0.7);
+}
+
+.cf-dash__period.is-active {
+	background: var(--cf-surface);
+	color: var(--cf-ink);
+	font-weight: 600;
+	box-shadow: 0 1px 2px rgba(20, 32, 31, 0.1);
+}
+
+/* --- Kerncijfers ----------------------------------------------------------- */
+
+.cf-dash__tiles {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 14px;
+	margin-bottom: 22px;
+}
+
+.cf-tile {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	padding: 18px 20px;
+	border: 1px solid var(--cf-border);
+	border-radius: 12px;
+	background: var(--cf-surface);
+}
+
+/* Een streep aan de zijkant markeert de twee uitkomsten die er echt toe doen. */
+.cf-tile--good { border-left: 4px solid var(--cf-found); }
+.cf-tile--bad { border-left: 4px solid var(--cf-lost); }
+
+.cf-tile__label {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	font-size: 0.82rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--cf-ink-2);
+}
+
+.cf-tile__value {
+	font-size: 2.4rem;
+	font-weight: 700;
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+}
+
+.cf-tile__note {
+	font-size: 0.83rem;
+	color: var(--cf-muted);
+	line-height: 1.4;
+}
+
+.cf-dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	flex: none;
+}
+
+.cf-dot--good { background: var(--cf-found); }
+.cf-dot--bad { background: var(--cf-lost); }
+
+/* --- Kaarten --------------------------------------------------------------- */
+
+.cf-dash__row {
+	display: grid;
+	gap: 14px;
+	margin-bottom: 14px;
+}
+
+.cf-dash__row--split {
+	grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+	/* Kaarten even hoog maken als hun buurman levert alleen loze ruimte op. */
+	align-items: start;
+}
+
+.cf-card {
+	padding: 20px 22px 22px;
+	margin-bottom: 14px;
+	border: 1px solid var(--cf-border);
+	border-radius: 12px;
+	background: var(--cf-surface);
+}
+
+.cf-card__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.cf-card__title {
+	margin: 0;
+	padding: 0;
+	font-size: 1.05rem;
+	font-weight: 650;
+	text-wrap: balance;
+}
+
+.cf-card__sub {
+	margin: 3px 0 16px;
+	font-size: 0.87rem;
+	color: var(--cf-ink-2);
+	max-width: 62ch;
+}
+
+.cf-subhead {
+	margin: 0 0 8px;
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--cf-muted);
+}
+
+.cf-subhead + .cf-bars { margin-bottom: 18px; }
+
+.cf-chart { overflow-x: auto; }
+
+/* De grafieken schalen mee met de kaart; de verhouding komt uit de viewBox. */
+.cf-chart svg {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.cf-empty {
+	margin: 0;
+	padding: 18px 0;
+	color: var(--cf-muted);
+	font-size: 0.9rem;
+}
+
+/* --- Gestapelde balk ------------------------------------------------------- */
+
+.cf-seg { transition: opacity 0.12s ease; }
+.cf-seg:hover { opacity: 0.85; }
+
+.cf-fill--found { fill: var(--cf-found); }
+.cf-fill--rescued { fill: var(--cf-rescued); }
+.cf-fill--lost { fill: var(--cf-lost); }
+.cf-fill--none { fill: var(--cf-none); }
+
+.cf-seg__label {
+	font-size: 12px;
+	font-weight: 600;
+	fill: #ffffff;
+	pointer-events: none;
+}
+
+/* Amber en grijs zijn te licht voor witte tekst - daar zetten we donkere inkt. */
+.cf-fill--rescued + .cf-seg__label,
+.cf-fill--none + .cf-seg__label {
+	fill: #14201f;
+}
+
+/* --- Legenda ---------------------------------------------------------------- */
+
+.cf-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 18px;
+	margin-top: 14px;
+}
+
+.cf-legend__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font-size: 0.83rem;
+	color: var(--cf-ink-2);
+}
+
+.cf-legend__swatch {
+	width: 11px;
+	height: 11px;
+	border-radius: 3px;
+	flex: none;
+}
+
+.cf-legend__swatch.cf-fill--found { background: var(--cf-found); }
+.cf-legend__swatch.cf-fill--rescued { background: var(--cf-rescued); }
+.cf-legend__swatch.cf-fill--lost { background: var(--cf-lost); }
+.cf-legend__swatch.cf-fill--none { background: var(--cf-none); }
+.cf-legend__swatch.cf-fill--shown { background: var(--cf-found); }
+.cf-legend__swatch.cf-fill--notfound { background: var(--cf-notfound); }
+
+/* --- Lijnen ----------------------------------------------------------------- */
+
+.cf-grid { stroke: var(--cf-grid); stroke-width: 1; }
+
+.cf-axis {
+	font-size: 11px;
+	fill: var(--cf-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.cf-line {
+	fill: none;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.cf-line--shown { stroke: var(--cf-found); }
+.cf-line--notfound { stroke: var(--cf-notfound); }
+
+.cf-area--shown {
+	fill: var(--cf-found);
+	opacity: 0.09;
+	stroke: none;
+}
+
+.cf-cross {
+	stroke: var(--cf-muted);
+	stroke-width: 1;
+	stroke-dasharray: 3 3;
+}
+
+/* Een ring in de vlakkleur houdt de punten leesbaar waar de lijnen elkaar raken. */
+.cf-dot--shown { fill: var(--cf-found); stroke: var(--cf-surface); stroke-width: 2; }
+.cf-dot--notfound { fill: var(--cf-notfound); stroke: var(--cf-surface); stroke-width: 2; }
+
+/* --- Kolommen (uur van de dag) ---------------------------------------------- */
+
+.cf-col { fill: var(--cf-found); }
+.cf-col:hover { fill: #0a6f66; }
+.cf-col__bg { fill: var(--cf-plane); }
+
+/* --- Horizontale staven ------------------------------------------------------ */
+
+.cf-bars {
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+}
+
+.cf-bars__row {
+	display: grid;
+	grid-template-columns: minmax(120px, 240px) 1fr 52px;
+	align-items: center;
+	gap: 14px;
+	padding: 3px 4px;
+	border-radius: 6px;
+}
+
+.cf-bars__row:hover { background: var(--cf-plane); }
+
+.cf-bars__label {
+	font-size: 0.87rem;
+	color: var(--cf-ink);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cf-bars__track {
+	height: 22px;
+	border-radius: 4px;
+	background: var(--cf-plane);
+	overflow: hidden;
+}
+
+.cf-bars__fill {
+	display: block;
+	height: 100%;
+	border-radius: 4px;
+	background: var(--cf-found);
+	min-width: 3px;
+}
+
+.cf-bars--compact .cf-bars__track { height: 16px; }
+.cf-bars--compact .cf-bars__row { grid-template-columns: minmax(110px, 200px) 1fr 44px; }
+
+.cf-bars__value {
+	font-size: 0.87rem;
+	font-weight: 600;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+/* --- Tabel -------------------------------------------------------------------- */
+
+.cf-tablewrap {
+	overflow-x: auto;
+	margin-top: 14px;
+}
+
+.cf-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.87rem;
+}
+
+.cf-table th {
+	text-align: left;
+	padding: 8px 12px 8px 0;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--cf-muted);
+	border-bottom: 1px solid var(--cf-border);
+	white-space: nowrap;
+}
+
+.cf-table td {
+	padding: 9px 12px 9px 0;
+	border-bottom: 1px solid var(--cf-grid);
+	vertical-align: middle;
+}
+
+.cf-table tr:last-child td { border-bottom: 0; }
+
+.cf-table__when {
+	white-space: nowrap;
+	color: var(--cf-ink-2);
+	font-variant-numeric: tabular-nums;
+}
+
+.cf-table__page {
+	max-width: 320px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cf-muted { color: var(--cf-muted); }
+
+/* Een pil draagt de status in vorm én tekst, niet in kleur alleen. */
+.cf-pill {
+	display: inline-block;
+	padding: 2px 9px;
+	border-radius: 20px;
+	font-size: 0.78rem;
+	font-weight: 500;
+	background: var(--cf-plane);
+	color: var(--cf-ink-2);
+	white-space: nowrap;
+}
+
+.cf-pill--good {
+	background: rgba(10, 145, 132, 0.13);
+	color: #0a6258;
+}
+
+.cf-pill--bad {
+	background: rgba(208, 59, 59, 0.12);
+	color: #a72c2c;
+}
+
+/* --- Tooltip -------------------------------------------------------------------- */
+
+.cf-tip {
+	position: fixed;
+	z-index: 100000;
+	max-width: 260px;
+	padding: 9px 12px;
+	border-radius: 8px;
+	background: #14201f;
+	color: #ffffff;
+	font-size: 0.82rem;
+	line-height: 1.45;
+	pointer-events: none;
+	box-shadow: 0 6px 20px rgba(20, 32, 31, 0.3);
+}
+
+.cf-tip[hidden] { display: none; }
+
+/* --- Leeg en voettekst ------------------------------------------------------------ */
+
+.cf-dash__empty {
+	padding: 40px 32px;
+	border: 1px dashed var(--cf-border);
+	border-radius: 12px;
+	background: var(--cf-surface);
+	text-align: center;
+}
+
+.cf-dash__empty h2 {
+	margin: 0 0 8px;
+	font-size: 1.1rem;
+}
+
+.cf-dash__empty p {
+	margin: 0 auto;
+	max-width: 60ch;
+	color: var(--cf-ink-2);
+}
+
+.cf-dash__privacy {
+	margin: 18px 2px 40px;
+	max-width: 70ch;
+	font-size: 0.83rem;
+	color: var(--cf-muted);
+}
+
+/* --- Toegankelijkheid --------------------------------------------------------------- */
+
+.cf-dash a:focus-visible,
+.cf-dash .button:focus-visible {
+	outline: 2px solid var(--cf-found);
+	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cf-seg { transition: none; }
+}

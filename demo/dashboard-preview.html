@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voorbeeld: dashboard exit-pop-up | Chiro-Fysio</title>
+<link rel="stylesheet" href="../src/dashboard.css">
+<style>
+  /* Alleen voor deze voorbeeldpagina: buiten WordPress bootsen we de
+     omgeving van het beheerscherm na. */
+  body {
+    margin: 0;
+    padding: 0 24px 40px;
+    background: #f0f0f1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    color: #14201f;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .preview-banner {
+    max-width: 1180px;
+    margin: 0 auto 20px;
+    padding: 14px 18px;
+    border-radius: 0 0 10px 10px;
+    background: #14201f;
+    color: #fff;
+    font-size: 0.88rem;
+  }
+  .preview-banner strong { color: #63c3b8; }
+  .button {
+    display: inline-block;
+    padding: 6px 13px;
+    border: 1px solid #c3c9c7;
+    border-radius: 6px;
+    background: #fff;
+    color: #14201f;
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="preview-banner">
+  <strong>Voorbeeldweergave.</strong>
+  Alle cijfers op deze pagina zijn verzonnen om te laten zien hoe het dashboard eruitziet.
+  Na installatie van de plugin staan hier de echte metingen van chiro-fysio.nl,
+  onder <em>WordPress → Exit-pop-up</em>.
+</div>
+
+<div class="wrap cf-dash">
+
+  <div class="cf-dash__head">
+    <div>
+      <h1 class="cf-dash__title">Exit-pop-up</h1>
+      <p class="cf-dash__sub">Wie stond er op het punt te vertrekken, en hadden we die kunnen helpen?</p>
+    </div>
+    <div class="cf-dash__periods">
+      <a class="cf-dash__period" href="#">Laatste 7 dagen</a>
+      <a class="cf-dash__period is-active" href="#" aria-current="page">Laatste 30 dagen</a>
+      <a class="cf-dash__period" href="#">Laatste 90 dagen</a>
+      <a class="cf-dash__period" href="#">Laatste 12 maanden</a>
+    </div>
+  </div>
+
+  <div class="cf-dash__tiles">
+    <div class="cf-tile">
+      <span class="cf-tile__label">Pop-up getoond</span>
+      <span class="cf-tile__value">340</span>
+      <span class="cf-tile__note">bezoekers die weg wilden gaan</span>
+    </div>
+
+    <div class="cf-tile">
+      <span class="cf-tile__label">Vond niet wat die zocht</span>
+      <span class="cf-tile__value">96</span>
+      <span class="cf-tile__note">45% van wie antwoord gaf</span>
+    </div>
+
+    <div class="cf-tile cf-tile--good">
+      <span class="cf-tile__label">
+        <span class="cf-dot cf-dot--good" aria-hidden="true"></span>
+        Nam alsnog contact op
+      </span>
+      <span class="cf-tile__value">31</span>
+      <span class="cf-tile__note">32% van wie het niet vond - 26x gebeld, 5x WhatsApp</span>
+    </div>
+
+    <div class="cf-tile cf-tile--bad">
+      <span class="cf-tile__label">
+        <span class="cf-dot cf-dot--bad" aria-hidden="true"></span>
+        Toch weg, zonder contact
+      </span>
+      <span class="cf-tile__value">65</span>
+      <span class="cf-tile__note">hier lag werk dat we misliepen</span>
+    </div>
+  </div>
+
+  <div class="cf-dash__row cf-dash__row--split">
+    <section class="cf-card">
+      <h2 class="cf-card__title">Hoe liep het af?</h2>
+      <p class="cf-card__sub">Alle 340 vertoningen in deze periode.</p>
+      <div id="cf-chart-outcome" class="cf-chart"></div>
+    </section>
+
+    <section class="cf-card">
+      <h2 class="cf-card__title">Verloop per dag</h2>
+      <p class="cf-card__sub">Getoond tegenover "niet gevonden".</p>
+      <div id="cf-chart-trend" class="cf-chart"></div>
+    </section>
+  </div>
+
+  <section class="cf-card">
+    <h2 class="cf-card__title">Op welke pagina's liepen bezoekers vast?</h2>
+    <p class="cf-card__sub">
+      Dit is het lijstje om mee aan de slag te gaan: hier stelden bezoekers een vraag
+      die de pagina niet beantwoordde.
+    </p>
+    <div id="cf-chart-pages" class="cf-chart"></div>
+  </section>
+
+  <div class="cf-dash__row cf-dash__row--split">
+    <section class="cf-card">
+      <h2 class="cf-card__title">Wanneer op de dag?</h2>
+      <p class="cf-card__sub">Vertoningen per uur. Buiten openingstijden is bellen geen optie.</p>
+      <div id="cf-chart-hours" class="cf-chart"></div>
+    </section>
+
+    <section class="cf-card">
+      <h2 class="cf-card__title">Waar kwamen ze vandaan?</h2>
+      <p class="cf-card__sub">Apparaat en het signaal waarop de pop-up verscheen.</p>
+      <div id="cf-chart-devices" class="cf-chart"></div>
+    </section>
+  </div>
+
+  <section class="cf-card">
+    <div class="cf-card__head">
+      <div>
+        <h2 class="cf-card__title">Laatste vertoningen</h2>
+        <p class="cf-card__sub">De 50 meest recente, om een gevoel te krijgen bij de cijfers.</p>
+      </div>
+      <a class="button" href="#">Alles downloaden (CSV)</a>
+    </div>
+
+    <div class="cf-tablewrap">
+      <table class="cf-table">
+        <thead>
+          <tr>
+            <th scope="col">Wanneer</th>
+            <th scope="col">Pagina</th>
+            <th scope="col">Apparaat</th>
+            <th scope="col">Antwoord</th>
+            <th scope="col">Actie</th>
+          </tr>
+        </thead>
+        <tbody id="preview-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="cf-dash__privacy">
+    Er worden geen persoonsgegevens vastgelegd: geen IP-adres, geen naam, en geen cookie
+    waarmee iemand over meerdere bezoeken te volgen is. Metingen ouder dan een jaar
+    worden automatisch verwijderd.
+  </p>
+</div>
+
+<script>
+/* Verzonnen cijfers, alleen voor deze voorbeeldpagina. De plugin vult dit
+   object in het echt met de metingen uit de database. */
+(function () {
+  // Vaste reeks pseudo-toevalsgetallen, zodat de voorbeeldpagina er elke keer
+  // hetzelfde uitziet.
+  var seed = 7;
+  function rnd() {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  }
+
+  var perDay = [];
+  var today = new Date('2026-07-30T00:00:00');
+  for (var i = 29; i >= 0; i--) {
+    var d = new Date(today.getTime() - i * 86400000);
+    var weekend = d.getDay() === 0 || d.getDay() === 6;
+    var shown = Math.round((weekend ? 5 : 14) + rnd() * 8);
+    var notFound = Math.round(shown * (0.24 + rnd() * 0.14));
+    perDay.push({
+      day: d.toISOString().slice(0, 10),
+      shown: shown,
+      not_found: notFound,
+      rescued: Math.round(notFound * (0.2 + rnd() * 0.25))
+    });
+  }
+
+  var perHour = [];
+  var shape = [0,0,0,0,0,1,2,5,11,18,22,19,14,17,21,24,20,15,9,6,4,3,2,1];
+  for (var h = 0; h < 24; h++) {
+    perHour.push({
+      hour: h,
+      shown: shape[h],
+      not_found: Math.round(shape[h] * 0.28)
+    });
+  }
+
+  window.CF_DASH = {
+    days: 30,
+    totals: {
+      shown: 340, found: 118, not_found: 96, rescued: 31, lost: 65,
+      no_answer: 126, calls: 26, whatsapps: 5, appointments: 14
+    },
+    perDay: perDay,
+    topPages: [
+      { page: '/tarieven-en-vergoedingen/', shown: 58, not_found: 27, lost: 19 },
+      { page: '/klachten/lage-rugpijn/',    shown: 44, not_found: 18, lost: 12 },
+      { page: '/openingstijden/',           shown: 31, not_found: 14, lost: 11 },
+      { page: '/je-1e-afspraak/',           shown: 39, not_found: 12, lost: 7 },
+      { page: '/de-praktijk/',              shown: 33, not_found: 9,  lost: 6 },
+      { page: '/',                          shown: 61, not_found: 8,  lost: 5 },
+      { page: '/hoe-het-werkt/',            shown: 27, not_found: 5,  lost: 3 },
+      { page: '/behandelingen/dry-needling/', shown: 19, not_found: 3, lost: 2 }
+    ],
+    devices: [
+      { label: 'desktop', shown: 198, not_found: 52 },
+      { label: 'mobiel',  shown: 142, not_found: 44 }
+    ],
+    triggers: [
+      { label: 'mouseleave', shown: 198, not_found: 52 },
+      { label: 'idle',       shown: 96,  not_found: 31 },
+      { label: 'scroll-up',  shown: 46,  not_found: 13 }
+    ],
+    perHour: perHour
+  };
+
+  // Een paar voorbeeldregels voor de tabel.
+  var pages = ['/tarieven-en-vergoedingen/', '/klachten/lage-rugpijn/', '/openingstijden/', '/', '/de-praktijk/'];
+  var rows = '';
+  for (var r = 0; r < 12; r++) {
+    var answer = rnd();
+    var page = pages[Math.floor(rnd() * pages.length)];
+    var device = rnd() > 0.45 ? 'desktop' : 'mobiel';
+    var hh = String(9 + Math.floor(rnd() * 10)).padStart(2, '0');
+    var mm = String(Math.floor(rnd() * 60)).padStart(2, '0');
+
+    var answerCell, actionCell;
+    if (answer < 0.28) {
+      answerCell = '<span class="cf-pill cf-pill--bad">niet gevonden</span>';
+      actionCell = rnd() > 0.6
+        ? '<span class="cf-pill cf-pill--good">gebeld</span>'
+        : '<span class="cf-muted">-</span>';
+    } else if (answer < 0.62) {
+      answerCell = '<span class="cf-pill cf-pill--good">gevonden</span>';
+      actionCell = '<span class="cf-muted">-</span>';
+    } else {
+      answerCell = '<span class="cf-pill">geen antwoord</span>';
+      actionCell = '<span class="cf-muted">-</span>';
+    }
+
+    rows += '<tr>' +
+      '<td class="cf-table__when">30 jul ' + hh + ':' + mm + '</td>' +
+      '<td class="cf-table__page">' + page + '</td>' +
+      '<td>' + device + '</td>' +
+      '<td>' + answerCell + '</td>' +
+      '<td>' + actionCell + '</td>' +
+      '</tr>';
+  }
+  document.getElementById('preview-rows').innerHTML = rows;
+})();
+</script>
+<script src="../src/dashboard.js"></script>
+</body>
+</html>

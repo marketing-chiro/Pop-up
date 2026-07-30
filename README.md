@@ -6,9 +6,29 @@ vraag: **"Heeft u gevonden wat u zocht?"**
 - **Ja** → korte bedankboodschap, met een knop om direct een afspraak te maken.
 - **Nee** → het telefoonnummer van de praktijk als grote belknop (en optioneel WhatsApp).
 
+Daarbij hoort een dashboard in WordPress dat laat zien hoe vaak dit gebeurt, op
+welke pagina's, en hoeveel van die bezoekers alsnog contact opnemen.
+
 Geen dependencies, geen tracking cookies, geen abonnement op een externe dienst.
 
 ![Zo ziet het eruit](docs/screenshot-vraag.png)
+
+---
+
+## Eerst even zelf proberen
+
+Twee manieren, allebei zonder iets te installeren:
+
+- **`demo/demo.html`** — open dit bestand in de browser. Neppagina met uitleg,
+  een knop om het "al getoond"-geheugen te wissen en genoeg tekst om te scrollen.
+- **`dist/testpagina.html`** — één zelfstandig bestand met een statuspaneel
+  (staat de detectie al scherp?), knoppen om de pop-up direct op te roepen, en
+  een logboek dat live meeschrijft wat de tool detecteert. Handig om ook op de
+  telefoon te bekijken: zet het bestand ergens neer waar je het kunt openen.
+
+Het dashboard bekijken zonder de plugin te installeren kan met
+**`demo/dashboard-preview.html`** — dezelfde weergave, gevuld met verzonnen
+cijfers.
 
 ---
 
@@ -117,10 +137,67 @@ oplevert. Daarom zit er het volgende in:
 
 ---
 
-## Meten of het werkt
+## Het dashboard
 
-Als Google Analytics of Google Tag Manager op de site staat, worden deze
-gebeurtenissen automatisch doorgegeven onder de naam `cf_exit_popup`:
+Na activatie verschijnt **Exit-pop-up** in het linkermenu van WordPress.
+
+![Het dashboard](docs/screenshot-dashboard.png)
+
+### De vier cijfers bovenaan
+
+| Cijfer | Wat het betekent |
+|---|---|
+| **Pop-up getoond** | Bezoekers die op het punt stonden te vertrekken |
+| **Vond niet wat die zocht** | Daarvan het aantal dat "nee" antwoordde |
+| **Nam alsnog contact op** | Die "nee" zeiden en daarna belden, appten of een afspraak maakten |
+| **Toch weg, zonder contact** | Die "nee" zeiden en alsnog vertrokken — hier lag werk dat je misliep |
+
+Het percentage bij "vond niet wat die zocht" rekent met de mensen die
+daadwerkelijk antwoord gaven. Van wie wegklikt weten we het simpelweg niet, en
+die meetellen zou het beeld vertekenen.
+
+### Wat er verder in staat
+
+- **Hoe liep het af** — alle vertoningen verdeeld over de vier uitkomsten.
+- **Verloop per dag** — getoond tegenover "niet gevonden", met details bij hover.
+- **Op welke pagina's liepen bezoekers vast** — het meest bruikbare lijstje van
+  het hele dashboard. Hier stelden bezoekers een vraag die de pagina niet
+  beantwoordde, dus dit is meteen je verbeterlijstje.
+- **Wanneer op de dag** — verschijnt de pop-up vooral buiten openingstijden, dan
+  is bellen op dat moment geen bruikbaar aanbod en is WhatsApp of een
+  terugbelverzoek waardevoller.
+- **Apparaat en signaal** — desktop tegenover mobiel, en waardoor de pop-up
+  verscheen.
+- **Laatste vertoningen** — de 50 meest recente regels, plus een knop om alles
+  als CSV te downloaden voor Excel.
+
+Kies bovenaan de periode: 7 dagen, 30 dagen, 90 dagen of 12 maanden.
+
+### Wat er wel en niet wordt vastgelegd
+
+Per vertoning wordt één regel bewaard: tijdstip, het pad van de pagina, of het
+een desktop of telefoon was, welk signaal de pop-up opriep, het antwoord, en of
+er daarna op een knop is geklikt.
+
+Wat er **niet** in staat: geen IP-adres, geen naam, geen e-mailadres, en geen
+cookie waarmee iemand over meerdere bezoeken te volgen is. Een zoekopdracht in
+de URL (`?s=...`) wordt afgeknipt, omdat daar zomaar iets persoonlijks in kan
+staan. Metingen ouder dan een jaar worden automatisch verwijderd.
+
+Dat betekent dat je hiervoor geen cookiemelding of toestemming nodig hebt. Ga je
+zelf uitbreiden met gegevens die wél naar een persoon te herleiden zijn, dan
+verandert dat — laat dat dan even toetsen.
+
+De metingen blijven staan als je de plugin deactiveert, dus je bent ze niet
+kwijt als hij een keer uit gaat.
+
+---
+
+## Meten via Google Analytics
+
+Naast het eigen dashboard worden dezelfde gebeurtenissen doorgegeven aan Google
+Analytics of Tag Manager, als die op de site staan, onder de naam
+`cf_exit_popup`:
 
 | Actie | Wanneer |
 |---|---|
@@ -143,24 +220,34 @@ window.addEventListener('cf-exit-popup', function (e) {
 });
 ```
 
----
+Je kunt de pop-up ook zelf oproepen, bijvoorbeeld vanaf een eigen knop:
 
-## Zelf testen
-
-Open `demo/demo.html` in de browser. Dat is een neppagina met uitleg erin, een
-knop om het "al getoond"-geheugen te wissen, en genoeg tekst om het
-scrollgedrag na te bootsen.
+```js
+cfExitPopup.toon();     // toon hem meteen
+cfExitPopup.vergeet();  // wis het "al getoond"-geheugen en zet de detectie weer scherp
+```
 
 ---
 
 ## Wat staat waar
 
 ```
-src/                          de bronbestanden - hier pas je dingen aan
-  exit-intent-popup.js        gedrag + alle instellingen
-  exit-intent-popup.css       vormgeving + kleuren
-wordpress/                    de plugin
-dist/                         het resultaat van ./build.sh (zip + snippet)
-demo/demo.html                testpagina
-build.sh                      bouwt dist/ opnieuw na een wijziging
+src/                            de bronbestanden - hier pas je dingen aan
+  exit-intent-popup.js          gedrag + alle instellingen van de pop-up
+  exit-intent-popup.css         vormgeving + kleuren van de pop-up
+  dashboard.js / dashboard.css  het dashboard in WordPress
+wordpress/chiro-fysio-exit-popup/
+  chiro-fysio-exit-popup.php    de plugin zelf
+  includes/                     opslag, meetpunt en dashboardpagina
+dist/                           resultaat van ./build.sh
+  chiro-fysio-exit-popup.zip    de plugin, klaar om te uploaden
+  wpcode-snippet.html           plakversie voor een snippet-plugin
+  testpagina.html               zelfstandige testpagina
+demo/                           lokaal uitproberen
+  demo.html                     testpagina met de pop-up
+  dashboard-preview.html        dashboard met verzonnen cijfers
+build.sh                        bouwt dist/ opnieuw na een wijziging
 ```
+
+Pas je iets aan in `src/`? Draai daarna `./build.sh`, anders blijft de plugin op
+de oude versie staan.
