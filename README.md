@@ -94,10 +94,19 @@ volgt vanzelf.
 
 ## Hoe herkent hij dat iemand weggaat?
 
-**Op desktop** houden we de muis in de gaten. Zodra die de bovenkant van het
-venster verlaat — richting de adresbalk, de tabbladen of het kruisje — is dat
-het signaal. Dat is precies het moment waarop iemand op het punt staat te
-vertrekken, en nog niet weg is.
+> Liever visueel? Open **`dist/uitleg.html`** — daar kun je het signaal zelf
+> uitlokken in een kader en zie je meteen wanneer het wel en niet afgaat.
+
+**We volgen de muis niet.** Er worden geen muisbewegingen bijgehouden, opgeslagen
+of in een kaart verwerkt. De browser geeft zelf één melding door — "de aanwijzer
+heeft het venster verlaten" — en daarop stellen we één vraag: gebeurde dat aan de
+bovenkant?
+
+**Op desktop** is dat het hele signaal. Verlaat de aanwijzer het venster naar
+boven — richting de adresbalk, de tabbladen, de terugknop of het kruisje — dan
+staat iemand op het punt te vertrekken maar is die er nog. Gaat de muis er via
+links, rechts of onder uit, dan negeren we het: daar liggen meestal een tweede
+scherm of de taakbalk, en dat zegt niets over vertrekken.
 
 **Op mobiel en tablet** bestaat er geen muis. Daar gebruiken we twee andere
 signalen: 45 seconden lang geen enkele aanraking, of heel snel omhoog swipen
@@ -106,6 +115,19 @@ of de adresbalk gaat).
 
 Wil je het rustiger houden? Zet `enableMobile` op `false` of verhoog
 `mobileIdleMs`.
+
+### De vijf voorwaarden
+
+Het signaal alleen is niet genoeg. Dit moet allemaal kloppen, in deze volgorde —
+valt er één af, dan gebeurt er niets:
+
+1. De bezoeker is niet op een contact-, afspraak- of bedanktpagina
+2. De pop-up is deze bezoeker de afgelopen 7 dagen niet getoond
+3. Het is geen ingelogde beheerder
+4. De bezoeker is minstens 8 seconden op de pagina
+5. Dán pas: de muis verlaat het venster aan de bovenkant
+
+Na één vertoning gaat de herkenning uit voor de rest van het bezoek.
 
 ---
 
@@ -243,9 +265,11 @@ dist/                           resultaat van ./build.sh
   chiro-fysio-exit-popup.zip    de plugin, klaar om te uploaden
   wpcode-snippet.html           plakversie voor een snippet-plugin
   testpagina.html               zelfstandige testpagina
+  uitleg.html                   visuele uitleg van de herkenning
 demo/                           lokaal uitproberen
   demo.html                     testpagina met de pop-up
   dashboard-preview.html        dashboard met verzonnen cijfers
+  uitleg.template.html          bron van de uitlegpagina
 build.sh                        bouwt dist/ opnieuw na een wijziging
 ```
 

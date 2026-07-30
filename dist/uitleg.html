@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>
+</head>
+<body>
+<title>Hoe de pop-up weet dat iemand weggaat — Chiro-Fysio</title>
+
+<style>
+:root {
+  --ink:        #101917;
+  --ink-2:      #46605a;
+  --muted:      #7c918c;
+  --surface:    #ffffff;
+  --plane:      #eef2f0;
+  --line:       #d9e2df;
+  --accent:     #0a7d72;
+  --accent-ink: #06544c;
+  --accent-wash:#e2f0ed;
+  --signal:     #b5730a;
+  --signal-wash:#fdf1dd;
+  --ignore:     #7c918c;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --ink:        #eaf2f0;
+    --ink-2:      #a3b8b3;
+    --muted:      #758b86;
+    --surface:    #101715;
+    --plane:      #19221f;
+    --line:       #293733;
+    --accent:     #3fb5a6;
+    --accent-ink: #7fd6c9;
+    --accent-wash:#14312c;
+    --signal:     #e0a33c;
+    --signal-wash:#2e2415;
+    --ignore:     #758b86;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink:        #eaf2f0;
+  --ink-2:      #a3b8b3;
+  --muted:      #758b86;
+  --surface:    #101715;
+  --plane:      #19221f;
+  --line:       #293733;
+  --accent:     #3fb5a6;
+  --accent-ink: #7fd6c9;
+  --accent-wash:#14312c;
+  --signal:     #e0a33c;
+  --signal-wash:#2e2415;
+  --ignore:     #758b86;
+}
+
+:root[data-theme="light"] {
+  --ink:        #101917;
+  --ink-2:      #46605a;
+  --muted:      #7c918c;
+  --surface:    #ffffff;
+  --plane:      #eef2f0;
+  --line:       #d9e2df;
+  --accent:     #0a7d72;
+  --accent-ink: #06544c;
+  --accent-wash:#e2f0ed;
+  --signal:     #b5730a;
+  --signal-wash:#fdf1dd;
+  --ignore:     #7c918c;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 22px 90px;
+}
+
+/* --- Kop -------------------------------------------------------------- */
+
+.masthead {
+  padding: 48px 0 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.73rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.75rem, 5vw, 2.35rem);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.standfirst {
+  margin: 0;
+  max-width: 58ch;
+  font-size: 1.06rem;
+  color: var(--ink-2);
+}
+
+h2 {
+  margin: 52px 0 8px;
+  font-size: 1.28rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+p { max-width: 62ch; }
+p.body { color: var(--ink-2); margin: 0 0 14px; }
+
+.lede { margin: 0 0 20px; color: var(--ink-2); max-width: 62ch; }
+
+strong.hl { color: var(--ink); }
+
+/* --- Het misverstand -------------------------------------------------- */
+
+.contrast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+  gap: 14px;
+  margin: 26px 0 8px;
+}
+
+.contrast__card {
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--plane);
+}
+
+.contrast__card--yes {
+  background: var(--accent-wash);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.contrast__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 0.71rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 9px;
+}
+
+.contrast__card--yes .contrast__tag { color: var(--accent-ink); }
+
+.contrast__card p { margin: 0; font-size: 0.95rem; color: var(--ink-2); }
+.contrast__card--yes p { color: var(--ink); }
+
+.mark { font-weight: 700; font-size: 0.95rem; }
+
+/* --- Interactief venster ---------------------------------------------- */
+
+.demo {
+  margin: 26px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--plane);
+}
+
+.demo__chrome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.demo__dots { display: flex; gap: 5px; }
+.demo__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+
+.demo__bar {
+  flex: 1;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--plane);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.demo__stage {
+  position: relative;
+  height: 300px;
+  cursor: crosshair;
+  overflow: hidden;
+}
+
+/* De strook waar het signaal vandaan komt. */
+.demo__zone {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 74px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--signal) 26%, transparent),
+    transparent);
+  border-bottom: 1px dashed color-mix(in srgb, var(--signal) 55%, transparent);
+  pointer-events: none;
+}
+
+.demo__zonelabel {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--signal);
+  pointer-events: none;
+}
+
+.demo__hint {
+  position: absolute;
+  inset: 96px 24px auto 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.94rem;
+  pointer-events: none;
+}
+
+.demo__readout {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* Flitst als het signaal afgaat. */
+.demo__flash {
+  position: absolute;
+  inset: 0;
+  background: var(--signal-wash);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.demo__flash.is-on { opacity: 1; transition: opacity 0.06s ease; }
+
+.demo__verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.93rem;
+  min-height: 22px;
+}
+
+.demo__verdict b { font-weight: 650; }
+
+.lamp {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+  flex: none;
+}
+
+.lamp--fire {
+  background: var(--signal);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 22%, transparent);
+}
+
+.lamp--ignore { background: var(--ignore); }
+
+.touch-note {
+  display: none;
+  margin: 26px 0 10px;
+  padding: 18px 20px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--plane);
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+
+/* --- Voorwaardenlijst -------------------------------------------------- */
+
+.gates {
+  counter-reset: gate;
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gates li {
+  counter-increment: gate;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 15px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.gates li:last-child { border-bottom: 0; }
+
+.gates li::before {
+  content: counter(gate);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+  border-radius: 6px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gates li:last-child::before {
+  color: var(--signal);
+  background: var(--signal-wash);
+}
+
+.gates strong { display: block; margin-bottom: 1px; }
+.gates span { color: var(--ink-2); font-size: 0.93rem; }
+
+/* --- Tijdlijn ----------------------------------------------------------- */
+
+.timeline {
+  margin: 24px 0 0;
+  padding: 0 0 0 22px;
+  list-style: none;
+  border-left: 2px solid var(--line);
+}
+
+.timeline li {
+  position: relative;
+  padding: 0 0 20px 14px;
+}
+
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: -29px;
+  top: 8px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+}
+
+.timeline li:last-child { padding-bottom: 0; }
+.timeline li:last-child::before { background: var(--signal); border-color: var(--signal); }
+
+.timeline time {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.timeline span { color: var(--ink-2); font-size: 0.95rem; }
+
+/* --- Nooit-lijst ---------------------------------------------------------- */
+
+.never {
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.never li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 11px;
+  align-items: start;
+  color: var(--ink-2);
+  font-size: 0.96rem;
+}
+
+.never svg { margin-top: 5px; color: var(--muted); }
+
+/* --- Slot ------------------------------------------------------------------ */
+
+.closer {
+  margin-top: 50px;
+  padding: 20px 22px;
+  border-left: 3px solid var(--accent);
+  background: var(--plane);
+  border-radius: 0 10px 10px 0;
+}
+
+.closer p { margin: 0; color: var(--ink-2); font-size: 0.96rem; }
+.closer p + p { margin-top: 10px; }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.87em;
+  background: var(--plane);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.closer code { background: var(--surface); }
+
+@media (prefers-reduced-motion: reduce) {
+  .demo__flash { transition: none; }
+}
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <span class="eyebrow">Chiro-Fysio · uitleg</span>
+    <h1>Hoe de pop-up weet dat iemand weggaat</h1>
+    <p class="standfirst">
+      Kort antwoord: we volgen de muis niet. We wachten op één moment — het
+      moment waarop de muisaanwijzer de bovenkant van het browservenster
+      verlaat.
+    </p>
+  </header>
+
+  <h2>Eerst het misverstand uit de weg</h2>
+  <p class="lede">
+    "De muis van de klant herkennen" klinkt alsof we iemand over de site volgen.
+    Dat gebeurt niet, en dat is bewust: het is niet nodig, en het zou een hoop
+    privacyvragen oproepen die je er niet bij wilt hebben.
+  </p>
+
+  <div class="contrast">
+    <div class="contrast__card">
+      <span class="contrast__tag"><span class="mark">✕</span> Dit doen we niet</span>
+      <p>
+        Muisbewegingen opslaan, bijhouden waar iemand overheen gaat, klikkaarten
+        of opnames maken van het bezoek. Er wordt geen enkele beweging bewaard.
+      </p>
+    </div>
+    <div class="contrast__card contrast__card--yes">
+      <span class="contrast__tag"><span class="mark">✓</span> Dit doen we wel</span>
+      <p>
+        Wachten op één melding van de browser: <strong class="hl">de aanwijzer
+        heeft het venster verlaten</strong>. Daarna stellen we één vraag: ging
+        dat via de bovenkant?
+      </p>
+    </div>
+  </div>
+
+  <h2>Probeer het zelf</h2>
+  <p class="lede">
+    Beweeg met je muis het kader hieronder in, en dan er weer uit. Verlaat het
+    kader eens via de bovenkant, en eens via links, rechts of onder — je ziet
+    meteen het verschil.
+  </p>
+
+  <div class="demo" id="demo">
+    <div class="demo__chrome">
+      <span class="demo__dots">
+        <span class="demo__dot"></span><span class="demo__dot"></span><span class="demo__dot"></span>
+      </span>
+      <span class="demo__bar">chiro-fysio.nl</span>
+    </div>
+
+    <div class="demo__stage" id="stage">
+      <div class="demo__flash" id="flash"></div>
+      <div class="demo__zone"></div>
+      <span class="demo__zonelabel">↑ hier ligt de uitgang</span>
+      <p class="demo__hint" id="hint">
+        Beweeg je muis hier naar binnen, en dan naar buiten.
+      </p>
+      <span class="demo__readout" id="readout">aanwijzer buiten het kader</span>
+    </div>
+
+    <div class="demo__verdict">
+      <span class="lamp" id="lamp"></span>
+      <span id="verdict">Nog geen signaal.</span>
+    </div>
+  </div>
+
+  <p class="touch-note" id="touchnote">
+    Je bekijkt dit op een touchscreen, dus er is geen muis om mee te proberen.
+    Verderop staat wat er op een telefoon gebeurt — daar gebruiken we andere
+    signalen.
+  </p>
+
+  <h2>Waarom juist de bovenkant</h2>
+  <p class="body">
+    Alles waarmee je een website verlaat zit bovenaan: de adresbalk, de
+    tabbladen, de terugknop, de favorieten en het kruisje. Gaat de aanwijzer
+    daarheen, dan is de kans groot dat het bezoek voorbij is.
+  </p>
+  <p class="body">
+    Verlaat de muis het venster via links, rechts of onder, dan negeren we het.
+    Daar ligt meestal een tweede scherm, de taakbalk of gewoon het bureaublad —
+    en die bewegingen zeggen niets over vertrekken. Dat verschil scheelt een
+    hoop pop-ups die nergens op slaan.
+  </p>
+
+  <h2>Wanneer hij verschijnt</h2>
+  <p class="lede">
+    Het signaal alleen is niet genoeg. Deze vijf dingen moeten allemaal kloppen,
+    in deze volgorde. Zodra er één afvalt, gebeurt er niets.
+  </p>
+
+  <ol class="gates">
+    <li>
+      <div>
+        <strong>De bezoeker is niet op een contact- of afspraakpagina</strong>
+        <span>Daar is die al aan het doen wat we willen. Een pop-up zou daar alleen maar in de weg zitten.</span>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>Hij is deze bezoeker de afgelopen 7 dagen niet getoond</strong>
+        <span>Wie hem al gezien heeft, krijgt een week lang rust.</span>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>Het is geen ingelogde beheerder</strong>
+        <span>Jij en je collega's zien hem niet tijdens het werken aan de site.</span>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>De bezoeker is minstens 8 seconden op de pagina</strong>
+        <span>Wie per ongeluk klikt en meteen wegklikt, wordt met rust gelaten. Pas daarna gaat de herkenning aan.</span>
+      </div>
+    </li>
+    <li>
+      <div>
+        <strong>Dán pas: de muis verlaat het venster aan de bovenkant</strong>
+        <span>Op dat moment verschijnt de vraag "Heeft u gevonden wat u zocht?".</span>
+      </div>
+    </li>
+  </ol>
+
+  <h2>Een bezoek in de tijd</h2>
+
+  <ol class="timeline">
+    <li>
+      <time>0 seconden</time>
+      <span>Bezoeker opent een pagina. De pop-up doet nog niets en staat uit.</span>
+    </li>
+    <li>
+      <time>8 seconden</time>
+      <span>De herkenning gaat aan. Vanaf nu luisteren we of de aanwijzer het venster verlaat.</span>
+    </li>
+    <li>
+      <time>ondertussen</time>
+      <span>De bezoeker leest, scrollt en klikt door. Er wordt niets vastgelegd.</span>
+    </li>
+    <li>
+      <time>het moment</time>
+      <span>De muis schiet omhoog, het venster uit. De vraag verschijnt — één keer, en daarna gaat de herkenning weer uit voor dit bezoek.</span>
+    </li>
+  </ol>
+
+  <h2>Op de telefoon</h2>
+  <p class="body">
+    Daar bestaat geen muisaanwijzer, dus dit signaal is er simpelweg niet. In
+    plaats daarvan letten we op twee dingen die hetzelfde betekenen:
+  </p>
+  <p class="body">
+    <strong class="hl">45 seconden niets aanraken.</strong> Geen tik, geen veeg,
+    geen scroll. De aandacht is dan meestal ergens anders.
+  </p>
+  <p class="body">
+    <strong class="hl">Snel omhoog vegen naar de top.</strong> Dat is de
+    beweging richting de adresbalk en de terugknop. We kijken daarbij naar de
+    snelheid: rustig terugscrollen om iets na te lezen telt niet mee.
+  </p>
+
+  <h2>Wanneer hij nooit verschijnt</h2>
+
+  <ul class="never">
+    <li>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span>Op de contact-, afspraak- of bedanktpagina</span>
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span>Binnen de eerste 8 seconden van een bezoek</span>
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span>Als dezelfde bezoeker hem de afgelopen 7 dagen al zag</span>
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span>Twee keer tijdens hetzelfde bezoek</span>
+    </li>
+    <li>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span>Als de muis het venster via links, rechts of onder verlaat</span>
+    </li>
+  </ul>
+
+  <div class="closer">
+    <p>
+      <strong class="hl">Alles is aan te passen.</strong> De 8 seconden, de 7
+      dagen, de 45 seconden op mobiel en de lijst met uitgesloten pagina's staan
+      bovenaan in <code>src/exit-intent-popup.js</code>, met uitleg erbij in
+      gewoon Nederlands.
+    </p>
+    <p>
+      Vind je hem te snel komen? Zet de 8 seconden hoger. Te vaak? Zet de 7
+      dagen op 30. Te opdringerig op mobiel? Daar kun je hem helemaal
+      uitzetten en alleen op desktop laten werken.
+    </p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  var readout = document.getElementById('readout');
+  var verdict = document.getElementById('verdict');
+  var lamp = document.getElementById('lamp');
+  var flash = document.getElementById('flash');
+  var hint = document.getElementById('hint');
+
+  var touch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  if (touch) {
+    document.getElementById('touchnote').style.display = 'block';
+  }
+
+  stage.addEventListener('mousemove', function (e) {
+    var box = stage.getBoundingClientRect();
+    var y = Math.round(e.clientY - box.top);
+    readout.textContent = 'afstand tot de bovenrand: ' + y + ' px';
+    hint.style.opacity = '0';
+  });
+
+  stage.addEventListener('mouseenter', function () {
+    hint.style.opacity = '0';
+  });
+
+  stage.addEventListener('mouseleave', function (e) {
+    var box = stage.getBoundingClientRect();
+    var x = e.clientX - box.left;
+    var y = e.clientY - box.top;
+
+    hint.style.opacity = '';
+    readout.textContent = 'aanwijzer buiten het kader';
+
+    // Precies de vraag die het echte script stelt: verliet de aanwijzer
+    // het venster aan de bovenkant?
+    if (y <= 2) {
+      lamp.className = 'lamp lamp--fire';
+      verdict.innerHTML = '<b>Signaal.</b> De aanwijzer ging via de bovenkant weg — hier zou de pop-up verschijnen.';
+      flash.classList.add('is-on');
+      window.setTimeout(function () { flash.classList.remove('is-on'); }, 90);
+      return;
+    }
+
+    var side = 'onder';
+    if (x <= 2) side = 'links';
+    else if (x >= box.width - 2) side = 'rechts';
+
+    lamp.className = 'lamp lamp--ignore';
+    verdict.innerHTML = '<b>Genegeerd.</b> De aanwijzer ging er via ' + side +
+      ' uit. Dat betekent meestal niet dat iemand vertrekt.';
+  });
+})();
+</script>
+</body>
+</html>

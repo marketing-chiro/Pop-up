@@ -72,5 +72,20 @@ sed "s|appointmentUrl: '/uw-afspraak/'|appointmentUrl: 'https://www.chiro-fysio.
 
 rm -f "$TMP_JS"
 
+echo "==> Uitlegpagina maken"
+{
+	echo '<!DOCTYPE html>'
+	echo '<html lang="nl">'
+	echo '<head>'
+	echo '<meta charset="utf-8">'
+	echo '<meta name="viewport" content="width=device-width, initial-scale=1">'
+	echo '<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style>'
+	echo '</head>'
+	echo '<body>'
+	cat demo/uitleg.template.html
+	echo '</body>'
+	echo '</html>'
+} > "$DIST/uitleg.html"
+
 echo "==> Klaar"
 ls -lh "$DIST"
