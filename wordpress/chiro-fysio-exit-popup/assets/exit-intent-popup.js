@@ -24,10 +24,10 @@
     // vanaf een mobiel of vanuit het buitenland belt.
     phoneHref: '+31243558830',
 
-    // WhatsApp-nummer in internationaal formaat zonder + en zonder spaties,
-    // bijvoorbeeld '31612345678'. Laat leeg ('') om de WhatsApp-knop te
-    // verbergen - een vast 024-nummer werkt meestal niet op WhatsApp.
-    whatsapp: '',
+    // WhatsApp-nummer van de praktijk, in internationaal formaat zonder + en
+    // zonder spaties. Dit is 06-14798722. Laat leeg ('') om de knop te
+    // verbergen; een vast 024-nummer werkt namelijk niet op WhatsApp.
+    whatsapp: '31614798722',
 
     // Tekst die alvast in het WhatsApp-bericht staat.
     whatsappText: 'Hallo, ik heb een vraag naar aanleiding van jullie website.',

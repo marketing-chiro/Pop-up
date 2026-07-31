@@ -280,9 +280,15 @@ body.cf-exit-lock {
     font-size: 1.3rem;
   }
 
-  /* Ja/nee onder elkaar: prettiger te raken met de duim. */
-  .cf-exit__actions {
-    flex-direction: column-reverse;
+  /* Ja/nee onder elkaar. "Nee, nog niet" hoort onderaan, in de duimzone: dat is
+     de knop die naar hulp leidt en ook als hoofdknop is vormgegeven. Stond die
+     bovenaan, dan lag juist "Ja, gelukt" - het wegtikken - het handigst, en dat
+     kost je precies de gesprekken waar het om begonnen was.
+
+     Alleen voor deze twee knoppen; de contactknoppen staan al onder elkaar in
+     de goede volgorde, met bellen als hoofdaanbod. */
+  .cf-exit__actions:not(.cf-exit__actions--stack) {
+    flex-direction: column;
   }
 }
 
@@ -327,10 +333,10 @@ body.cf-exit-lock {
     // vanaf een mobiel of vanuit het buitenland belt.
     phoneHref: '+31243558830',
 
-    // WhatsApp-nummer in internationaal formaat zonder + en zonder spaties,
-    // bijvoorbeeld '31612345678'. Laat leeg ('') om de WhatsApp-knop te
-    // verbergen - een vast 024-nummer werkt meestal niet op WhatsApp.
-    whatsapp: '',
+    // WhatsApp-nummer van de praktijk, in internationaal formaat zonder + en
+    // zonder spaties. Dit is 06-14798722. Laat leeg ('') om de knop te
+    // verbergen; een vast 024-nummer werkt namelijk niet op WhatsApp.
+    whatsapp: '31614798722',
 
     // Tekst die alvast in het WhatsApp-bericht staat.
     whatsappText: 'Hallo, ik heb een vraag naar aanleiding van jullie website.',

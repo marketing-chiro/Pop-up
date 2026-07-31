@@ -26,3 +26,17 @@ dashboard toonde toen nullen alsof het een rustige week was.
 
 Dat is precies waarom deze test bestaat. Draai hem opnieuw na elke wijziging
 aan de queries in `class-cf-exit-popup-storage.php`.
+
+## De losse testbestanden
+
+| Bestand | Wat het controleert |
+|---|---|
+| `browser-basis.js` | Verschijnen, ja/nee, sluiten, rustperiode, uitgesloten pagina's, mobiel |
+| `browser-instellingen.js` | De keuzes uit het Analytics-rapport: wachttijd, interactie-eis, hulplink |
+| `browser-menu.js` | Het menu bovenaan mag geen pop-up geven, ook niet bij voorbijschieten |
+| `browser-terugkerend.js` | Bezoekteller en de andere vraag voor wie terugkomt |
+| `e2e-wordpress.js` | Tegen een echte WordPress: laden, meten, wegschrijven |
+| `e2e-app.js` | De installeerbare app: manifest, iconen, offline, toegang |
+
+De eerste vier draaien tegen `dist/testpagina.html` en hebben geen server nodig.
+De laatste twee vragen een draaiende WordPress; zie hierboven.

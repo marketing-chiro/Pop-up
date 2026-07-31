@@ -53,17 +53,22 @@ het **footer**-veld. Dat bestand bevat de CSS en JavaScript al bij elkaar.
 
 ---
 
-## Voordat je live gaat
+## Contactgegevens
 
-Het telefoonnummer klopt: **024-3558830**, bevestigd door de praktijk. De knop
-toont `024 - 355 88 30` en belt `+31243558830` — dat is hetzelfde nummer, met de
-nul vervangen door de landcode zodat het ook vanaf een mobiel werkt.
+Allebei bevestigd door de praktijk en verwerkt in de code:
 
-Eén ding staat nog open in `src/exit-intent-popup.js`, bovenin het blok `CONFIG`:
-
-| Instelling | Nu | Actie |
+| Wat | Nummer | Wordt in de pop-up |
 |---|---|---|
-| `whatsapp` | leeg | Vul een **mobiel** nummer in als je WhatsApp wilt aanbieden, bijvoorbeeld `31612345678`. Zolang dit leeg is, wordt de WhatsApp-knop netjes verborgen. |
+| Telefoon | 024-3558830 | knop *Bel 024 - 355 88 30*, belt `tel:+31243558830` |
+| WhatsApp | 06-14798722 | knop *Stuur een WhatsApp* naar `wa.me/31614798722` |
+
+Bij beide staat de landcode in de link in plaats van de nul, zodat bellen en
+appen ook werken vanaf een mobiel of vanuit het buitenland. Het WhatsApp-bericht
+begint alvast met een zin, zodat de bezoeker niet vanaf niets hoeft te typen.
+
+**Bellen blijft het hoofdaanbod.** De belknop staat bovenaan in de huisstijlkleur,
+WhatsApp eronder in het groen van WhatsApp zelf. Wil je WhatsApp weghalen, dan
+maak je `whatsapp` leeg en verdwijnt de knop vanzelf.
 
 Na het aanpassen van `src/` draai je `./build.sh` om de plugin-zip en het
 snippet opnieuw te bouwen.
@@ -78,7 +83,7 @@ Alles staat bovenaan `src/exit-intent-popup.js`.
 |---|---|---|
 | `phoneDisplay` | `024 - 355 88 30` | Nummer zoals de bezoeker het ziet |
 | `phoneHref` | `+31243558830` | Nummer voor de belknop (internationaal, geen spaties) |
-| `whatsapp` | `''` | WhatsApp-nummer, leeg = knop verbergen |
+| `whatsapp` | `31614798722` | WhatsApp-nummer, leeg = knop verbergen |
 | `whatsappText` | vraag over de website | Tekst die vast in het WhatsApp-bericht staat |
 | `appointmentUrl` | `/uw-afspraak/` | Afspraakknop in het ja-scherm, leeg = verbergen |
 | `helpUrl` / `helpLabel` | `/kosten-en-vergoedingen/` | Hulplink in het nee-scherm, leeg = verbergen |
