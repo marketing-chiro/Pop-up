@@ -85,12 +85,12 @@ Alles staat bovenaan `src/exit-intent-popup.js`.
 | `cooldownDays` | `7` | Hoeveel dagen iemand met rust wordt gelaten na het zien |
 | `enableMobile` | `true` | Pop-up ook op telefoon/tablet |
 | `mobileIdleMs` | `45000` | Mobiel: na hoeveel stilte de pop-up verschijnt (`0` = uit) |
-| `excludePaths` | contact, afspraak, bedankt, screening, vacature, sollicitatie | Pagina's waar hij nooit verschijnt |
+| `excludePaths` | contact, afspraak, bedankt, vacature | Pagina's waar hij nooit verschijnt |
 | `text` | Nederlandse teksten | Alle zinnen in de pop-up |
 
 Bij `excludePaths` schrijf je de termen **zonder schuine streep**. `'/afspraak'`
 zou `/je-1e-afspraak/` namelijk missen, omdat daar `-afspraak` staat; `'afspraak'`
-dekt alle vier de afspraakpagina's in één keer.
+dekt alle vier de afspraakpagina's in één keer, en `'vacature'` dekt `/vacatures/`.
 
 De kleuren staan bovenaan `src/exit-intent-popup.css` als CSS-variabelen
 (`--cf-primary`, `--cf-accent`, …). Pas die aan naar de huisstijl en de rest
@@ -127,7 +127,7 @@ Wil je het rustiger houden? Zet `enableMobile` op `false` of verhoog
 Het signaal alleen is niet genoeg. Dit moet allemaal kloppen, in deze volgorde —
 valt er één af, dan gebeurt er niets:
 
-1. De bezoeker is niet op een contact-, afspraak- of bedanktpagina
+1. De bezoeker is niet op een contact-, afspraak-, bedankt- of vacaturepagina
 2. De pop-up is deze bezoeker de afgelopen 7 dagen niet getoond
 3. Het is geen ingelogde beheerder
 4. De bezoeker is minstens 6 seconden op de pagina én heeft iets gedaan
@@ -148,7 +148,7 @@ De standaardwaarden zijn geen gok: ze komen uit het Analytics-rapport van
 | 31,6% van de gebruikers uit Singapore, de VS, China en Iran (404 van 1.277) | `requireInteraction` erbij: pas scherpzetten ná een echte beweging, scroll, tik of toetsaanslag. Wie een pagina alleen ophaalt en stilzit, komt niet in de metingen. |
 | 92,3% nieuwe bezoekers, retentie vrijwel nul (week 1: 2 tot 6 van 231–599) | `cooldownDays` blijft 7. Vrijwel niemand komt terug, dus die grens raakt in de praktijk bijna niemand — en je hebt precies één kans per bezoeker. |
 | Geen webshop, omzet € 0, en geen enkele pagina met die naam | `winkelwagen` en `checkout` uit `excludePaths` gehaald: dode instellingen. |
-| Screening (36 weergaven) is een aanmeldpagina; vacatures en sollicitatie trekken werkzoekenden | `screening`, `vacature` en `sollicitatie` toegevoegd aan `excludePaths`. Wie werk zoekt, heeft niets aan de vraag of die gevonden heeft wat die zocht. |
+| De vacaturepagina trekt werkzoekenden in plaats van patiënten | `vacature` toegevoegd aan `excludePaths` (dekt `/vacatures/`). Wie werk zoekt, heeft niets aan de vraag of die gevonden heeft wat die zocht. De praktijk bevestigde dat dit de enige extra uitzondering is. |
 | 18% van de zoekopdrachten op de site gaat over kosten, tarieven of vergoeding — verspreid over 7 pagina's met samen 2,5% van alle weergaven | `helpUrl` erbij: onder de belknop een rustige link naar *Kosten en vergoedingen*, voor de vraag die het vaakst onbeantwoord blijft. |
 
 ### De nulmeting
