@@ -7,8 +7,10 @@
 (function () {
 	'use strict';
 
-	var DATA = window.CF_DASH;
-	if (!DATA) return;
+	// De cijfers komen op twee manieren binnen: in het WordPress-beheer worden
+	// ze meegegeven in window.CF_DASH, en in de app worden ze opgehaald en via
+	// cfDashboard.render() doorgegeven. De tekencode is voor beide dezelfde.
+	var DATA = window.CF_DASH || null;
 
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -388,9 +390,21 @@
 
 	/* --- Start --------------------------------------------------------------- */
 
-	drawOutcome();
-	drawTrend();
-	drawPages();
-	drawHours();
-	drawDevices();
+	function drawAll() {
+		if (!DATA) return;
+		drawOutcome();
+		drawTrend();
+		drawPages();
+		drawHours();
+		drawDevices();
+	}
+
+	window.cfDashboard = {
+		render: function (data) {
+			DATA = data;
+			drawAll();
+		}
+	};
+
+	drawAll();
 })();

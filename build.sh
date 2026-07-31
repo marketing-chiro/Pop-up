@@ -23,6 +23,8 @@ cp "$SRC/exit-intent-popup.css" "$ASSETS/"
 cp "$SRC/exit-intent-popup.js" "$ASSETS/"
 cp "$SRC/dashboard.css" "$ASSETS/"
 cp "$SRC/dashboard.js" "$ASSETS/"
+cp "$SRC/app.css" "$ASSETS/"
+cp "$SRC/app.js" "$ASSETS/"
 
 echo "==> Plugin-zip maken"
 mkdir -p "$DIST"

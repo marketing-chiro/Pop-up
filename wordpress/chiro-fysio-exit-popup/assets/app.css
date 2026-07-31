@@ -1,0 +1,148 @@
+/*!
+ * Extra opmaak voor de installeerbare app.
+ *
+ * De grafieken en kaarten komen uit dashboard.css; dit bestand voegt alleen
+ * toe wat de app buiten het WordPress-beheer nodig heeft: een eigen balk
+ * bovenaan, en ruimte voor de randen van een telefoonscherm.
+ */
+
+body.cf-app {
+	margin: 0;
+	background: #f4f5f3;
+	color: #14201f;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* --- Balk bovenaan ---------------------------------------------------- */
+
+.cf-app__bar {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 20px;
+	/* Bij een geïnstalleerde app op een telefoon loopt het scherm door tot
+	   onder de statusbalk; deze marge houdt de tekst daaronder vandaan. */
+	padding-top: calc(12px + env(safe-area-inset-top));
+	background: #0a5f57;
+	color: #fff;
+}
+
+.cf-app__title {
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.cf-app__site {
+	font-size: 0.85rem;
+	color: rgba(255, 255, 255, 0.72);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cf-app__state {
+	margin-left: auto;
+	font-size: 0.8rem;
+	color: rgba(255, 255, 255, 0.8);
+	white-space: nowrap;
+}
+
+.cf-app__state[hidden] { display: none; }
+
+.cf-app__state--offline {
+	color: #ffd9a3;
+}
+
+/* Zonder statusmelding moeten de knoppen alsnog rechts staan. */
+.cf-app__state[hidden] ~ .cf-app__install,
+.cf-app__state[hidden] ~ .cf-app__refresh:first-of-type {
+	margin-left: auto;
+}
+
+.cf-app__install {
+	font: inherit;
+	font-size: 0.85rem;
+	font-weight: 600;
+	padding: 7px 14px;
+	border: 1px solid rgba(255, 255, 255, 0.55);
+	border-radius: 8px;
+	background: transparent;
+	color: #fff;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.cf-app__install:hover { background: rgba(255, 255, 255, 0.14); }
+.cf-app__install[hidden] { display: none; }
+
+.cf-app__refresh {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	border-radius: 8px;
+	background: transparent;
+	color: #fff;
+	cursor: pointer;
+	flex: none;
+}
+
+.cf-app__refresh:hover { background: rgba(255, 255, 255, 0.14); }
+
+.cf-app__refresh.is-busy svg {
+	animation: cf-spin 0.8s linear infinite;
+}
+
+@keyframes cf-spin {
+	to { transform: rotate(360deg); }
+}
+
+.cf-app__install:focus-visible,
+.cf-app__refresh:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+/* --- Inhoud ------------------------------------------------------------ */
+
+.cf-app__main {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 22px 20px calc(48px + env(safe-area-inset-bottom));
+}
+
+.cf-app .cf-dash__title {
+	font-size: 1.5rem;
+	text-wrap: balance;
+}
+
+/* De downloadknop bestaat in het beheer al; hier geven we hem een eigen vorm. */
+.cf-app .cf-button {
+	display: inline-block;
+	padding: 7px 14px;
+	border: 1px solid var(--cf-border);
+	border-radius: 8px;
+	background: var(--cf-surface);
+	color: var(--cf-ink);
+	font-size: 0.85rem;
+	text-decoration: none;
+}
+
+@media (max-width: 600px) {
+	.cf-app__bar { padding-left: 14px; padding-right: 14px; gap: 9px; }
+	.cf-app__site { display: none; }
+	.cf-app__main { padding: 16px 14px 44px; }
+	.cf-app .cf-dash__title { font-size: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cf-app__refresh.is-busy svg { animation: none; }
+}

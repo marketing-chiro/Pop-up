@@ -254,6 +254,55 @@ kwijt als hij een keer uit gaat.
 
 ---
 
+## De app op je bureaublad
+
+Naast de pagina in het WordPress-beheer draait hetzelfde dashboard op een eigen
+adres: **`/exit-dashboard/`**. Open dat in Chrome of Edge en klik rechtsboven op
+**Installeren** — je krijgt dan een eigen icoon en een eigen venster zonder
+adresbalk. Op een telefoon kies je in het browsermenu voor *Toevoegen aan
+beginscherm*. Geen installatiebestand, geen app store, en updates gaan vanzelf.
+
+![De app](docs/screenshot-app.png)
+
+Wat de app extra doet ten opzichte van de beheerpagina:
+
+- **Verversen zonder herladen** met de knop rechtsboven, en automatisch zodra je
+  hem na een tijdje weer opent.
+- **Werkt zonder verbinding**: onderweg zie je de laatst opgehaalde cijfers, met
+  een melding erbij dat er geen verbinding is.
+- **Ruimte voor telefoonschermen**, inclusief de inkeping bovenaan.
+
+### Wie erbij kan
+
+Twee manieren, in te stellen onder **Exit-pop-up → Instellingen**.
+
+![Instellingen](docs/screenshot-instellingen.png)
+
+**Met een account.** Beheerders en redacteuren kunnen er meteen bij. Voor een
+collega die alleen mee moet kijken is er de rol **Exit-pop-up kijker**: die ziet
+de cijfers en verder niets van de site.
+
+**Met een geheime link.** Staat standaard uit. Zet je hem aan, dan krijg je een
+adres met een sleutel van 40 tekens erin, dat werkt zonder inloggen. Handig om
+te delen, maar houd in gedachten: wie de link heeft ziet alles, en een link die
+eenmaal rondgaat krijg je niet meer terug.
+
+Daarom zitten deze remmen erop:
+
+| Maatregel | Wat het doet |
+|---|---|
+| Sleutel van 40 tekens | Niet te raden |
+| Vergelijking in gelijke tijd | Niet teken voor teken af te tasten |
+| **Nieuwe link maken** | De oude link vervalt op slag |
+| `noindex` in kop én pagina | Komt nooit in Google terecht |
+| Eén schakelaar | Delen in één klik weer uit, alle links dood |
+
+Getest: juiste sleutel geeft toegang, foute en ontbrekende sleutel geven 403, na
+het vernieuwen werkt de oude link niet meer, en met delen uit werkt geen enkele
+link.
+
+---
+
 ## Blijft het draaien?
 
 Dat is geen theoretische vraag. Tijdens het testen tegen een echte WordPress
@@ -353,10 +402,18 @@ cfExitPopup.vergeet();  // wis het "al getoond"-geheugen en zet de detectie weer
 src/                            de bronbestanden - hier pas je dingen aan
   exit-intent-popup.js          gedrag + alle instellingen van de pop-up
   exit-intent-popup.css         vormgeving + kleuren van de pop-up
-  dashboard.js / dashboard.css  het dashboard in WordPress
+  dashboard.js / dashboard.css  de grafieken, gedeeld door beheer en app
+  app.js / app.css              alleen voor de installeerbare app
 wordpress/chiro-fysio-exit-popup/
   chiro-fysio-exit-popup.php    de plugin zelf
-  includes/                     opslag, meetpunt, dashboard en bewaking
+  includes/
+    storage    opslag en alle databasevragen
+    rest       het meetpunt waar de pop-up naartoe stuurt
+    view       de opmaak van het dashboard, gedeeld door beheer en app
+    admin      de pagina in het WordPress-beheer
+    app        de installeerbare app, manifest en toegang
+    settings   instellingen: delen, meldingen
+    health     zelfcontrole, waarschuwingen en de weekmail
 dist/                           resultaat van ./build.sh
   chiro-fysio-exit-popup.zip    de plugin, klaar om te uploaden
   wpcode-snippet.html           plakversie voor een snippet-plugin

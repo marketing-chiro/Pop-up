@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Chiro-Fysio exit-intent pop-up
  * Description:       Vraagt bezoekers die de site dreigen te verlaten of ze gevonden hebben wat ze zochten, toont anders het telefoonnummer van de praktijk, en houdt in een eigen dashboard bij hoe vaak dat gebeurt.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Requires at least: 5.5
  * Requires PHP:      7.0
  * Author:            Chiro-Fysio
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CF_EXIT_POPUP_VERSION', '1.3.0' );
+define( 'CF_EXIT_POPUP_VERSION', '1.4.0' );
 define( 'CF_EXIT_POPUP_DB_VERSION', '2' );
 define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 
@@ -23,16 +23,26 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-storage
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-admin.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-health.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-view.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-app.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-settings.php';
 
 CF_Exit_Popup_Rest::init();
 CF_Exit_Popup_Admin::init();
 CF_Exit_Popup_Health::init();
+CF_Exit_Popup_App::init();
+CF_Exit_Popup_Settings::init();
 
 /**
  * Bij activatie: tabel klaarzetten en de opruimtaak inplannen.
  */
 function cf_exit_popup_activate() {
 	CF_Exit_Popup_Storage::install();
+	CF_Exit_Popup_App::setup_roles();
+
+	// De adressen van de app moeten bekend zijn voordat ze werken.
+	CF_Exit_Popup_App::add_rewrite();
+	flush_rewrite_rules();
 
 	cf_exit_popup_schedule_tasks();
 }
@@ -63,6 +73,7 @@ register_activation_hook( __FILE__, 'cf_exit_popup_activate' );
  * zodat je ze niet kwijt bent als de plugin even uit gaat.
  */
 function cf_exit_popup_deactivate() {
+	flush_rewrite_rules();
 	wp_clear_scheduled_hook( 'cf_exit_popup_cleanup' );
 	wp_clear_scheduled_hook( 'cf_exit_popup_healthcheck' );
 	wp_clear_scheduled_hook( 'cf_exit_popup_weekly_digest' );
@@ -78,6 +89,8 @@ add_action( 'cf_exit_popup_cleanup', array( 'CF_Exit_Popup_Storage', 'cleanup' )
 function cf_exit_popup_maybe_upgrade() {
 	if ( get_option( 'cf_exit_popup_db_version' ) !== CF_EXIT_POPUP_DB_VERSION ) {
 		CF_Exit_Popup_Storage::install();
+		CF_Exit_Popup_App::setup_roles();
+		flush_rewrite_rules();
 	}
 
 	// Verdwenen taken stilletjes herstellen.
@@ -147,7 +160,11 @@ add_action( 'wp_enqueue_scripts', 'cf_exit_popup_enqueue_assets' );
  */
 function cf_exit_popup_action_links( $links ) {
 	$url = admin_url( 'admin.php?page=cf-exit-popup' );
-	array_unshift( $links, '<a href="' . esc_url( $url ) . '">Dashboard</a>' );
+	array_unshift(
+		$links,
+		'<a href="' . esc_url( $url ) . '">Dashboard</a>',
+		'<a href="' . esc_url( CF_Exit_Popup_App::url() ) . '" target="_blank" rel="noopener">App</a>'
+	);
 
 	return $links;
 }
