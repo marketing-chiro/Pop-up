@@ -71,6 +71,7 @@ class CF_Exit_Popup_Rest {
 			'device'  => self::pick( isset( $body['device'] ) ? (string) $body['device'] : '', array( 'desktop', 'mobiel' ) ),
 			'trigger' => self::pick( isset( $body['trigger'] ) ? (string) $body['trigger'] : '', array( 'mouseleave', 'idle', 'scroll-up', 'test', 'handmatig' ) ),
 			'answer'  => self::pick( isset( $body['answer'] ) ? (string) $body['answer'] : '', array( 'ja', 'nee' ) ),
+			'visitor' => self::pick( isset( $body['visitor'] ) ? (string) $body['visitor'] : '', array( 'nieuw', 'terugkerend' ) ),
 		);
 
 		CF_Exit_Popup_Storage::record( $data );

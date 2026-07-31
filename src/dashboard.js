@@ -382,6 +382,7 @@
 
 		host.innerHTML =
 			block('Apparaat', DATA.devices || []) +
+			block('Nieuw of eerder geweest', DATA.visitors || []) +
 			block('Signaal waarop de pop-up verscheen', DATA.triggers || [], TRIGGER_LABELS);
 	}
 

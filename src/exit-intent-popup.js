@@ -43,6 +43,15 @@
     // ruime derde van dat venster al voorbij voordat we begonnen te kijken.
     armAfterMs: 6000,
 
+    // Hoe lang we na het vertreksignaal wachten voordat de pop-up verschijnt.
+    // Komt de aanwijzer binnen die tijd terug in het venster, dan was het geen
+    // vertrek maar een greep naar het menu bovenaan, en gebeurt er niets.
+    //
+    // Dit is de belangrijkste rem tegen een vervelende pop-up: het menu van de
+    // site staat bovenaan, dus bezoekers bewegen daar constant naartoe en
+    // schieten er soms voorbij. Een echte vertrekker komt niet terug.
+    exitGraceMs: 400,
+
     // Wacht met scherpzetten tot de bezoeker iets gedaan heeft: bewegen,
     // scrollen, tikken of typen. Een echte bezoeker doet dat altijd binnen een
     // paar seconden; een geautomatiseerde bezoeker laadt de pagina en blijft
@@ -94,10 +103,25 @@
     helpUrl: '/kosten-en-vergoedingen/',
     helpLabel: 'Gaat uw vraag over kosten of vergoeding?',
 
+    // Vanaf het hoeveelste bezoek we iemand als terugkerend behandelen.
+    // Zet op 0 om geen onderscheid te maken.
+    //
+    // Let op wat het rapport hierover zegt: 92% van de bezoekers is nieuw en de
+    // retentie is vrijwel nul (van de 231 tot 599 bezoekers per week kwamen er
+    // 2 tot 6 terug). Deze herkenning raakt dus maar een handvol mensen. Het
+    // kost bijna niets en het cijfer is nuttig om te volgen, maar verwacht er
+    // geen omzet van.
+    returningFromVisit: 2,
+
     // Teksten. Pas gerust aan naar de toon van de praktijk.
     text: {
       question: 'Heeft u gevonden wat u zocht?',
       questionSub: 'We horen het graag - zo kunnen we de site verbeteren.',
+
+      // Voor wie al eens eerder op de site was. Iemand die terugkomt is verder
+      // in zijn overweging, dus die spreken we directer aan.
+      questionReturning: 'Kunnen we u ergens mee helpen?',
+      questionSubReturning: 'U bent hier eerder geweest - stelt u de vraag gerust rechtstreeks.',
       yes: 'Ja, gelukt',
       no: 'Nee, nog niet',
 
@@ -120,9 +144,16 @@
      ========================================================================== */
 
   var STORAGE_KEY = 'cf_exit_popup_shown_at';
+  var VISITS_KEY = 'cf_exit_popup_visits';
+  var LAST_SEEN_KEY = 'cf_exit_popup_last_seen';
+
+  // Na een half uur zonder activiteit geldt een volgend bezoek als nieuw.
+  var VISIT_TIMEOUT_MS = 30 * 60 * 1000;
   var shown = false;
   var armed = false;
   var idleTimer = null;
+  var exitTimer = null;
+  var visitCount = 1;
   var lastFocused = null;
   var root = null;
 
@@ -166,6 +197,45 @@
     }
   }
 
+  /**
+   * Houdt bij hoeveel keer deze browser de site bezocht heeft, en geeft dat
+   * aantal terug.
+   *
+   * Er wordt één getal bewaard, niets meer: geen datums per bezoek, geen
+   * bekeken pagina's, geen kenmerk waarmee iemand te identificeren is. De
+   * sessieteller zorgt dat doorklikken binnen één bezoek niet meetelt.
+   *
+   * Belangrijke beperking: dit werkt per browser. Wie eerst op de telefoon
+   * kijkt en later op de laptop, telt twee keer als nieuw. Wie in een privé-
+   * venster zit of zijn gegevens wist, begint weer bij 1. Verder komen zonder
+   * inlog kan alleen met technieken die bezoekers over apparaten heen volgen,
+   * en dat is precies wat we hier niet doen.
+   */
+  function countVisit() {
+    var visits = parseInt(storageGet(VISITS_KEY) || '0', 10);
+    var lastSeen = parseInt(storageGet(LAST_SEEN_KEY) || '0', 10);
+    var now = Date.now();
+
+    // Een bezoek loopt door zolang er activiteit is, en geldt als afgesloten na
+    // een half uur stilte. Dat is dezelfde grens die Google Analytics gebruikt,
+    // zodat de cijfers hier en daar over hetzelfde gaan.
+    //
+    // Bewust niet via sessionStorage: dat hoort bij één tabblad, dus wie drie
+    // pagina's in drie tabbladen opent zou als drie bezoeken tellen.
+    if (!lastSeen || now - lastSeen > VISIT_TIMEOUT_MS) {
+      visits += 1;
+      storageSet(VISITS_KEY, String(visits));
+    }
+
+    storageSet(LAST_SEEN_KEY, String(now));
+
+    return visits;
+  }
+
+  function isReturning() {
+    return CONFIG.returningFromVisit > 0 && visitCount >= CONFIG.returningFromVisit;
+  }
+
   function inCooldown() {
     var stamp = parseInt(storageGet(STORAGE_KEY) || '0', 10);
     if (!stamp) return false;
@@ -195,7 +265,10 @@
       page: window.location.pathname,
       device: isTouchDevice() ? 'mobiel' : 'desktop',
       trigger: detail.trigger || '',
-      answer: detail.answer || ''
+      answer: detail.answer || '',
+      // Alleen 'nieuw' of 'terugkerend', nooit het precieze aantal bezoeken.
+      // Een teller van bijvoorbeeld 47 zou een browser onderscheidend maken.
+      visitor: isReturning() ? 'terugkerend' : 'nieuw'
     });
 
     try {
@@ -263,10 +336,12 @@
           '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>' +
         '</button>' +
 
-        // Stap 1: de vraag
+        // Stap 1: de vraag. Terugkerende bezoekers krijgen een directere versie.
         '<div class="cf-exit__step" data-step="ask">' +
-          '<h2 class="cf-exit__title" id="cf-exit-title">' + t.question + '</h2>' +
-          '<p class="cf-exit__body">' + t.questionSub + '</p>' +
+          '<h2 class="cf-exit__title" id="cf-exit-title">' +
+            (isReturning() ? t.questionReturning : t.question) + '</h2>' +
+          '<p class="cf-exit__body">' +
+            (isReturning() ? t.questionSubReturning : t.questionSub) + '</p>' +
           '<div class="cf-exit__actions">' +
             '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="answer-yes">' + t.yes + '</button>' +
             '<button type="button" class="cf-exit__btn cf-exit__btn--primary" data-cf="answer-no">' + t.no + '</button>' +
@@ -396,10 +471,41 @@
 
   // Desktop: de muis verlaat het venster aan de bovenkant (richting tabbladen,
   // adresbalk of de sluitknop). relatedTarget is dan leeg.
+  //
+  // We wachten daarna nog exitGraceMs af. Wie naar het menu bovenaan reikt en
+  // er net voorbij schiet, is binnen een fractie van een seconde weer terug -
+  // en krijgt dus niets te zien. Wie echt weggaat, komt niet terug.
   function onMouseOut(e) {
-    if (!armed || shown) return;
+    if (!armed || shown || exitTimer) return;
     if (e.relatedTarget || e.clientY > 0) return;
-    open('mouseleave');
+
+    if (!CONFIG.exitGraceMs) {
+      open('mouseleave');
+      return;
+    }
+
+    exitTimer = window.setTimeout(function () {
+      exitTimer = null;
+      open('mouseleave');
+    }, CONFIG.exitGraceMs);
+  }
+
+  // De aanwijzer is terug in het venster: het was een valse start.
+  function onMouseBack() {
+    if (!exitTimer) return;
+
+    window.clearTimeout(exitTimer);
+    exitTimer = null;
+
+    // Alleen voor de testpagina en eigen scripts; hier gaat niets naar de
+    // server, want een valse start is geen gebeurtenis om te bewaren.
+    try {
+      window.dispatchEvent(new CustomEvent('cf-exit-popup', {
+        detail: { action: 'valse-start', data: {} }
+      }));
+    } catch (e) {
+      /* oude browsers: niet erg */
+    }
   }
 
   // Mobiel: geen inactiviteit meer -> timer opnieuw starten.
@@ -468,6 +574,8 @@
       resetIdle();
     } else {
       document.addEventListener('mouseout', onMouseOut);
+      // mouseover vuurt zodra de aanwijzer weer boven de pagina komt.
+      document.addEventListener('mouseover', onMouseBack);
     }
   }
 
@@ -475,7 +583,10 @@
     armed = false;
     if (stopWaiting) stopWaiting();
     window.clearTimeout(idleTimer);
+    window.clearTimeout(exitTimer);
+    exitTimer = null;
     document.removeEventListener('mouseout', onMouseOut);
+    document.removeEventListener('mouseover', onMouseBack);
     window.removeEventListener('scroll', onScroll);
     ['touchstart', 'click', 'keydown'].forEach(function (evt) {
       document.removeEventListener(evt, resetIdle);
@@ -528,6 +639,10 @@
       if (inCooldown() || onExcludedPage()) return;
     }
     if (isTouchDevice() && !CONFIG.enableMobile) return;
+
+    // Bezoek tellen voordat we de pop-up opbouwen, zodat de tekst meteen bij
+    // het juiste soort bezoeker past.
+    visitCount = countVisit();
 
     root = buildMarkup();
     document.body.appendChild(root);

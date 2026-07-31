@@ -93,6 +93,12 @@
       <span class="cf-tile__value">65</span>
       <span class="cf-tile__note">hier lag werk dat we misliepen</span>
     </div>
+
+    <div class="cf-tile">
+      <span class="cf-tile__label">Was er al eerder</span>
+      <span class="cf-tile__value">24</span>
+      <span class="cf-tile__note">7% van de vertoningen - 9x zonder resultaat</span>
+    </div>
   </div>
 
   <div class="cf-dash__row cf-dash__row--split">
@@ -127,7 +133,7 @@
 
     <section class="cf-card">
       <h2 class="cf-card__title">Waar kwamen ze vandaan?</h2>
-      <p class="cf-card__sub">Apparaat en het signaal waarop de pop-up verscheen.</p>
+      <p class="cf-card__sub">Apparaat, of ze er al eerder waren, en het signaal waarop de pop-up verscheen.</p>
       <div id="cf-chart-devices" class="cf-chart"></div>
     </section>
   </div>
@@ -148,6 +154,7 @@
             <th scope="col">Wanneer</th>
             <th scope="col">Pagina</th>
             <th scope="col">Apparaat</th>
+            <th scope="col">Bezoeker</th>
             <th scope="col">Antwoord</th>
             <th scope="col">Actie</th>
           </tr>
@@ -158,9 +165,10 @@
   </section>
 
   <p class="cf-dash__privacy">
-    Er worden geen persoonsgegevens vastgelegd: geen IP-adres, geen naam, en geen cookie
-    waarmee iemand over meerdere bezoeken te volgen is. Metingen ouder dan een jaar
-    worden automatisch verwijderd.
+    Er worden geen persoonsgegevens vastgelegd: geen IP-adres, geen naam en geen
+    e-mailadres. Voor "nieuw" en "terugkerend" houdt de browser van de bezoeker zelf
+    een bezoekteller bij; wij ontvangen daarvan alleen het label, nooit het aantal.
+    Metingen ouder dan een jaar worden automatisch verwijderd.
   </p>
 </div>
 
@@ -205,7 +213,8 @@
     days: 30,
     totals: {
       shown: 340, found: 118, not_found: 96, rescued: 31, lost: 65,
-      no_answer: 126, calls: 26, whatsapps: 5, appointments: 14
+      no_answer: 126, calls: 26, whatsapps: 5, appointments: 14,
+      returning: 24, returning_not_found: 9
     },
     perDay: perDay,
     topPages: [
@@ -221,6 +230,10 @@
     devices: [
       { label: 'desktop', shown: 198, not_found: 52 },
       { label: 'mobiel',  shown: 142, not_found: 44 }
+    ],
+    visitors: [
+      { label: 'nieuw',       shown: 316, not_found: 87 },
+      { label: 'terugkerend', shown: 24,  not_found: 9 }
     ],
     triggers: [
       { label: 'mouseleave', shown: 198, not_found: 52 },
@@ -258,6 +271,7 @@
       '<td class="cf-table__when">30 jul ' + hh + ':' + mm + '</td>' +
       '<td class="cf-table__page">' + page + '</td>' +
       '<td>' + device + '</td>' +
+      '<td>' + (rnd() > 0.9 ? 'terugkerend' : 'nieuw') + '</td>' +
       '<td>' + answerCell + '</td>' +
       '<td>' + actionCell + '</td>' +
       '</tr>';

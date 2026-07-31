@@ -81,6 +81,41 @@ body {
   padding: 0 22px 80px;
 }
 
+/* --- Menubalk, zoals op de echte site ------------------------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 22px;
+  height: 52px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.92rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.topbar__brand { font-weight: 700; letter-spacing: -0.01em; }
+
+.topbar__link {
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+
+.topbar__link:hover,
+.topbar__link:focus-visible {
+  color: #fff;
+  border-bottom-color: rgba(255, 255, 255, 0.7);
+}
+
+.topbar__link:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
 /* --- Kop ----------------------------------------------------------- */
 
 .masthead {
@@ -340,6 +375,16 @@ h2 + .lead {
 }
 </style>
 
+<!-- Menubalk bovenaan, net als op de echte site. Hiermee kun je uitproberen of
+     naar het menu bewegen een pop-up oplevert. Dat hoort niet te gebeuren. -->
+<nav class="topbar">
+  <span class="topbar__brand">Chiro-Fysio</span>
+  <a href="#" class="topbar__link">Klachten</a>
+  <a href="#" class="topbar__link">Behandelingen</a>
+  <a href="#" class="topbar__link">Tarieven</a>
+  <a href="#" class="topbar__link">Contact</a>
+</nav>
+
 <div class="shell">
 
   <header class="masthead">
@@ -390,6 +435,19 @@ h2 + .lead {
         <p>
           Naar boven, richting de adresbalk of het kruisje. Dat is het moment
           waarop iemand op het punt staat te vertrekken.
+        </p>
+      </div>
+    </div>
+
+    <div class="step" data-for="desktop">
+      <span class="step__tag">controle</span>
+      <div class="step__body">
+        <strong>Probeer ook eens naar het menu te gaan</strong>
+        <p>
+          Beweeg naar de groene balk bovenaan, klik een menu-item aan, of schiet
+          er net voorbij en kom meteen terug. Er hoort dan <em>geen</em> pop-up
+          te komen. Schiet je erdoorheen en kom je terug, dan meldt het logboek
+          hieronder een valse start.
         </p>
       </div>
     </div>
@@ -518,7 +576,9 @@ h2 + .lead {
     call: 'op bellen geklikt',
     whatsapp: 'op WhatsApp geklikt',
     appointment: 'op afspraak maken geklikt',
-    close: 'pop-up gesloten'
+    help: 'op de kostenlink geklikt',
+    close: 'pop-up gesloten',
+    'valse-start': 'valse start — aanwijzer kwam terug, geen pop-up'
   };
 
   function add(text) {

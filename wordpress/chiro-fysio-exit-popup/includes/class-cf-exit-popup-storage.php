@@ -7,8 +7,12 @@
  * een compleet verhaal: waar was iemand, wat antwoordde die, en heeft die
  * daarna contact opgenomen?
  *
- * Wat er NIET in staat: geen IP-adres, geen naam, geen e-mail, geen cookie
- * waarmee iemand over meerdere bezoeken te volgen is.
+ * Wat er NIET in staat: geen IP-adres, geen naam en geen e-mailadres.
+ *
+ * Over "nieuw" en "terugkerend": de browser van de bezoeker houdt zelf een
+ * teller bij van het aantal bezoeken. Wij ontvangen daar alleen het label
+ * 'nieuw' of 'terugkerend' van, nooit het aantal. Er staat dus geen kenmerk in
+ * deze tabel waarmee twee regels aan dezelfde persoon te knopen zijn.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,6 +49,7 @@ class CF_Exit_Popup_Storage {
 			trigger_type varchar(20) NOT NULL DEFAULT '',
 			answer varchar(10) NOT NULL DEFAULT '',
 			action_taken varchar(20) NOT NULL DEFAULT '',
+			visitor varchar(20) NOT NULL DEFAULT '',
 			PRIMARY KEY  (id),
 			UNIQUE KEY sid (sid),
 			KEY created_at (created_at),
@@ -73,13 +78,14 @@ class CF_Exit_Popup_Storage {
 			// Eerste gebeurtenis van een vertoning: nieuwe regel.
 			// INSERT IGNORE want een dubbele beacon mag geen dubbele regel geven.
 			$sql = $wpdb->prepare(
-				"INSERT IGNORE INTO {$table} (sid, created_at, page, device, trigger_type, answer, action_taken)
-				 VALUES (%s, %s, %s, %s, %s, '', '')", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"INSERT IGNORE INTO {$table} (sid, created_at, page, device, trigger_type, visitor, answer, action_taken)
+				 VALUES (%s, %s, %s, %s, %s, %s, '', '')", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$sid,
 				current_time( 'mysql' ),
 				$data['page'],
 				$data['device'],
-				$data['trigger']
+				$data['trigger'],
+				$data['visitor']
 			);
 
 			return (bool) $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -133,7 +139,9 @@ class CF_Exit_Popup_Storage {
 					SUM(CASE WHEN answer = '' THEN 1 ELSE 0 END) AS no_answer,
 					SUM(CASE WHEN action_taken = 'call' THEN 1 ELSE 0 END) AS calls,
 					SUM(CASE WHEN action_taken = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapps,
-					SUM(CASE WHEN action_taken = 'appointment' THEN 1 ELSE 0 END) AS appointments
+					SUM(CASE WHEN action_taken = 'appointment' THEN 1 ELSE 0 END) AS appointments,
+					SUM(CASE WHEN visitor = 'terugkerend' THEN 1 ELSE 0 END) AS returning,
+					SUM(CASE WHEN visitor = 'terugkerend' AND answer = 'nee' THEN 1 ELSE 0 END) AS returning_not_found
 				 FROM {$table} WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$since
 			),
@@ -145,7 +153,7 @@ class CF_Exit_Popup_Storage {
 		}
 
 		// SUM() geeft NULL terug op een lege tabel; nul leest prettiger.
-		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'calls', 'whatsapps', 'appointments' ) as $key ) {
+		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'calls', 'whatsapps', 'appointments', 'returning', 'returning_not_found' ) as $key ) {
 			$row[ $key ] = isset( $row[ $key ] ) ? (int) $row[ $key ] : 0;
 		}
 
@@ -235,7 +243,7 @@ class CF_Exit_Popup_Storage {
 
 		// Een kolomnaam kan niet via prepare(), dus die controleren we hier
 		// streng tegen een vaste lijst.
-		$allowed = array( 'device', 'trigger_type' );
+		$allowed = array( 'device', 'trigger_type', 'visitor' );
 		if ( ! in_array( $column, $allowed, true ) ) {
 			return array();
 		}
@@ -306,7 +314,7 @@ class CF_Exit_Popup_Storage {
 
 		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->prepare(
-				"SELECT created_at, page, device, trigger_type, answer, action_taken
+				"SELECT created_at, page, device, trigger_type, visitor, answer, action_taken
 				 FROM {$table}
 				 WHERE created_at >= %s
 				 ORDER BY created_at DESC

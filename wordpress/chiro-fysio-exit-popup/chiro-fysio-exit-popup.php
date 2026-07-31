@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Chiro-Fysio exit-intent pop-up
  * Description:       Vraagt bezoekers die de site dreigen te verlaten of ze gevonden hebben wat ze zochten, toont anders het telefoonnummer van de praktijk, en houdt in een eigen dashboard bij hoe vaak dat gebeurt.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 5.5
  * Requires PHP:      7.0
  * Author:            Chiro-Fysio
@@ -15,8 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CF_EXIT_POPUP_VERSION', '1.1.0' );
-define( 'CF_EXIT_POPUP_DB_VERSION', '1' );
+define( 'CF_EXIT_POPUP_VERSION', '1.2.0' );
+define( 'CF_EXIT_POPUP_DB_VERSION', '2' );
 define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-storage.php';

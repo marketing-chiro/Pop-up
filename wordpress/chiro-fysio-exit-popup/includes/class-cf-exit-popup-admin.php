@@ -97,6 +97,7 @@ class CF_Exit_Popup_Admin {
 			'topPages' => CF_Exit_Popup_Storage::top_pages( $days ),
 			'devices'  => CF_Exit_Popup_Storage::breakdown( $days, 'device' ),
 			'triggers' => CF_Exit_Popup_Storage::breakdown( $days, 'trigger_type' ),
+			'visitors' => CF_Exit_Popup_Storage::breakdown( $days, 'visitor' ),
 			'perHour'  => CF_Exit_Popup_Storage::per_hour( $days ),
 		);
 	}
@@ -188,6 +189,21 @@ class CF_Exit_Popup_Admin {
 					<span class="cf-tile__value"><?php echo esc_html( number_format_i18n( $totals['lost'] ) ); ?></span>
 					<span class="cf-tile__note">hier lag werk dat we misliepen</span>
 				</div>
+
+				<div class="cf-tile">
+					<span class="cf-tile__label">Was er al eerder</span>
+					<span class="cf-tile__value"><?php echo esc_html( number_format_i18n( $totals['returning'] ) ); ?></span>
+					<span class="cf-tile__note">
+						<?php
+						$pct_returning = $totals['shown'] > 0 ? round( $totals['returning'] / $totals['shown'] * 100 ) : 0;
+						echo esc_html( $pct_returning );
+						?>% van de vertoningen<?php
+						if ( $totals['returning'] > 0 ) {
+							echo ' - ' . esc_html( number_format_i18n( $totals['returning_not_found'] ) ) . 'x zonder resultaat';
+						}
+						?>
+					</span>
+				</div>
 			</div>
 
 			<!-- Uitkomst + verloop -->
@@ -224,7 +240,7 @@ class CF_Exit_Popup_Admin {
 
 				<section class="cf-card">
 					<h2 class="cf-card__title">Waar kwamen ze vandaan?</h2>
-					<p class="cf-card__sub">Apparaat en het signaal waarop de pop-up verscheen.</p>
+					<p class="cf-card__sub">Apparaat, of ze er al eerder waren, en het signaal waarop de pop-up verscheen.</p>
 					<div id="cf-chart-devices" class="cf-chart"></div>
 				</section>
 			</div>
@@ -248,6 +264,7 @@ class CF_Exit_Popup_Admin {
 								<th scope="col">Wanneer</th>
 								<th scope="col">Pagina</th>
 								<th scope="col">Apparaat</th>
+								<th scope="col">Bezoeker</th>
 								<th scope="col">Antwoord</th>
 								<th scope="col">Actie</th>
 							</tr>
@@ -258,6 +275,7 @@ class CF_Exit_Popup_Admin {
 								<td class="cf-table__when"><?php echo esc_html( mysql2date( 'j M H:i', $row['created_at'] ) ); ?></td>
 								<td class="cf-table__page"><?php echo esc_html( $row['page'] ); ?></td>
 								<td><?php echo esc_html( $row['device'] ); ?></td>
+								<td><?php echo '' === $row['visitor'] ? '<span class="cf-muted">-</span>' : esc_html( $row['visitor'] ); ?></td>
 								<td>
 									<?php
 									if ( 'nee' === $row['answer'] ) {
@@ -290,9 +308,11 @@ class CF_Exit_Popup_Admin {
 			</section>
 
 			<p class="cf-dash__privacy">
-				Er worden geen persoonsgegevens vastgelegd: geen IP-adres, geen naam, en geen cookie
-				waarmee iemand over meerdere bezoeken te volgen is. Metingen ouder dan een jaar
-				worden automatisch verwijderd.
+				Er worden geen persoonsgegevens vastgelegd: geen IP-adres, geen naam en geen
+				e-mailadres. Voor "nieuw" en "terugkerend" houdt de browser van de bezoeker zelf
+				een bezoekteller bij; wij ontvangen daarvan alleen het label, nooit het aantal.
+				Er staat dus niets in de tabel waarmee twee regels aan dezelfde persoon te knopen
+				zijn. Metingen ouder dan een jaar worden automatisch verwijderd.
 			</p>
 
 			<?php endif; ?>
@@ -323,7 +343,7 @@ class CF_Exit_Popup_Admin {
 		// UTF-8 markering, anders maakt Excel er rommel van bij accenten.
 		fwrite( $out, "\xEF\xBB\xBF" );
 
-		fputcsv( $out, array( 'Wanneer', 'Pagina', 'Apparaat', 'Signaal', 'Antwoord', 'Actie' ), ';' );
+		fputcsv( $out, array( 'Wanneer', 'Pagina', 'Apparaat', 'Signaal', 'Bezoeker', 'Antwoord', 'Actie' ), ';' );
 
 		foreach ( $rows as $row ) {
 			fputcsv(
@@ -333,6 +353,7 @@ class CF_Exit_Popup_Admin {
 					$row['page'],
 					$row['device'],
 					$row['trigger_type'],
+					'' === $row['visitor'] ? '-' : $row['visitor'],
 					'' === $row['answer'] ? 'geen antwoord' : $row['answer'],
 					'' === $row['action_taken'] ? '-' : $row['action_taken'],
 				),
