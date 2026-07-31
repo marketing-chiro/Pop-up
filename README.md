@@ -75,9 +75,45 @@ snippet opnieuw te bouwen.
 
 ---
 
-## Alle instellingen
+## Alles aanpassen vanuit het dashboard
 
-Alles staat bovenaan `src/exit-intent-popup.js`.
+Ga naar **Exit-pop-up → Pop-up instellen**. Daar staat alles wat de bezoeker
+ziet en merkt, verdeeld over vier tabbladen, met rechts een voorbeeld dat bij
+elke toetsaanslag meebeweegt. Je hoeft dus nooit een bestand te openen.
+
+![De instelpagina](docs/screenshot-instelpagina.png)
+
+| Tabblad | Wat je er instelt |
+|---|---|
+| **Teksten** | Elke zin: de vraag, de knoppen, beide vervolgschermen, de regel over openingstijden, de hulplink |
+| **Contact** | Telefoonnummer, WhatsApp met het klaarstaande bericht, de link naar afspraak maken |
+| **Huisstijl** | Vijf kleuren, de ronding van venster en knoppen, een eigen lettertype en je logo |
+| **Gedrag** | Aan/uit, de wachttijden, de rustperiode, mobiel, en de uitgesloten pagina's |
+
+Het voorbeeld rechts is de échte pop-up met de échte opmaak — alleen de
+achtergrond is nagebootst. Je kunt tussen de drie schermen wisselen om te zien
+hoe elk eruitziet. Wijzigingen gaan pas live als je opslaat, en met **Terug naar
+standaard** zet je alles in één klik terug.
+
+### De huisstijl
+
+De hele opmaak is op vijf CSS-variabelen gebouwd, dus één kleur wijzigen werkt
+meteen door in knoppen, randen, accenten en de focusrand. Kies je een logo uit de
+mediabibliotheek, dan verschijnt dat bovenaan in de pop-up.
+
+Laat je het lettertype leeg, dan neemt de pop-up automatisch de letter van de
+site over — meestal precies wat je wilt.
+
+> **Nog te doen:** de kleuren staan nu op de teal waarmee ik het ontworpen heb.
+> Vul de kleuren uit jullie brandbook in en de hele pop-up volgt.
+
+---
+
+## De standaardwaarden in de code
+
+Deze staan bovenaan `src/exit-intent-popup.js` en gelden alleen als terugval:
+als er nog niets is ingesteld, en op de demo- en testpagina's die buiten
+WordPress draaien.
 
 | Instelling | Standaard | Wat het doet |
 |---|---|---|

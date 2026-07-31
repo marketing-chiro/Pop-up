@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Chiro-Fysio exit-intent pop-up
  * Description:       Vraagt bezoekers die de site dreigen te verlaten of ze gevonden hebben wat ze zochten, toont anders het telefoonnummer van de praktijk, en houdt in een eigen dashboard bij hoe vaak dat gebeurt.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Requires at least: 5.5
  * Requires PHP:      7.0
  * Author:            Chiro-Fysio
@@ -15,10 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CF_EXIT_POPUP_VERSION', '1.4.0' );
+define( 'CF_EXIT_POPUP_VERSION', '1.5.0' );
 define( 'CF_EXIT_POPUP_DB_VERSION', '2' );
 define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-options.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-storage.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-admin.php';
@@ -26,12 +27,14 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-health.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-view.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-app.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-settings.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-editor.php';
 
 CF_Exit_Popup_Rest::init();
 CF_Exit_Popup_Admin::init();
 CF_Exit_Popup_Health::init();
 CF_Exit_Popup_App::init();
 CF_Exit_Popup_Settings::init();
+CF_Exit_Popup_Editor::init();
 
 /**
  * Bij activatie: tabel klaarzetten en de opruimtaak inplannen.
@@ -108,6 +111,11 @@ function cf_exit_popup_enqueue_assets() {
 		return;
 	}
 
+	// In het dashboard uitgezet? Dan laden we niets. De cijfers blijven staan.
+	if ( ! CF_Exit_Popup_Options::get( 'enabled' ) ) {
+		return;
+	}
+
 	// Ingelogde beheerders zien de pop-up standaard niet, zodat je rustig kunt
 	// werken. Wil je hem juist wel zien om te testen? Gebruik dan ?cf-popup=test
 	// in de URL, of verwijder deze drie regels.
@@ -143,15 +151,23 @@ function cf_exit_popup_enqueue_assets() {
 		true // in de footer, zodat de pagina niet vertraagt
 	);
 
-	// Waar het script zijn metingen naartoe mag sturen. Zonder dit adres houdt
-	// de pop-up gewoon op met meten - hij blijft dan verder werken.
+	// Het meetpunt en alle instellingen uit het dashboard. Zonder dit adres
+	// houdt de pop-up op met meten, maar blijft hij verder gewoon werken; zonder
+	// de instellingen valt hij terug op de standaardwaarden in het script zelf.
 	wp_add_inline_script(
 		'cf-exit-popup',
 		'window.CF_EXIT_POPUP = ' . wp_json_encode(
-			array( 'endpoint' => esc_url_raw( rest_url( 'cf-exit-popup/v1/event' ) ) )
+			array(
+				'endpoint' => esc_url_raw( rest_url( 'cf-exit-popup/v1/event' ) ),
+				'config'   => CF_Exit_Popup_Options::for_script(),
+			)
 		) . ';',
 		'before'
 	);
+
+	// De huisstijl als CSS-variabelen. De hele opmaak is daarop gebouwd, dus dit
+	// kleurt in één keer de knoppen, randen en accenten.
+	wp_add_inline_style( 'cf-exit-popup', CF_Exit_Popup_Options::brand_css() );
 }
 add_action( 'wp_enqueue_scripts', 'cf_exit_popup_enqueue_assets' );
 

@@ -12,9 +12,14 @@
   'use strict';
 
   /* ==========================================================================
-     INSTELLINGEN - dit is het enige blok dat je normaal hoeft aan te passen.
+     STANDAARDWAARDEN
+
+     In WordPress hoef je hier niets te wijzigen: alles is aan te passen onder
+     Exit-pop-up -> Pop-up instellen. Wat daar is opgeslagen wordt hieronder
+     overheen gelegd. Deze waarden gelden dus alleen als terugval, en op de
+     demo- en testpagina's die buiten WordPress draaien.
      ========================================================================== */
-  var CONFIG = {
+  var DEFAULTS = {
     // Telefoonnummer van de praktijk, zoals de bezoeker het te zien krijgt.
     // Bevestigd door de praktijk: 024-3558830.
     phoneDisplay: '024 - 355 88 30',
@@ -143,6 +148,51 @@
      Vanaf hier hoef je in principe niets meer te wijzigen.
      ========================================================================== */
 
+  // Wordt door de WordPress-plugin gevuld met het meetpunt en de instellingen.
+  // Buiten WordPress blijft dit leeg en gelden de standaardwaarden hierboven.
+  var SETTINGS = window.CF_EXIT_POPUP || {};
+
+  // De instellingen uit WordPress over de standaardwaarden heen leggen. De
+  // teksten zitten een niveau dieper, dus die mengen we apart - anders zou één
+  // aangepaste zin alle andere teksten wissen.
+  var CONFIG = (function () {
+    var uit = {};
+    var sleutel;
+
+    for (sleutel in DEFAULTS) {
+      if (Object.prototype.hasOwnProperty.call(DEFAULTS, sleutel)) {
+        uit[sleutel] = DEFAULTS[sleutel];
+      }
+    }
+
+    var eigen = SETTINGS.config;
+    if (!eigen) return uit;
+
+    for (sleutel in eigen) {
+      if (!Object.prototype.hasOwnProperty.call(eigen, sleutel)) continue;
+      if (sleutel === 'text') continue;
+      if (eigen[sleutel] === null || eigen[sleutel] === undefined) continue;
+      uit[sleutel] = eigen[sleutel];
+    }
+
+    if (eigen.text) {
+      var teksten = {};
+      for (sleutel in DEFAULTS.text) {
+        if (Object.prototype.hasOwnProperty.call(DEFAULTS.text, sleutel)) {
+          teksten[sleutel] = DEFAULTS.text[sleutel];
+        }
+      }
+      for (sleutel in eigen.text) {
+        if (Object.prototype.hasOwnProperty.call(eigen.text, sleutel) && eigen.text[sleutel]) {
+          teksten[sleutel] = eigen.text[sleutel];
+        }
+      }
+      uit.text = teksten;
+    }
+
+    return uit;
+  })();
+
   var STORAGE_KEY = 'cf_exit_popup_shown_at';
   var VISITS_KEY = 'cf_exit_popup_visits';
   var LAST_SEEN_KEY = 'cf_exit_popup_last_seen';
@@ -156,11 +206,6 @@
   var visitCount = 1;
   var lastFocused = null;
   var root = null;
-
-  // Wordt door de WordPress-plugin gevuld met het adres van het meetpunt.
-  // Buiten WordPress (bijvoorbeeld op de demopagina) blijft dit leeg en slaan
-  // we simpelweg niets op.
-  var SETTINGS = window.CF_EXIT_POPUP || {};
 
   // Willekeurige code per vertoning, zodat het dashboard de gebeurtenissen van
   // één bezoek aan elkaar kan knopen. Bevat geen enkel persoonsgegeven en
@@ -335,6 +380,12 @@
           '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="20" height="20">' +
           '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>' +
         '</button>' +
+
+        // Logo van de praktijk, als er een is ingesteld in het dashboard.
+        (CONFIG.logo
+          ? '<img class="cf-exit__logo" src="' + CONFIG.logo + '" alt="" ' +
+            'style="height:' + (CONFIG.logoHeight || 34) + 'px">'
+          : '') +
 
         // Stap 1: de vraag. Terugkerende bezoekers krijgen een directere versie.
         '<div class="cf-exit__step" data-step="ask">' +

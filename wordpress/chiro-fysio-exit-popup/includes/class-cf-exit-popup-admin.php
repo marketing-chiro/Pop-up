@@ -152,6 +152,9 @@ class CF_Exit_Popup_Admin {
 				<a class="button" href="<?php echo esc_url( CF_Exit_Popup_App::url() ); ?>" target="_blank" rel="noopener">
 					App openen
 				</a>
+				<a class="cf-appbanner__link" href="<?php echo esc_url( admin_url( 'admin.php?page=' . CF_Exit_Popup_Editor::SLUG ) ); ?>">
+					pop-up aanpassen
+				</a>
 				<a class="cf-appbanner__link" href="<?php echo esc_url( admin_url( 'admin.php?page=' . CF_Exit_Popup_Settings::SLUG ) ); ?>">
 					instellingen
 				</a>

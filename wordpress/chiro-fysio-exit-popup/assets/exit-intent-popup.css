@@ -14,6 +14,11 @@
   --cf-muted: #5c6f78;
   --cf-surface: #ffffff;
   --cf-radius: 14px;
+  --cf-btn-radius: 10px;
+
+  /* Standaard neemt de pop-up de letter van de site over. In het dashboard kun
+     je daar een eigen letterfamilie voor in de plaats zetten. */
+  --cf-font: inherit;
 
   position: fixed;
   inset: 0;
@@ -22,7 +27,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  font-family: inherit;
+  font-family: var(--cf-font);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -92,6 +97,16 @@
 .cf-exit__close:focus-visible {
   background: var(--cf-accent);
   color: var(--cf-text);
+}
+
+/* --- Logo ------------------------------------------------------------------ */
+
+.cf-exit__logo {
+  display: block;
+  width: auto;
+  max-width: 62%;
+  margin: 0 auto 16px;
+  object-fit: contain;
 }
 
 /* --- Tekst ---------------------------------------------------------------- */
@@ -171,10 +186,10 @@
   min-height: 50px;
   padding: 13px 20px;
   border: 2px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--cf-btn-radius);
   font-size: 1rem;
   font-weight: 600;
-  font-family: inherit;
+  font-family: var(--cf-font);
   line-height: 1.2;
   text-decoration: none;
   cursor: pointer;

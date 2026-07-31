@@ -1,0 +1,312 @@
+/*!
+ * De instelpagina van de pop-up.
+ *
+ * Links de velden, rechts een voorbeeld dat meebeweegt. Op een smal scherm
+ * schuift het voorbeeld naar boven, zodat het altijd in beeld blijft.
+ */
+
+.cf-editor { max-width: 1500px; }
+
+.cf-editor__layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(340px, 460px);
+	gap: 22px;
+	align-items: start;
+	margin-top: 18px;
+}
+
+@media (max-width: 1100px) {
+	.cf-editor__layout {
+		grid-template-columns: 1fr;
+	}
+
+	/* Voorbeeld eerst: op een smal scherm wil je zien wat je verandert. */
+	.cf-editor__voorbeeld { order: -1; }
+}
+
+/* --- Tabbladen ------------------------------------------------------------- */
+
+.cf-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	padding: 3px;
+	margin-bottom: 14px;
+	border: 1px solid var(--cf-border);
+	border-radius: 10px;
+	background: var(--cf-plane);
+}
+
+.cf-tab {
+	font: inherit;
+	font-size: 0.88rem;
+	font-weight: 500;
+	padding: 8px 16px;
+	border: 0;
+	border-radius: 7px;
+	background: transparent;
+	color: var(--cf-ink-2);
+	cursor: pointer;
+}
+
+.cf-tab:hover { color: var(--cf-ink); background: rgba(255, 255, 255, 0.65); }
+
+.cf-tab.is-active {
+	background: var(--cf-surface);
+	color: var(--cf-ink);
+	font-weight: 650;
+	box-shadow: 0 1px 2px rgba(20, 32, 31, 0.1);
+}
+
+.cf-tab:focus-visible { outline: 2px solid var(--cf-found); outline-offset: -1px; }
+
+/* --- Panelen --------------------------------------------------------------- */
+
+.cf-paneel { display: none; }
+.cf-paneel.is-active { display: block; }
+
+.cf-mt { margin-top: 30px; }
+
+/* --- Velden ---------------------------------------------------------------- */
+
+.cf-field {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	margin: 0 0 16px;
+	max-width: 560px;
+}
+
+.cf-field label {
+	font-size: 0.88rem;
+	font-weight: 600;
+	color: var(--cf-ink);
+}
+
+.cf-field input[type="text"],
+.cf-field input[type="number"],
+.cf-field textarea {
+	width: 100%;
+	max-width: 340px;
+	padding: 7px 11px;
+	border: 1px solid var(--cf-border);
+	border-radius: 8px;
+	background: var(--cf-surface);
+	font-size: 0.92rem;
+	color: var(--cf-ink);
+}
+
+.cf-field input.cf-wide,
+.cf-field textarea {
+	max-width: 100%;
+}
+
+.cf-field textarea {
+	line-height: 1.5;
+	resize: vertical;
+}
+
+.cf-field input:focus,
+.cf-field textarea:focus {
+	outline: 2px solid var(--cf-found);
+	outline-offset: -1px;
+	border-color: var(--cf-found);
+}
+
+.cf-hulp {
+	font-size: 0.82rem;
+	color: var(--cf-muted);
+	line-height: 1.5;
+	max-width: 64ch;
+}
+
+.cf-hulp--onder { margin-left: 27px; }
+
+/* Getallen met hun eenheid ernaast. */
+.cf-getal {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.cf-getal input { max-width: 130px; font-variant-numeric: tabular-nums; }
+
+.cf-suffix {
+	font-size: 0.85rem;
+	color: var(--cf-muted);
+}
+
+/* --- Kleuren ---------------------------------------------------------------- */
+
+.cf-kleur {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+}
+
+.cf-kleur input[type="color"] {
+	width: 46px;
+	height: 34px;
+	padding: 2px;
+	border: 1px solid var(--cf-border);
+	border-radius: 8px;
+	background: var(--cf-surface);
+	cursor: pointer;
+}
+
+.cf-kleur__code {
+	width: 108px;
+	padding: 7px 10px;
+	border: 1px solid var(--cf-border);
+	border-radius: 8px;
+	background: var(--cf-surface);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.84rem;
+	text-transform: lowercase;
+}
+
+/* --- Logo -------------------------------------------------------------------- */
+
+.cf-logo {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 16px;
+}
+
+.cf-logo__voorbeeld {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 150px;
+	min-height: 62px;
+	padding: 8px 14px;
+	border: 1px dashed var(--cf-border);
+	border-radius: 10px;
+	background: var(--cf-plane);
+}
+
+.cf-logo__voorbeeld img { max-width: 190px; max-height: 46px; }
+
+.cf-logo__knoppen { display: flex; gap: 8px; }
+
+/* --- Opslaan ------------------------------------------------------------------ */
+
+.cf-editor__acties {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	padding: 16px 0 30px;
+}
+
+/* --- Het voorbeeld -------------------------------------------------------------- */
+
+.cf-editor__voorbeeld {
+	position: sticky;
+	top: 42px;
+}
+
+.cf-preview {
+	border: 1px solid var(--cf-border);
+	border-radius: 12px;
+	background: var(--cf-surface);
+	overflow: hidden;
+}
+
+.cf-preview__balk {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+	padding: 11px 14px;
+	border-bottom: 1px solid var(--cf-border);
+}
+
+.cf-preview__titel {
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--cf-muted);
+}
+
+.cf-preview__stappen {
+	display: flex;
+	gap: 2px;
+	margin-left: auto;
+	padding: 2px;
+	border-radius: 8px;
+	background: var(--cf-plane);
+}
+
+.cf-preview__stap {
+	font: inherit;
+	font-size: 0.78rem;
+	padding: 5px 10px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--cf-ink-2);
+	cursor: pointer;
+}
+
+.cf-preview__stap.is-active {
+	background: var(--cf-surface);
+	color: var(--cf-ink);
+	font-weight: 600;
+}
+
+.cf-preview__stap:focus-visible { outline: 2px solid var(--cf-found); outline-offset: -1px; }
+
+/* Nagebootste website-achtergrond, zodat de pop-up niet in het luchtledige hangt. */
+.cf-preview__vlak {
+	position: relative;
+	min-height: 430px;
+	padding: 26px 18px;
+	background:
+		repeating-linear-gradient(
+			transparent 0 14px,
+			rgba(20, 32, 31, 0.05) 14px 15px,
+			transparent 15px 30px
+		),
+		var(--cf-plane);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* De pop-up staat hier in de pagina in plaats van over het scherm. */
+.cf-preview__popup.cf-exit {
+	position: static;
+	inset: auto;
+	z-index: 1;
+	padding: 0;
+	width: 100%;
+	max-width: 400px;
+}
+
+.cf-preview__popup .cf-exit__dialog {
+	opacity: 1;
+	transform: none;
+	max-height: none;
+	box-shadow: 0 14px 40px rgba(10, 25, 30, 0.2);
+}
+
+/* Het is een voorbeeld: knoppen doen niets. */
+.cf-preview__popup .cf-exit__btn,
+.cf-preview__popup .cf-exit__close,
+.cf-preview__popup .cf-exit__help {
+	cursor: default;
+	pointer-events: none;
+}
+
+.cf-preview__hulp {
+	margin: 0;
+	padding: 12px 15px;
+	border-top: 1px solid var(--cf-border);
+	font-size: 0.82rem;
+	line-height: 1.5;
+	color: var(--cf-muted);
+}

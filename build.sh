@@ -25,6 +25,8 @@ cp "$SRC/dashboard.css" "$ASSETS/"
 cp "$SRC/dashboard.js" "$ASSETS/"
 cp "$SRC/app.css" "$ASSETS/"
 cp "$SRC/app.js" "$ASSETS/"
+cp "$SRC/editor.css" "$ASSETS/"
+cp "$SRC/editor.js" "$ASSETS/"
 
 echo "==> Plugin-zip maken"
 mkdir -p "$DIST"
