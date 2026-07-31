@@ -254,6 +254,63 @@ kwijt als hij een keer uit gaat.
 
 ---
 
+## Blijft het draaien?
+
+Dat is geen theoretische vraag. Tijdens het testen tegen een echte WordPress
+bleek een query stuk te lopen op een gereserveerd woord in SQLite, waardoor het
+dashboard **nullen toonde alsof het een rustige week was** terwijl de metingen
+gewoon binnenkwamen. Zoiets kun je maanden over het hoofd zien. Daarom bewaakt
+de plugin zichzelf.
+
+### Statuskaart bovenaan het dashboard
+
+Eén regel met een stoplicht: *Alles draait — laatste meting 11 minuten geleden*.
+Klap hem open en je ziet acht controles: staat de tabel er, staan de bestanden
+er, is het meetpunt bereikbaar, hoeveel metingen kwamen er binnen in 24 uur en
+in 7 dagen, en staan de drie automatische taken nog ingepland.
+
+Het meetpunt wordt echt benaderd, met een bewust onbruikbaar verzoek. Antwoordt
+het met "400, dat klopt niet", dan weten we dat het leeft — zonder dat er een
+verzonnen meting in je cijfers belandt.
+
+### Meldingen
+
+| Wanneer | Wat |
+|---|---|
+| Elke ochtend 06:30 | Zelfcontrole. Alleen bij een probleem gaat er een mail uit. |
+| Elke maandag 07:30 | Weeksamenvatting: de vier cijfers en de pagina's waar bezoekers vastliepen. |
+| Dagelijks | Metingen ouder dan een jaar opruimen. |
+
+Een storingsmelding komt **hooguit eens per week** terug zolang het probleem
+duurt, en pas nadat de plugin minstens 15 metingen heeft gedaan — een verse
+installatie die nog op zijn eerste bezoeker wacht, is geen storing. Een lege
+week levert geen weekmail op.
+
+Meldingen gaan standaard naar het beheerdersadres van de site. Een ander adres
+instellen kan met de optie `cf_exit_popup_mail_to`.
+
+### Bestand tegen updates en cacheplugins
+
+De meest voorkomende manier waarop zoiets stilletjes stopt: een
+optimalisatieplugin voegt alle JavaScript samen of stelt het uit, en het script
+draait daarna te laat of niet meer. De scripttag draagt daarom markeringen die
+bij de bekende plugins "deze met rust laten" betekenen:
+
+```html
+<script data-no-optimize="1" data-no-defer="1" data-cfasync="false"
+        data-nowprocket data-no-minify="1" ...>
+```
+
+Dat dekt Autoptimize, WP Rocket, LiteSpeed Cache, SG Optimizer, Swift
+Performance en Cloudflare Rocket Loader.
+
+Verder: het is een losstaande plugin, dus een thema-update raakt hem niet. De
+geplande taken worden bij elk beheerbezoek nagelopen en hersteld als ze
+verdwenen zijn. En als het meetpunt onbereikbaar is, blijft de pop-up gewoon
+werken voor de bezoeker — die merkt er niets van.
+
+---
+
 ## Meten via Google Analytics
 
 Naast het eigen dashboard worden dezelfde gebeurtenissen doorgegeven aan Google
@@ -299,7 +356,7 @@ src/                            de bronbestanden - hier pas je dingen aan
   dashboard.js / dashboard.css  het dashboard in WordPress
 wordpress/chiro-fysio-exit-popup/
   chiro-fysio-exit-popup.php    de plugin zelf
-  includes/                     opslag, meetpunt en dashboardpagina
+  includes/                     opslag, meetpunt, dashboard en bewaking
 dist/                           resultaat van ./build.sh
   chiro-fysio-exit-popup.zip    de plugin, klaar om te uploaden
   wpcode-snippet.html           plakversie voor een snippet-plugin

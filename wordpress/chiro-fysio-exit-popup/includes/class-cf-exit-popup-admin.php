@@ -111,6 +111,15 @@ class CF_Exit_Popup_Admin {
 		$totals  = CF_Exit_Popup_Storage::totals( $days );
 		$recent  = CF_Exit_Popup_Storage::recent( $days );
 		$periods = self::periods();
+		$health  = CF_Exit_Popup_Health::report();
+
+		$health_labels = array(
+			'goed'     => array( 'Alles draait', 'goed' ),
+			'wachten'  => array( 'Klaar, wacht op de eerste bezoeker', 'wachten' ),
+			'let op'   => array( 'Let op', 'letop' ),
+			'probleem' => array( 'Er is iets mis', 'probleem' ),
+		);
+		list( $health_text, $health_class ) = $health_labels[ $health['status'] ];
 
 		// Percentage van de mensen die daadwerkelijk antwoord gaven. Dat is een
 		// eerlijker noemer dan alle vertoningen: wie niets invult, weten we niet.
@@ -136,6 +145,67 @@ class CF_Exit_Popup_Admin {
 					<?php endforeach; ?>
 				</div>
 			</div>
+
+			<!-- Statuskaart: draait het nog, en wanneer kwam de laatste meting binnen? -->
+			<details class="cf-health cf-health--<?php echo esc_attr( $health_class ); ?>">
+				<summary class="cf-health__summary">
+					<span class="cf-health__lamp" aria-hidden="true"></span>
+					<span class="cf-health__label"><?php echo esc_html( $health_text ); ?></span>
+					<span class="cf-health__meta">
+						<?php
+						if ( $health['laatste_event'] ) {
+							printf(
+								/* translators: %s: hoe lang geleden */
+								esc_html__( 'laatste meting %s geleden', 'chiro-fysio-exit-popup' ),
+								esc_html( human_time_diff( strtotime( $health['laatste_event'] ), current_time( 'timestamp' ) ) )
+							);
+						} else {
+							echo esc_html__( 'nog geen metingen', 'chiro-fysio-exit-popup' );
+						}
+						?>
+					</span>
+					<span class="cf-health__toggle">details</span>
+				</summary>
+
+				<div class="cf-health__body">
+					<ul class="cf-health__list">
+						<?php
+						$regels = array(
+							array( 'Tabel met metingen', $health['tabel_bestaat'], number_format_i18n( $health['regels'] ) . ' regels' ),
+							array( 'Bestanden van de pop-up', $health['bestanden'], $health['bestanden'] ? 'aanwezig' : 'ontbreken' ),
+							array( 'Meetpunt bereikbaar', $health['meetpunt']['ok'], 'antwoord ' . (int) $health['meetpunt']['code'] ),
+							array( 'Metingen afgelopen 24 uur', true, number_format_i18n( $health['events_24u'] ) ),
+							array( 'Metingen afgelopen 7 dagen', true, number_format_i18n( $health['events_7d'] ) ),
+							array( 'Dagelijkse controle ingepland', (bool) $health['cron_controle'], $health['cron_controle'] ? wp_date( 'j M H:i', $health['cron_controle'] ) : 'niet ingepland' ),
+							array( 'Wekelijkse mail ingepland', (bool) $health['cron_weekmail'], $health['cron_weekmail'] ? wp_date( 'j M H:i', $health['cron_weekmail'] ) : 'niet ingepland' ),
+							array( 'Opruimen oude metingen', (bool) $health['cron_opruimen'], $health['cron_opruimen'] ? wp_date( 'j M H:i', $health['cron_opruimen'] ) : 'niet ingepland' ),
+						);
+						foreach ( $regels as $r ) :
+							?>
+							<li class="cf-health__item">
+								<span class="cf-health__dot cf-health__dot--<?php echo $r[1] ? 'ok' : 'nok'; ?>" aria-hidden="true"></span>
+								<span class="cf-health__key"><?php echo esc_html( $r[0] ); ?></span>
+								<span class="cf-health__val"><?php echo esc_html( $r[2] ); ?></span>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+
+					<?php if ( $health['db_fout'] ) : ?>
+						<p class="cf-health__error">
+							<strong>Databasefout op <?php echo esc_html( $health['db_fout']['when'] ); ?>:</strong>
+							<?php echo esc_html( $health['db_fout']['message'] ); ?>
+						</p>
+					<?php endif; ?>
+
+					<p class="cf-health__hint">
+						Meldingen gaan naar <?php echo esc_html( get_option( 'admin_email' ) ); ?>.
+						Valt de stroom metingen stil terwijl er wel bezoek is, dan krijg je vanzelf bericht -
+						hooguit eens per week, zolang het probleem blijft. Elke maandagochtend komt de
+						weeksamenvatting binnen. Blijft het stil terwijl de site het doet, dan is het meestal
+						een cache- of optimalisatieplugin; die legen lost het vaak op.
+					</p>
+				</div>
+			</details>
 
 			<?php if ( 0 === (int) $totals['shown'] ) : ?>
 				<div class="cf-dash__empty">

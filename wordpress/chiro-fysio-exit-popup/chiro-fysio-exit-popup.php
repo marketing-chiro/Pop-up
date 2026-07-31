@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Chiro-Fysio exit-intent pop-up
  * Description:       Vraagt bezoekers die de site dreigen te verlaten of ze gevonden hebben wat ze zochten, toont anders het telefoonnummer van de praktijk, en houdt in een eigen dashboard bij hoe vaak dat gebeurt.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Requires at least: 5.5
  * Requires PHP:      7.0
  * Author:            Chiro-Fysio
@@ -15,16 +15,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CF_EXIT_POPUP_VERSION', '1.2.0' );
+define( 'CF_EXIT_POPUP_VERSION', '1.3.0' );
 define( 'CF_EXIT_POPUP_DB_VERSION', '2' );
 define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-storage.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-admin.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-health.php';
 
 CF_Exit_Popup_Rest::init();
 CF_Exit_Popup_Admin::init();
+CF_Exit_Popup_Health::init();
 
 /**
  * Bij activatie: tabel klaarzetten en de opruimtaak inplannen.
@@ -32,8 +34,26 @@ CF_Exit_Popup_Admin::init();
 function cf_exit_popup_activate() {
 	CF_Exit_Popup_Storage::install();
 
+	cf_exit_popup_schedule_tasks();
+}
+
+/**
+ * Zet de terugkerende taken klaar. Draait bij activatie en wordt ook bij elk
+ * beheerbezoek nagelopen, zodat een taak die om wat voor reden ook verdwijnt
+ * vanzelf weer terugkomt.
+ */
+function cf_exit_popup_schedule_tasks() {
 	if ( ! wp_next_scheduled( 'cf_exit_popup_cleanup' ) ) {
 		wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'cf_exit_popup_cleanup' );
+	}
+
+	if ( ! wp_next_scheduled( 'cf_exit_popup_healthcheck' ) ) {
+		// 's Ochtends vroeg, zodat een melding er ligt voordat de praktijk opengaat.
+		wp_schedule_event( strtotime( 'tomorrow 6:30' ), 'daily', 'cf_exit_popup_healthcheck' );
+	}
+
+	if ( ! wp_next_scheduled( 'cf_exit_popup_weekly_digest' ) ) {
+		wp_schedule_event( strtotime( 'next monday 7:30' ), 'weekly', 'cf_exit_popup_weekly_digest' );
 	}
 }
 register_activation_hook( __FILE__, 'cf_exit_popup_activate' );
@@ -44,6 +64,8 @@ register_activation_hook( __FILE__, 'cf_exit_popup_activate' );
  */
 function cf_exit_popup_deactivate() {
 	wp_clear_scheduled_hook( 'cf_exit_popup_cleanup' );
+	wp_clear_scheduled_hook( 'cf_exit_popup_healthcheck' );
+	wp_clear_scheduled_hook( 'cf_exit_popup_weekly_digest' );
 }
 register_deactivation_hook( __FILE__, 'cf_exit_popup_deactivate' );
 
@@ -57,6 +79,9 @@ function cf_exit_popup_maybe_upgrade() {
 	if ( get_option( 'cf_exit_popup_db_version' ) !== CF_EXIT_POPUP_DB_VERSION ) {
 		CF_Exit_Popup_Storage::install();
 	}
+
+	// Verdwenen taken stilletjes herstellen.
+	cf_exit_popup_schedule_tasks();
 }
 add_action( 'admin_init', 'cf_exit_popup_maybe_upgrade' );
 
@@ -127,3 +152,30 @@ function cf_exit_popup_action_links( $links ) {
 	return $links;
 }
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'cf_exit_popup_action_links' );
+
+/**
+ * Houdt cache- en optimalisatieplugins van het script af.
+ *
+ * Dit is verreweg de meest voorkomende manier waarop zoiets stilletjes stopt
+ * met werken: een plugin voegt alle JavaScript samen of stelt het uit, en het
+ * script draait daarna net te laat of helemaal niet meer. Elk van deze
+ * markeringen betekent bij een van de bekende plugins "deze met rust laten":
+ *
+ *   data-no-optimize   Autoptimize
+ *   data-no-defer      Autoptimize, Swift Performance
+ *   data-cfasync       Cloudflare Rocket Loader
+ *   data-nowprocket    WP Rocket
+ *   data-no-minify     LiteSpeed Cache, SG Optimizer
+ */
+function cf_exit_popup_keep_script_untouched( $tag, $handle ) {
+	if ( 'cf-exit-popup' !== $handle ) {
+		return $tag;
+	}
+
+	return str_replace(
+		'<script ',
+		'<script data-no-optimize="1" data-no-defer="1" data-cfasync="false" data-nowprocket data-no-minify="1" ',
+		$tag
+	);
+}
+add_filter( 'script_loader_tag', 'cf_exit_popup_keep_script_untouched', 10, 2 );

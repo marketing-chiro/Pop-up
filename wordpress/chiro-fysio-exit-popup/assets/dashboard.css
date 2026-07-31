@@ -83,6 +83,128 @@
 	box-shadow: 0 1px 2px rgba(20, 32, 31, 0.1);
 }
 
+/* --- Statuskaart ----------------------------------------------------------- */
+
+.cf-health {
+	margin-bottom: 18px;
+	border: 1px solid var(--cf-border);
+	border-radius: 12px;
+	background: var(--cf-surface);
+	overflow: hidden;
+}
+
+/* Een streep aan de zijkant draagt de status ook zonder de kleur te lezen. */
+.cf-health--goed { border-left: 4px solid var(--cf-found); }
+.cf-health--wachten { border-left: 4px solid var(--cf-none); }
+.cf-health--letop { border-left: 4px solid var(--cf-rescued); }
+.cf-health--probleem { border-left: 4px solid var(--cf-lost); }
+
+.cf-health__summary {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 13px 18px;
+	cursor: pointer;
+	list-style: none;
+	font-size: 0.92rem;
+}
+
+.cf-health__summary::-webkit-details-marker { display: none; }
+
+.cf-health__summary:focus-visible {
+	outline: 2px solid var(--cf-found);
+	outline-offset: -2px;
+}
+
+.cf-health__lamp {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	flex: none;
+	background: var(--cf-muted);
+}
+
+.cf-health--goed .cf-health__lamp { background: var(--cf-found); }
+.cf-health--wachten .cf-health__lamp { background: var(--cf-none); }
+.cf-health--letop .cf-health__lamp { background: var(--cf-rescued); }
+.cf-health--probleem .cf-health__lamp { background: var(--cf-lost); }
+
+.cf-health__label { font-weight: 600; }
+
+.cf-health__meta {
+	color: var(--cf-muted);
+	font-size: 0.86rem;
+}
+
+.cf-health__toggle {
+	margin-left: auto;
+	font-size: 0.83rem;
+	color: var(--cf-ink-2);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.cf-health[open] .cf-health__toggle::after { content: " verbergen"; }
+
+.cf-health__body {
+	padding: 4px 18px 18px;
+	border-top: 1px solid var(--cf-grid);
+}
+
+.cf-health__list {
+	margin: 14px 0 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+	gap: 2px 26px;
+}
+
+.cf-health__item {
+	display: grid;
+	grid-template-columns: 14px 1fr auto;
+	align-items: center;
+	gap: 9px;
+	padding: 6px 0;
+	border-bottom: 1px solid var(--cf-grid);
+	font-size: 0.87rem;
+}
+
+.cf-health__dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-left: 3px;
+}
+
+.cf-health__dot--ok { background: var(--cf-found); }
+.cf-health__dot--nok { background: var(--cf-lost); }
+
+.cf-health__key { color: var(--cf-ink-2); }
+
+.cf-health__val {
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.cf-health__error {
+	margin: 14px 0 0;
+	padding: 11px 14px;
+	border-radius: 8px;
+	background: rgba(208, 59, 59, 0.09);
+	color: #8f2424;
+	font-size: 0.87rem;
+}
+
+.cf-health__hint {
+	margin: 14px 0 0;
+	max-width: 78ch;
+	font-size: 0.84rem;
+	color: var(--cf-muted);
+	line-height: 1.5;
+}
+
 /* --- Kerncijfers ----------------------------------------------------------- */
 
 .cf-dash__tiles {

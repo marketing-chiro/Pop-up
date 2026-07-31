@@ -381,11 +381,10 @@ body.cf-exit-lock {
     // '/je-1e-afspraak/'. Schrijf de termen zonder schuine streep: '/afspraak'
     // zou '/je-1e-afspraak/' juist missen, omdat daar '-afspraak' staat.
     //
-    // Deze lijst komt uit het Analytics-rapport. Weggehaald: 'winkelwagen' en
-    // 'checkout', want die pagina's bestaan niet (geen webshop, omzet 0).
-    // Toegevoegd: de screeningpagina omdat dat een aanmeldpagina is, en de
-    // vacature- en sollicitatiepagina's - wie naar werk zoekt heeft niets aan
-    // de vraag of die gevonden heeft wat die zocht.
+    // Deze lijst komt uit het Analytics-rapport, nagelopen door de praktijk.
+    // Weggehaald: 'winkelwagen' en 'checkout', want die pagina's bestaan niet
+    // (geen webshop, omzet 0). 'vacature' dekt /vacatures/: wie naar werk
+    // zoekt, heeft niets aan de vraag of die gevonden heeft wat die zocht.
     //
     // Let op: het online boekingssysteem (Crossuite) staat op een ander domein,
     // dus daar draait dit script van zichzelf al niet.
@@ -393,9 +392,7 @@ body.cf-exit-lock {
       'contact',
       'afspraak',
       'bedankt',
-      'screening',
-      'vacature',
-      'sollicitatie'
+      'vacature'
     ],
 
     // Optionele hulplink onderin het nee-scherm, voor de vraag die het vaakst
