@@ -192,14 +192,14 @@ class CF_Exit_Popup_Admin {
 
 				<div class="cf-tile">
 					<span class="cf-tile__label">Was er al eerder</span>
-					<span class="cf-tile__value"><?php echo esc_html( number_format_i18n( $totals['returning'] ) ); ?></span>
+					<span class="cf-tile__value"><?php echo esc_html( number_format_i18n( $totals['repeat_shown'] ) ); ?></span>
 					<span class="cf-tile__note">
 						<?php
-						$pct_returning = $totals['shown'] > 0 ? round( $totals['returning'] / $totals['shown'] * 100 ) : 0;
+						$pct_returning = $totals['shown'] > 0 ? round( $totals['repeat_shown'] / $totals['shown'] * 100 ) : 0;
 						echo esc_html( $pct_returning );
 						?>% van de vertoningen<?php
-						if ( $totals['returning'] > 0 ) {
-							echo ' - ' . esc_html( number_format_i18n( $totals['returning_not_found'] ) ) . 'x zonder resultaat';
+						if ( $totals['repeat_shown'] > 0 ) {
+							echo ' - ' . esc_html( number_format_i18n( $totals['repeat_not_found'] ) ) . 'x zonder resultaat';
 						}
 						?>
 					</span>

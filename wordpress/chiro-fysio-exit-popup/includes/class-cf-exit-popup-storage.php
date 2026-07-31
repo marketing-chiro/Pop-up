@@ -140,20 +140,29 @@ class CF_Exit_Popup_Storage {
 					SUM(CASE WHEN action_taken = 'call' THEN 1 ELSE 0 END) AS calls,
 					SUM(CASE WHEN action_taken = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapps,
 					SUM(CASE WHEN action_taken = 'appointment' THEN 1 ELSE 0 END) AS appointments,
-					SUM(CASE WHEN visitor = 'terugkerend' THEN 1 ELSE 0 END) AS returning,
-					SUM(CASE WHEN visitor = 'terugkerend' AND answer = 'nee' THEN 1 ELSE 0 END) AS returning_not_found
+					SUM(CASE WHEN visitor = 'terugkerend' THEN 1 ELSE 0 END) AS repeat_shown,
+					SUM(CASE WHEN visitor = 'terugkerend' AND answer = 'nee' THEN 1 ELSE 0 END) AS repeat_not_found
 				 FROM {$table} WHERE created_at >= %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$since
 			),
 			ARRAY_A
 		);
 
+		// Een query die faalt gaf hier eerst stilletjes nullen terug, waardoor een
+		// kapot dashboard er hetzelfde uitzag als een rustige week. Nu leggen we
+		// het vast, zodat de gezondheidscontrole het kan oppikken.
 		if ( ! $row ) {
+			if ( $wpdb->last_error ) {
+				update_option( 'cf_exit_popup_last_db_error', array(
+					'when'    => current_time( 'mysql' ),
+					'message' => substr( wp_strip_all_tags( $wpdb->last_error ), 0, 500 ),
+				), false );
+			}
 			$row = array();
 		}
 
 		// SUM() geeft NULL terug op een lege tabel; nul leest prettiger.
-		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'calls', 'whatsapps', 'appointments', 'returning', 'returning_not_found' ) as $key ) {
+		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'calls', 'whatsapps', 'appointments', 'repeat_shown', 'repeat_not_found' ) as $key ) {
 			$row[ $key ] = isset( $row[ $key ] ) ? (int) $row[ $key ] : 0;
 		}
 
