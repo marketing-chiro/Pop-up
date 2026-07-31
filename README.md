@@ -53,14 +53,16 @@ het **footer**-veld. Dat bestand bevat de CSS en JavaScript al bij elkaar.
 
 ---
 
-## Voordat je live gaat: even controleren
+## Voordat je live gaat
 
-Deze twee dingen wil je nalopen in `src/exit-intent-popup.js`, bovenin het blok
-`CONFIG`:
+Het telefoonnummer klopt: **024-3558830**, bevestigd door de praktijk. De knop
+toont `024 - 355 88 30` en belt `+31243558830` — dat is hetzelfde nummer, met de
+nul vervangen door de landcode zodat het ook vanaf een mobiel werkt.
 
-| Instelling | Nu ingesteld op | Actie |
+Eén ding staat nog open in `src/exit-intent-popup.js`, bovenin het blok `CONFIG`:
+
+| Instelling | Nu | Actie |
 |---|---|---|
-| `phoneDisplay` / `phoneHref` | `024 - 355 88 30` / `+31243558830` | **Controleer of dit klopt.** Ik heb dit nummer van een zoekresultaat gehaald, niet van jullie site zelf (die blokkeerde mijn verzoek). |
 | `whatsapp` | leeg | Vul een **mobiel** nummer in als je WhatsApp wilt aanbieden, bijvoorbeeld `31612345678`. Zolang dit leeg is, wordt de WhatsApp-knop netjes verborgen. |
 
 Na het aanpassen van `src/` draai je `./build.sh` om de plugin-zip en het

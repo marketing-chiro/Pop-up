@@ -15,10 +15,13 @@
      INSTELLINGEN - dit is het enige blok dat je normaal hoeft aan te passen.
      ========================================================================== */
   var CONFIG = {
-    // Telefoonnummer zoals de bezoeker het te zien krijgt.
+    // Telefoonnummer van de praktijk, zoals de bezoeker het te zien krijgt.
+    // Bevestigd door de praktijk: 024-3558830.
     phoneDisplay: '024 - 355 88 30',
 
-    // Zelfde nummer, maar internationaal en zonder spaties (voor de belknop).
+    // Hetzelfde nummer, maar met de landcode in plaats van de nul en zonder
+    // spaties. Dat is wat de belknop gebruikt, zodat hij ook werkt als iemand
+    // vanaf een mobiel of vanuit het buitenland belt.
     phoneHref: '+31243558830',
 
     // WhatsApp-nummer in internationaal formaat zonder + en zonder spaties,
