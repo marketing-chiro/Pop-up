@@ -28,10 +28,16 @@ cp "$SRC/app.js" "$ASSETS/"
 cp "$SRC/editor.css" "$ASSETS/"
 cp "$SRC/editor.js" "$ASSETS/"
 
-echo "==> Plugin-zip maken"
+echo "==> Plugin-zips maken"
 mkdir -p "$DIST"
-rm -f "$DIST/chiro-fysio-exit-popup.zip"
-( cd wordpress && zip -qr "../$DIST/chiro-fysio-exit-popup.zip" chiro-fysio-exit-popup -x '*.DS_Store' )
+
+# Twee losse plugins, bewust. De pop-up en de e-mailcampagnes hebben elkaar
+# niet nodig: zet je de een uit, dan hoort de ander door te draaien.
+for PLUGIN in chiro-fysio-exit-popup chiro-fysio-campagnes; do
+	rm -f "$DIST/$PLUGIN.zip"
+	( cd wordpress && zip -qr "../$DIST/$PLUGIN.zip" "$PLUGIN" -x '*.DS_Store' )
+	echo "    $PLUGIN.zip"
+done
 
 echo "==> Plak-snippet maken"
 {

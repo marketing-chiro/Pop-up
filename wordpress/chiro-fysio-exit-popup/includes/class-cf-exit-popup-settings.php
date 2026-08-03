@@ -40,11 +40,6 @@ class CF_Exit_Popup_Settings {
 		if ( isset( $_POST['vernieuw_sleutel'] ) ) {
 			CF_Exit_Popup_App::new_key();
 			$melding = 'vernieuwd';
-		} elseif ( isset( $_POST['laposta_los'] ) ) {
-			CF_Exit_Popup_Laposta::sleutel_opslaan( '' );
-			CF_Exit_Popup_Laposta::lijst_opslaan( '' );
-			delete_transient( 'cf_laposta_status' );
-			$melding = 'losgekoppeld';
 		} else {
 			$aan = isset( $_POST['delen_aan'] ) ? 1 : 0;
 			update_option( 'cf_exit_popup_share_enabled', $aan, false );
@@ -54,21 +49,6 @@ class CF_Exit_Popup_Settings {
 				update_option( 'cf_exit_popup_mail_to', $mail, false );
 			} else {
 				delete_option( 'cf_exit_popup_mail_to' );
-			}
-
-			// Een lege sleutel betekent hier "niet wijzigen": het veld staat leeg
-			// omdat we een bestaande sleutel nooit terugtonen in de HTML.
-			$nieuw = isset( $_POST['laposta_sleutel'] )
-				? trim( sanitize_text_field( wp_unslash( $_POST['laposta_sleutel'] ) ) )
-				: '';
-
-			if ( '' !== $nieuw ) {
-				CF_Exit_Popup_Laposta::sleutel_opslaan( $nieuw );
-				delete_transient( 'cf_laposta_status' );
-			}
-
-			if ( isset( $_POST['laposta_lijst'] ) ) {
-				CF_Exit_Popup_Laposta::lijst_opslaan( wp_unslash( $_POST['laposta_lijst'] ) );
 			}
 		}
 
@@ -98,8 +78,6 @@ class CF_Exit_Popup_Settings {
 
 			<?php if ( 'vernieuwd' === $melding ) : ?>
 				<div class="notice notice-success"><p>Nieuwe sleutel aangemaakt. De vorige link werkt nu niet meer.</p></div>
-			<?php elseif ( 'losgekoppeld' === $melding ) : ?>
-				<div class="notice notice-success"><p>De koppeling met Laposta is verbroken.</p></div>
 			<?php elseif ( 'opgeslagen' === $melding ) : ?>
 				<div class="notice notice-success"><p>Opgeslagen.</p></div>
 			<?php endif; ?>
@@ -169,8 +147,6 @@ class CF_Exit_Popup_Settings {
 					<?php endif; ?>
 				</section>
 
-				<?php self::render_laposta(); ?>
-
 				<section class="cf-card">
 					<h2 class="cf-card__title">Meldingen</h2>
 					<p class="cf-card__sub">
@@ -188,99 +164,6 @@ class CF_Exit_Popup_Settings {
 				<p><button type="submit" class="button button-primary">Opslaan</button></p>
 			</form>
 		</div>
-		<?php
-	}
-
-	/**
-	 * De koppeling met Laposta.
-	 *
-	 * De sleutel wordt bewust nooit teruggetoond. Wie hem heeft, kan mail
-	 * versturen namens de praktijk - dat hoort niet in de HTML van een pagina
-	 * te staan, ook niet achter een inlog. Je ziet alleen dát er een sleutel
-	 * staat; vervangen kan door een nieuwe in te vullen.
-	 */
-	private static function render_laposta() {
-		$ingesteld = CF_Exit_Popup_Laposta::ingesteld();
-		$status    = false;
-
-		if ( $ingesteld ) {
-			// Even bewaren: dit is een echte oproep naar Laposta en de pagina
-			// wordt bij elke opslag opnieuw getekend.
-			$status = get_transient( 'cf_laposta_status' );
-
-			if ( false === $status ) {
-				$status = CF_Exit_Popup_Laposta::controleer();
-				set_transient( 'cf_laposta_status', $status, 5 * MINUTE_IN_SECONDS );
-			}
-		}
-		?>
-		<section class="cf-card">
-			<h2 class="cf-card__title">Koppeling met Laposta</h2>
-			<p class="cf-card__sub">
-				Hiermee haalt het dashboard de resultaten van je nieuwsbrieven op en kun je
-				campagnes starten. De sleutel maak je aan in Laposta onder
-				<strong>Profiel &rarr; API</strong>.
-			</p>
-
-			<?php if ( ! $ingesteld ) : ?>
-
-				<p>
-					<label for="cf-laposta-sleutel"><strong>API-sleutel</strong></label><br>
-					<input type="password" id="cf-laposta-sleutel" name="laposta_sleutel"
-						class="regular-text" autocomplete="off" spellcheck="false"
-						placeholder="Plak hier de sleutel uit Laposta">
-				</p>
-				<p class="cf-note">
-					Nog geen koppeling. Zolang deze leeg is, werkt de rest van de plug-in gewoon
-					door - je ziet alleen geen e-mailcijfers in het dashboard.
-				</p>
-
-			<?php else : ?>
-
-				<?php if ( $status && $status['goed'] ) : ?>
-					<p class="cf-note cf-note--ok">
-						<strong>&check; <?php echo esc_html( $status['melding'] ); ?></strong>
-					</p>
-				<?php else : ?>
-					<p class="cf-note cf-note--warn">
-						<strong>Er is een sleutel ingesteld, maar de verbinding lukt niet.</strong><br>
-						<?php echo esc_html( $status ? $status['melding'] : CF_Exit_Popup_Laposta::laatste_fout() ); ?>
-					</p>
-				<?php endif; ?>
-
-				<?php if ( $status && ! empty( $status['lijsten'] ) ) : ?>
-					<p>
-						<label for="cf-laposta-lijst"><strong>Welke lijst gebruiken we?</strong></label><br>
-						<select id="cf-laposta-lijst" name="laposta_lijst">
-							<?php foreach ( $status['lijsten'] as $lijst ) : ?>
-								<option value="<?php echo esc_attr( $lijst['id'] ); ?>"
-									<?php selected( CF_Exit_Popup_Laposta::lijst_id(), $lijst['id'] ); ?>>
-									<?php
-									printf(
-										'%s (%s aanmeldingen)',
-										esc_html( $lijst['naam'] ),
-										esc_html( number_format_i18n( $lijst['leden'] ) )
-									);
-									?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</p>
-				<?php endif; ?>
-
-				<p>
-					<label for="cf-laposta-sleutel">Sleutel vervangen</label><br>
-					<input type="password" id="cf-laposta-sleutel" name="laposta_sleutel"
-						class="regular-text" autocomplete="off" spellcheck="false"
-						placeholder="Laat leeg om de huidige te houden">
-					<button type="submit" name="laposta_los" value="1" class="button"
-						onclick="return confirm('De koppeling wordt verbroken. Doorgaan?');">
-						Loskoppelen
-					</button>
-				</p>
-
-			<?php endif; ?>
-		</section>
 		<?php
 	}
 }

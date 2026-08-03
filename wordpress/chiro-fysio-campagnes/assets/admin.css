@@ -1,0 +1,90 @@
+/*!
+ * Vormgeving van het campagnescherm.
+ *
+ * Eigen stijlen, los van de pop-upplugin: die twee horen niet van elkaar
+ * afhankelijk te zijn. Wel dezelfde maatvoering en kleuren, zodat het één
+ * geheel blijft voor wie ertussen wisselt.
+ */
+
+.cf-camp {
+	--cf-ok: #0a9184;
+	--cf-let-op: #eda100;
+	--cf-ink: #14201f;
+	--cf-ink-2: #55635f;
+	--cf-muted: #82918c;
+	--cf-plane: #f4f5f3;
+	--cf-border: rgba(20, 32, 31, 0.11);
+
+	max-width: 1180px;
+	color: var(--cf-ink);
+}
+
+.cf-camp__title {
+	margin: 8px 0 0;
+	padding: 0;
+	font-size: 1.6rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.cf-camp__sub {
+	margin: 4px 0 24px;
+	color: var(--cf-ink-2);
+	font-size: 0.95rem;
+}
+
+.cf-camp__card {
+	max-width: 780px;
+	margin: 0 0 18px;
+	padding: 20px 24px;
+	border: 1px solid var(--cf-border);
+	border-radius: 12px;
+	background: #fff;
+}
+
+.cf-camp__cardtitle {
+	margin: 0;
+	padding: 0;
+	font-size: 1.05rem;
+	font-weight: 700;
+}
+
+.cf-camp__cardsub {
+	margin: 6px 0 16px;
+	max-width: 68ch;
+	color: var(--cf-ink-2);
+	font-size: 0.9rem;
+	line-height: 1.55;
+}
+
+.cf-camp__note {
+	margin: 12px 0 0;
+	max-width: 72ch;
+	font-size: 0.86rem;
+	color: var(--cf-muted);
+	line-height: 1.55;
+}
+
+/* Een werkende koppeling en een storing verdienen allebei een zichtbare
+   markering - niet alleen een kleurverschil in de tekst. */
+.cf-camp__note--ok,
+.cf-camp__note--warn {
+	padding: 10px 13px;
+	border-radius: 0 8px 8px 0;
+	color: var(--cf-ink-2);
+}
+
+.cf-camp__note--ok {
+	border-left: 3px solid var(--cf-ok);
+	background: rgba(10, 145, 132, 0.1);
+}
+
+.cf-camp__note--warn {
+	border-left: 3px solid var(--cf-let-op);
+	background: rgba(237, 161, 0, 0.1);
+}
+
+.cf-camp select,
+.cf-camp input[type="password"] {
+	margin-top: 4px;
+}

@@ -26,16 +26,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class CF_Exit_Popup_Laposta {
+class CF_Campagne_Laposta {
 
 	/** Waar de sleutel staat. Bewust zonder autoload: hij hoort niet op elke pagina mee te komen. */
-	const OPTIE_SLEUTEL = 'cf_exit_popup_laposta_key';
+	const OPTIE_SLEUTEL = 'cf_campagne_laposta_key';
 
 	/** Het gekozen lijst-ID binnen Laposta. */
-	const OPTIE_LIJST = 'cf_exit_popup_laposta_list';
+	const OPTIE_LIJST = 'cf_campagne_laposta_list';
 
 	/** Onthoudt de laatste foutmelding, zodat een stille storing zichtbaar wordt. */
-	const OPTIE_FOUT = 'cf_exit_popup_laposta_last_error';
+	const OPTIE_FOUT = 'cf_campagne_laposta_last_error';
 
 	const BASIS = 'https://api.laposta.nl/v2/';
 
@@ -207,7 +207,7 @@ class CF_Exit_Popup_Laposta {
 	 * geval af waar het echt om gaat: een lus die per ongeluk doordraait.
 	 */
 	private static function mag_nog() {
-		$sleutel = 'cf_laposta_tempo_' . gmdate( 'YmdHi' );
+		$sleutel = 'cf_campagne_tempo_' . gmdate( 'YmdHi' );
 		$aantal  = (int) get_transient( $sleutel );
 
 		if ( $aantal >= self::LIMIET_PER_MINUUT ) {
