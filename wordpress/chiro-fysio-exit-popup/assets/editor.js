@@ -73,6 +73,22 @@
 
 	/* --- Het voorbeeld tekenen ---------------------------------------------- */
 
+	var ICONEN = {
+		vraag: '<path fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" ' +
+			'stroke-linejoin="round" d="M9.1 9a3 3 0 1 1 4.2 2.75c-.8.37-1.3 1.16-1.3 2.04v.46M12 17.5h.01"/>' +
+			'<circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2.1"/>',
+		goed: '<path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" ' +
+			'stroke-linejoin="round" d="M20 6.5 9.4 17 4 11.7"/>',
+		hulp: '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 ' +
+			'1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 ' +
+			'1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>'
+	};
+
+	function baken(soort) {
+		return '<div class="cf-exit__mark' + ('goed' === soort ? ' cf-exit__mark--goed' : '') +
+			'" aria-hidden="true"><svg viewBox="0 0 24 24">' + ICONEN[soort] + '</svg></div>';
+	}
+
 	function logoTag() {
 		var img = document.querySelector('#cf-logo-voorbeeld img');
 		if (!img) return '';
@@ -82,7 +98,8 @@
 	}
 
 	function schermVraag() {
-		return '<h2 class="cf-exit__title">' + ontsnap(tekst('txt_question')) + '</h2>' +
+		return baken('vraag') +
+			'<h2 class="cf-exit__title">' + ontsnap(tekst('txt_question')) + '</h2>' +
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_question_sub')) + '</p>' +
 			'<div class="cf-exit__actions">' +
 				'<button type="button" class="cf-exit__btn cf-exit__btn--ghost">' + ontsnap(tekst('txt_yes')) + '</button>' +
@@ -96,10 +113,7 @@
 				ontsnap(tekst('txt_appointment')) + '</span></div>'
 			: '';
 
-		return '<div class="cf-exit__check">' +
-				'<svg viewBox="0 0 24 24" width="28" height="28">' +
-				'<path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" ' +
-				'stroke-linejoin="round" d="M20 6 9 17l-5-5"/></svg></div>' +
+		return baken('goed') +
 			'<h2 class="cf-exit__title">' + ontsnap(tekst('txt_yes_title')) + '</h2>' +
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_yes_body')) + '</p>' + knop;
 	}
@@ -116,7 +130,8 @@
 			? '<span class="cf-exit__help">' + ontsnap(tekst('help_label')) + '</span>'
 			: '';
 
-		return '<h2 class="cf-exit__title">' + ontsnap(tekst('txt_no_title')) + '</h2>' +
+		return baken('hulp') +
+			'<h2 class="cf-exit__title">' + ontsnap(tekst('txt_no_title')) + '</h2>' +
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_no_body')) + '</p>' +
 			'<div class="cf-exit__actions cf-exit__actions--stack">' +
 				'<span class="cf-exit__btn cf-exit__btn--call">' +

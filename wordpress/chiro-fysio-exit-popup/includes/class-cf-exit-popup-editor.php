@@ -72,8 +72,17 @@ class CF_Exit_Popup_Editor {
 			$melding = 'opgeslagen';
 		}
 
+		// De instellingen staan in de HTML van elke pagina. Zolang een
+		// cacheplugin de oude versie uitserveert, ziet een bezoeker niets van
+		// de wijziging - ook al staat het hier allang goed.
+		$geleegd = CF_Exit_Popup_Cache::flush();
+
 		wp_safe_redirect( add_query_arg(
-			array( 'page' => self::SLUG, 'cf_melding' => $melding ),
+			array(
+				'page'       => self::SLUG,
+				'cf_melding' => $melding,
+				'cf_cache'   => $geleegd ? rawurlencode( implode( ', ', $geleegd ) ) : '',
+			),
 			admin_url( 'admin.php' )
 		) );
 		exit;
@@ -82,6 +91,31 @@ class CF_Exit_Popup_Editor {
 	/* ======================================================================
 	   Kleine hulpjes voor de formuliervelden
 	   ====================================================================== */
+
+	/**
+	 * Milliseconden als leesbare tijd, zodat de toelichting meebeweegt met wat
+	 * er werkelijk staat in plaats van een vast getal te noemen.
+	 */
+	private static function seconden( $ms ) {
+		$ms = (int) $ms;
+
+		if ( 0 === $ms ) {
+			return 'geen wachttijd';
+		}
+
+		if ( $ms < 1000 ) {
+			return $ms . ' milliseconden';
+		}
+
+		$sec = $ms / 1000;
+
+		// Hele seconden zonder komma, anders met één cijfer erachter.
+		$net = ( $sec === floor( $sec ) )
+			? (string) (int) $sec
+			: number_format_i18n( $sec, 1 );
+
+		return $net . ( '1' === $net ? ' seconde' : ' seconden' );
+	}
 
 	private static function tekst( $naam, $label, $o, $hulp = '', $breed = false ) {
 		?>
@@ -174,6 +208,10 @@ class CF_Exit_Popup_Editor {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$melding = isset( $_GET['cf_melding'] ) ? sanitize_text_field( wp_unslash( $_GET['cf_melding'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$cache = isset( $_GET['cf_cache'] ) ? sanitize_text_field( wp_unslash( $_GET['cf_cache'] ) ) : '';
+
+		$cacheplugins = CF_Exit_Popup_Cache::detected();
 		?>
 		<div class="wrap cf-dash cf-editor">
 
@@ -187,10 +225,32 @@ class CF_Exit_Popup_Editor {
 				</div>
 			</div>
 
-			<?php if ( 'opgeslagen' === $melding ) : ?>
-				<div class="notice notice-success"><p>Opgeslagen. De wijzigingen staan meteen live.</p></div>
-			<?php elseif ( 'hersteld' === $melding ) : ?>
-				<div class="notice notice-success"><p>Alles staat weer op de standaardwaarden.</p></div>
+			<?php if ( $melding ) : ?>
+				<div class="notice notice-success">
+					<p>
+						<?php
+						echo 'hersteld' === $melding
+							? 'Alles staat weer op de standaardwaarden.'
+							: 'Opgeslagen.';
+						?>
+						<?php if ( $cache ) : ?>
+							De cache van <?php echo esc_html( $cache ); ?> is meteen geleegd,
+							dus bezoekers zien de nieuwe versie direct.
+						<?php else : ?>
+							De wijzigingen staan meteen live.
+						<?php endif; ?>
+					</p>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $cacheplugins ) : ?>
+				<p class="cf-note">
+					Er draait een cachelaag op deze site
+					(<?php echo esc_html( implode( ', ', $cacheplugins ) ); ?>). Die wordt na
+					elke keer opslaan automatisch geleegd. Zie je een wijziging toch niet terug
+					op de site, ververs dan je browser met <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>
+					(of <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> op een Mac).
+				</p>
 			<?php endif; ?>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="cf-editor-form">
@@ -324,8 +384,8 @@ class CF_Exit_Popup_Editor {
 
 							<h2 class="cf-card__title cf-mt">Wanneer hij verschijnt</h2>
 							<?php
-							self::getal( 'arm_after', 'Wachten voordat hij scherp staat', $o, 'ms', 'Nu 6 seconden. Onderbouwd met het Analytics-rapport: bezoekers zijn gemiddeld 38 seconden actief over 1,98 pagina\'s.', 0, 60000, 500 );
-							self::getal( 'exit_grace', 'Wachten na het vertreksignaal', $o, 'ms', 'Komt de aanwijzer binnen deze tijd terug, dan gebeurt er niets. Dit vangt af dat iemand naar het menu bovenaan reikt en er net voorbij schiet.', 0, 3000, 50 );
+							self::getal( 'arm_after', 'Wachten voordat hij scherp staat', $o, 'ms', 'Dat is nu ' . self::seconden( $o['arm_after'] ) . '. Onderbouwd met het Analytics-rapport: bezoekers zijn gemiddeld 38 seconden actief over 1,98 pagina\'s, dus grofweg 19 seconden per pagina.', 0, 60000, 500 );
+							self::getal( 'exit_grace', 'Wachten na het vertreksignaal', $o, 'ms', 'Dat is nu ' . self::seconden( $o['exit_grace'] ) . '. Komt de aanwijzer binnen die tijd terug, dan gebeurt er niets. Dit vangt af dat iemand naar het menu bovenaan reikt en er net voorbij schiet.', 0, 3000, 50 );
 							self::schakel( 'require_interaction', 'Pas na een echte beweging of scroll', $o, 'Houdt geautomatiseerd verkeer uit de cijfers. In juli kwam 31% van het verkeer uit landen zonder plausibele patiëntrelatie.' );
 							?>
 
@@ -338,7 +398,7 @@ class CF_Exit_Popup_Editor {
 							<h2 class="cf-card__title cf-mt">Op telefoon en tablet</h2>
 							<?php
 							self::schakel( 'enable_mobile', 'Ook tonen op mobiel', $o, 'Daar bestaat geen muis, dus wordt er gekeken naar stilte en snel omhoog vegen.' );
-							self::getal( 'mobile_idle', 'Tonen na deze stilte', $o, 'ms', 'Nu 45 seconden zonder aanraking. Op 0 zetten om deze trigger uit te schakelen.', 0, 300000, 5000 );
+							self::getal( 'mobile_idle', 'Tonen na deze stilte', $o, 'ms', 'Dat is nu ' . self::seconden( $o['mobile_idle'] ) . ' zonder aanraking. Op 0 zetten om deze trigger uit te schakelen.', 0, 300000, 5000 );
 							?>
 
 							<h2 class="cf-card__title cf-mt">Waar hij nooit verschijnt</h2>

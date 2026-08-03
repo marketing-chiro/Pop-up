@@ -1,8 +1,13 @@
 /*!
  * Chiro-Fysio exit-intent pop-up - vormgeving
  *
- * De kleuren staan bovenaan als custom properties. Pas die aan naar de
- * huisstijl en de rest volgt vanzelf.
+ * Uitgangspunt: de pop-up onderbreekt iemand al, dus hij moet rustig en
+ * vriendelijk zijn in plaats van luid. Vandaar veel witruimte, één zacht
+ * gekleurd icoon als baken, en knoppen met gewicht maar zonder geschreeuw.
+ *
+ * Alle kleuren en vormen komen uit de variabelen hieronder. Die worden in
+ * WordPress overschreven met wat er onder Pop-up instellen staat, dus één
+ * kleur wijzigen werkt door in het hele venster.
  */
 
 .cf-exit {
@@ -26,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   font-family: var(--cf-font);
   -webkit-font-smoothing: antialiased;
 }
@@ -37,35 +42,58 @@
 
 /* --- Overlay -------------------------------------------------------------- */
 
+/* De overlay krijgt een vleugje van de huisstijlkleur mee in plaats van neutraal
+   grijs te zijn. Dat bindt het venster aan de site eronder. */
 .cf-exit__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(12, 26, 31, 0.55);
+  background:
+    radial-gradient(120% 90% at 50% 0%,
+      color-mix(in srgb, var(--cf-primary) 22%, transparent),
+      transparent 70%),
+    rgba(10, 22, 26, 0.52);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.28s ease;
+}
+
+/* Vervaging geeft diepte, maar alleen waar de browser het aankan. */
+@supports (backdrop-filter: blur(3px)) {
+  .cf-exit__overlay {
+    backdrop-filter: blur(3px);
+  }
 }
 
 .cf-exit.is-open .cf-exit__overlay {
   opacity: 1;
 }
 
-/* --- Dialoog -------------------------------------------------------------- */
+/* --- Het venster ---------------------------------------------------------- */
 
 .cf-exit__dialog {
   position: relative;
   width: 100%;
-  max-width: 440px;
-  max-height: calc(100vh - 40px);
+  max-width: 424px;
+  max-height: calc(100vh - 48px);
   overflow-y: auto;
-  padding: 36px 32px 30px;
+  padding: 38px 34px 30px;
   border-radius: var(--cf-radius);
   background: var(--cf-surface);
   color: var(--cf-text);
-  box-shadow: 0 24px 60px rgba(10, 25, 30, 0.28);
   text-align: center;
+
+  /* Gelaagde schaduw: een korte voor de rand, een lange voor de diepte, en een
+     haarlijn erbovenop zodat het venster ook op wit blijft staan. */
+  box-shadow:
+    0 0 0 1px rgba(23, 36, 43, 0.06),
+    0 2px 6px rgba(23, 36, 43, 0.06),
+    0 18px 40px -12px rgba(23, 36, 43, 0.28);
+
   opacity: 0;
-  transform: translateY(14px) scale(0.98);
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transform: translateY(18px) scale(0.97);
+  /* Een lichte veer aan het eind: komt vriendelijker binnen dan een rechte lijn. */
+  transition:
+    opacity 0.3s ease,
+    transform 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.08);
 }
 
 .cf-exit.is-open .cf-exit__dialog {
@@ -75,12 +103,14 @@
 
 /* --- Sluitknop ------------------------------------------------------------ */
 
+/* Bewust bescheiden: wie weg wil moet dat makkelijk kunnen, maar de knop hoeft
+   niet om aandacht te vragen. */
 .cf-exit__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 38px;
-  height: 38px;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,14 +119,16 @@
   border-radius: 50%;
   background: transparent;
   color: var(--cf-muted);
+  opacity: 0.65;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
 }
 
 .cf-exit__close:hover,
 .cf-exit__close:focus-visible {
   background: var(--cf-accent);
   color: var(--cf-text);
+  opacity: 1;
 }
 
 /* --- Logo ------------------------------------------------------------------ */
@@ -104,65 +136,94 @@
 .cf-exit__logo {
   display: block;
   width: auto;
-  max-width: 62%;
-  margin: 0 auto 16px;
+  max-width: 58%;
+  margin: 0 auto 20px;
   object-fit: contain;
+}
+
+/* --- Het baken bovenaan ----------------------------------------------------- */
+
+/* Eén zachte cirkel met een icoon erin. Per scherm een ander icoon, zodat je in
+   een oogopslag ziet waar je bent: een vraag, een bevestiging, of hulp. */
+.cf-exit__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--cf-accent);
+  color: var(--cf-primary);
+  /* Een zachte ring eromheen geeft het wat lucht. */
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--cf-accent) 45%, transparent);
+}
+
+.cf-exit__mark svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Het vinkje bij "gelukt" verdient net wat meer nadruk. */
+.cf-exit__mark--goed {
+  background: var(--cf-primary);
+  color: #fff;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--cf-primary) 14%, transparent);
 }
 
 /* --- Tekst ---------------------------------------------------------------- */
 
 .cf-exit__title {
-  margin: 0 0 10px;
-  font-size: 1.45rem;
-  line-height: 1.25;
+  margin: 0 0 9px;
+  font-size: 1.52rem;
+  line-height: 1.22;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--cf-text);
+  text-wrap: balance;
 }
 
 .cf-exit__body {
-  margin: 0 0 22px;
-  font-size: 1rem;
-  line-height: 1.55;
+  /* Niet te breed: regels van ruim 40 tekens lezen op deze afstand het prettigst. */
+  max-width: 34ch;
+  margin: 0 auto 24px;
+  font-size: 1.02rem;
+  line-height: 1.58;
   color: var(--cf-muted);
 }
 
 .cf-exit__note {
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   font-size: 0.85rem;
+  line-height: 1.5;
   color: var(--cf-muted);
+  opacity: 0.85;
 }
 
 /* Hulplink voor de vraag die het vaakst onbeantwoord blijft. Bewust rustiger
    dan de knoppen: bellen blijft het hoofdaanbod. */
 .cf-exit__help {
   display: inline-block;
-  margin: 14px 0 0;
-  font-size: 0.9rem;
+  margin: 16px 0 0;
+  font-size: 0.92rem;
+  font-weight: 500;
   color: var(--cf-primary);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  transition: color 0.15s ease;
 }
 
 .cf-exit__help:hover,
 .cf-exit__help:focus-visible {
   color: var(--cf-primary-dark);
+  text-decoration-thickness: 2px;
 }
 
 .cf-exit__help:focus-visible {
   outline: 3px solid var(--cf-primary);
   outline-offset: 3px;
-}
-
-.cf-exit__check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 16px;
-  border-radius: 50%;
-  background: var(--cf-accent);
-  color: var(--cf-primary);
+  border-radius: 3px;
 }
 
 /* --- Knoppen -------------------------------------------------------------- */
@@ -181,76 +242,88 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 10px;
   flex: 1 1 auto;
-  min-height: 50px;
-  padding: 13px 20px;
-  border: 2px solid transparent;
+  min-height: 52px;
+  padding: 14px 22px;
+  border: 0;
   border-radius: var(--cf-btn-radius);
   font-size: 1rem;
   font-weight: 600;
   font-family: var(--cf-font);
   line-height: 1.2;
+  letter-spacing: -0.005em;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.14s ease;
+}
+
+/* Een knop die iets omhoog komt voelt aanraakbaar. */
+.cf-exit__btn:hover {
+  transform: translateY(-1px);
 }
 
 .cf-exit__btn:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
+/* De hoofdknop draagt de huisstijlkleur, met een schaduw in diezelfde kleur
+   zodat hij op de kaart lijkt te liggen in plaats van erop geplakt. */
 .cf-exit__btn--primary {
   background: var(--cf-primary);
-  border-color: var(--cf-primary);
   color: #fff;
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--cf-primary) 55%, transparent);
 }
 
 .cf-exit__btn--primary:hover,
 .cf-exit__btn--primary:focus-visible {
   background: var(--cf-primary-dark);
-  border-color: var(--cf-primary-dark);
   color: #fff;
+  box-shadow: 0 6px 16px -4px color-mix(in srgb, var(--cf-primary) 60%, transparent);
 }
 
+/* De nevenknop: geen harde rand, maar een zachte vlek. Rustiger, en het verschil
+   met de hoofdknop wordt er juist duidelijker door. */
 .cf-exit__btn--ghost {
-  background: transparent;
-  border-color: #d5dfe2;
+  background: color-mix(in srgb, var(--cf-muted) 9%, transparent);
   color: var(--cf-text);
 }
 
 .cf-exit__btn--ghost:hover,
 .cf-exit__btn--ghost:focus-visible {
   background: var(--cf-accent);
-  border-color: var(--cf-primary);
   color: var(--cf-text);
 }
 
 .cf-exit__btn--call {
   background: var(--cf-primary);
-  border-color: var(--cf-primary);
   color: #fff;
-  font-size: 1.05rem;
+  font-size: 1.06rem;
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--cf-primary) 55%, transparent);
 }
 
 .cf-exit__btn--call:hover,
 .cf-exit__btn--call:focus-visible {
   background: var(--cf-primary-dark);
-  border-color: var(--cf-primary-dark);
   color: #fff;
+  box-shadow: 0 6px 16px -4px color-mix(in srgb, var(--cf-primary) 60%, transparent);
 }
 
 .cf-exit__btn--whatsapp {
   background: var(--cf-whatsapp);
-  border-color: var(--cf-whatsapp);
   color: #fff;
+  box-shadow: 0 2px 8px -2px rgba(37, 211, 102, 0.5);
 }
 
 .cf-exit__btn--whatsapp:hover,
 .cf-exit__btn--whatsapp:focus-visible {
   background: #1fb857;
-  border-color: #1fb857;
   color: #fff;
+  box-shadow: 0 6px 16px -4px rgba(37, 211, 102, 0.55);
 }
 
 .cf-exit__icon {
@@ -263,7 +336,7 @@
 .cf-exit__btn:focus-visible,
 .cf-exit__close:focus-visible {
   outline: 3px solid var(--cf-primary);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 /* --- Achtergrond niet mee laten scrollen ---------------------------------- */
@@ -274,18 +347,60 @@ body.cf-exit-lock {
 
 /* --- Mobiel --------------------------------------------------------------- */
 
-@media (max-width: 480px) {
+/* Op een telefoon wordt het een blad dat van onderen opkomt: dat is waar de duim
+   is, en het voelt minder als een blokkade dan een venster midden op het scherm. */
+@media (max-width: 560px) {
   .cf-exit {
-    padding: 12px;
+    padding: 0;
     align-items: flex-end;
   }
 
   .cf-exit__dialog {
-    padding: 30px 20px 24px;
+    max-width: none;
+    max-height: 92vh;
+    padding: 26px 22px calc(26px + env(safe-area-inset-bottom));
+    border-radius: calc(var(--cf-radius) + 8px) calc(var(--cf-radius) + 8px) 0 0;
+    transform: translateY(100%);
+    transition:
+      opacity 0.24s ease,
+      transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.02);
+  }
+
+  /* Het greepje bovenaan: hetzelfde teken dat je in apps ziet, zodat meteen
+     duidelijk is dat dit blad hoort weg te kunnen. */
+  .cf-exit__dialog::before {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 4px;
+    margin: 0 auto 18px;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--cf-muted) 28%, transparent);
+  }
+
+  .cf-exit__close {
+    top: 16px;
+    right: 12px;
+  }
+
+  .cf-exit__mark {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+  }
+
+  .cf-exit__mark svg {
+    width: 23px;
+    height: 23px;
   }
 
   .cf-exit__title {
-    font-size: 1.3rem;
+    font-size: 1.34rem;
+  }
+
+  .cf-exit__body {
+    font-size: 0.99rem;
+    margin-bottom: 20px;
   }
 
   /* Ja/nee onder elkaar. "Nee, nog niet" hoort onderaan, in de duimzone: dat is
@@ -305,11 +420,28 @@ body.cf-exit-lock {
 @media (prefers-reduced-motion: reduce) {
   .cf-exit__overlay,
   .cf-exit__dialog,
-  .cf-exit__btn {
+  .cf-exit__btn,
+  .cf-exit__close,
+  .cf-exit__help {
     transition: none;
   }
 
   .cf-exit__dialog {
     transform: none;
+  }
+
+  .cf-exit__btn:hover {
+    transform: none;
+  }
+}
+
+/* In hoogcontrastmodus vervangen randen wat de kleuren normaal doen. */
+@media (forced-colors: active) {
+  .cf-exit__dialog {
+    border: 1px solid CanvasText;
+  }
+
+  .cf-exit__btn {
+    border: 1px solid ButtonText;
   }
 }

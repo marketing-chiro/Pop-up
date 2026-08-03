@@ -354,6 +354,30 @@
 
   /* --- Opbouw van de pop-up ---------------------------------------------- */
 
+  // De drie bakens bovenaan het venster. Per scherm een ander icoon, zodat je
+  // in een oogopslag ziet waar je bent.
+  var ICONEN = {
+    vraag: '<path fill="none" stroke="currentColor" stroke-width="2.1" ' +
+      'stroke-linecap="round" stroke-linejoin="round" ' +
+      'd="M9.1 9a3 3 0 1 1 4.2 2.75c-.8.37-1.3 1.16-1.3 2.04v.46M12 17.5h.01"/>' +
+      '<circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2.1"/>',
+
+    goed: '<path fill="none" stroke="currentColor" stroke-width="2.6" ' +
+      'stroke-linecap="round" stroke-linejoin="round" d="M20 6.5 9.4 17 4 11.7"/>',
+
+    hulp: '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 ' +
+      '1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 ' +
+      '1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>'
+  };
+
+  function baken(soort) {
+    var extra = 'goed' === soort ? ' cf-exit__mark--goed' : '';
+
+    return '<div class="cf-exit__mark' + extra + '" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" focusable="false">' + ICONEN[soort] + '</svg>' +
+      '</div>';
+  }
+
   function buildMarkup() {
     var t = CONFIG.text;
     var el = document.createElement('div');
@@ -389,6 +413,7 @@
 
         // Stap 1: de vraag. Terugkerende bezoekers krijgen een directere versie.
         '<div class="cf-exit__step" data-step="ask">' +
+          baken('vraag') +
           '<h2 class="cf-exit__title" id="cf-exit-title">' +
             (isReturning() ? t.questionReturning : t.question) + '</h2>' +
           '<p class="cf-exit__body">' +
@@ -401,10 +426,7 @@
 
         // Stap 2a: bezoeker heeft het gevonden
         '<div class="cf-exit__step" data-step="yes" hidden>' +
-          '<div class="cf-exit__check" aria-hidden="true">' +
-            '<svg viewBox="0 0 24 24" width="28" height="28">' +
-            '<path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/></svg>' +
-          '</div>' +
+          baken('goed') +
           '<h2 class="cf-exit__title">' + t.yesTitle + '</h2>' +
           '<p class="cf-exit__body">' + t.yesBody + '</p>' +
           (appointmentBtn ? '<div class="cf-exit__actions">' + appointmentBtn + '</div>' : '') +
@@ -412,6 +434,7 @@
 
         // Stap 2b: bezoeker heeft het niet gevonden -> contact
         '<div class="cf-exit__step" data-step="no" hidden>' +
+          baken('hulp') +
           '<h2 class="cf-exit__title">' + t.noTitle + '</h2>' +
           '<p class="cf-exit__body">' + t.noBody + '</p>' +
           '<div class="cf-exit__actions cf-exit__actions--stack">' +
