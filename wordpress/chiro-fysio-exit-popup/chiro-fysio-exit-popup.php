@@ -22,6 +22,7 @@ define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-options.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-cache.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-storage.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-laposta.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-admin.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-health.php';

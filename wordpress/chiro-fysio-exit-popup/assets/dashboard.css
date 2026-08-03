@@ -154,6 +154,15 @@
 	color: var(--cf-ink-2);
 }
 
+/* Een werkende koppeling mag je net zo goed zien als een openstaand risico. */
+.cf-note--ok {
+	padding: 10px 13px;
+	border-left: 3px solid var(--cf-found);
+	border-radius: 0 8px 8px 0;
+	background: rgba(10, 145, 132, 0.1);
+	color: var(--cf-ink-2);
+}
+
 /* --- Statuskaart ----------------------------------------------------------- */
 
 .cf-health {
