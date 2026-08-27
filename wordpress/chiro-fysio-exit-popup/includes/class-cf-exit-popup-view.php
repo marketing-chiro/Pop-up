@@ -158,6 +158,17 @@ class CF_Exit_Popup_View {
 				<h2 class="cf-card__title">Hoe liep het af?</h2>
 				<p class="cf-card__sub">Alle <?php echo esc_html( number_format_i18n( $totals['shown'] ) ); ?> vertoningen in deze periode.</p>
 				<div id="cf-chart-outcome" class="cf-chart"></div>
+				<?php
+				/*
+				 * De splitsing van "geen antwoord" staat hier als regel en niet als
+				 * vijfde balkje. Twee grijstinten die dicht genoeg bij elkaar liggen
+				 * om allebei "neutraal" te lezen, zijn met een kleurverschil van 12,9
+				 * niet uit elkaar te houden - ook niet met normaal zicht. En er een
+				 * echte kleur van maken zou het verschil groter voorstellen dan het
+				 * is: beide groepen gaven immers geen antwoord.
+				 */
+				?>
+				<p id="cf-outcome-note" class="cf-chart__note" hidden></p>
 			</section>
 
 			<section class="cf-card">

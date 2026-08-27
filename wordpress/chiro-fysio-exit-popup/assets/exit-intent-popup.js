@@ -106,7 +106,9 @@
     // informatie verspreid staat over zeven pagina's die samen maar 2,5% van
     // alle weergaven halen. Laat leeg om de link te verbergen.
     helpUrl: '/kosten-en-vergoedingen/',
-    helpLabel: 'Gaat uw vraag over kosten of vergoeding?',
+    // Was een vraagzin toen dit nog een klein tekstlinkje onderaan was. Nu het
+    // een knop is, hoort er een handeling op te staan.
+    helpLabel: 'Kosten en vergoeding bekijken',
 
     // Vanaf het hoeveelste bezoek we iemand als terugkerend behandelen.
     // Zet op 0 om geen onderscheid te maken.
@@ -135,7 +137,9 @@
       appointmentLabel: 'Direct een afspraak maken',
 
       noTitle: 'Dat lossen we even op',
-      noBody: 'Bel ons gerust, dan denken we direct met u mee. U krijgt gewoon iemand van de praktijk aan de lijn.',
+      // Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen:
+      // die plannen liever zelf een afspraak dan dat ze de telefoon pakken.
+      noBody: 'Plan gerust direct een afspraak, of stel uw vraag - we denken graag met u mee.',
       callLabel: 'Bel',
       whatsappLabel: 'Stuur een WhatsApp',
       hours: 'Maandag t/m vrijdag bereikbaar tijdens openingstijden.',
@@ -206,6 +210,9 @@
   var visitCount = 1;
   var lastFocused = null;
   var root = null;
+
+  // Welk scherm er nu staat: 'ask', 'yes' of 'no'. Gaat mee bij het sluiten.
+  var huidigeStap = 'ask';
 
   // Willekeurige code per vertoning, zodat het dashboard de gebeurtenissen van
   // één bezoek aan elkaar kan knopen. Bevat geen enkel persoonsgegeven en
@@ -311,6 +318,8 @@
       device: isTouchDevice() ? 'mobiel' : 'desktop',
       trigger: detail.trigger || '',
       answer: detail.answer || '',
+      // Bij het sluiten: op welk scherm de bezoeker toen stond.
+      step: detail.step || '',
       // Alleen 'nieuw' of 'terugkerend', nooit het precieze aantal bezoeken.
       // Een teller van bijvoorbeeld 47 zou een browser onderscheidend maken.
       visitor: isReturning() ? 'terugkerend' : 'nieuw'
@@ -365,9 +374,14 @@
     goed: '<path fill="none" stroke="currentColor" stroke-width="2.6" ' +
       'stroke-linecap="round" stroke-linejoin="round" d="M20 6.5 9.4 17 4 11.7"/>',
 
-    hulp: '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 ' +
-      '1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 ' +
-      '1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>'
+    // Een gespreksballon, geen telefoon meer. Dit scherm leidt met een afspraak
+    // en de kostenpagina; een telefoonhoorn erboven zou het tegenspreken.
+    hulp: '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+      'stroke-linejoin="round" d="M20.5 11.7c0 4.3-3.8 7.8-8.5 7.8-1 0-2-.16-2.9-.45L4 20.5l1.3-4.2' +
+      'a7.4 7.4 0 0 1-1.3-4.6C4 7.4 7.8 3.9 12.5 3.9s8 3.5 8 7.8Z"/>' +
+      '<circle cx="9.3" cy="11.7" r="1.05" fill="currentColor"/>' +
+      '<circle cx="12.5" cy="11.7" r="1.05" fill="currentColor"/>' +
+      '<circle cx="15.7" cy="11.7" r="1.05" fill="currentColor"/>'
   };
 
   function baken(soort) {
@@ -432,22 +446,37 @@
           (appointmentBtn ? '<div class="cf-exit__actions">' + appointmentBtn + '</div>' : '') +
         '</div>' +
 
-        // Stap 2b: bezoeker heeft het niet gevonden -> contact
+        // Stap 2b: bezoeker heeft het niet gevonden -> hulp aanbieden.
+        //
+        // De volgorde hier is niet willekeurig. In de eerste 30 dagen zeiden 37
+        // mensen "niet gevonden", kreeg ieder van hen een grote belknop te zien,
+        // en klikte niemand erop - nul keer. Ondertussen start 19% van alle
+        // sessies wel een online afspraak tegenover 1,26% die het nummer
+        // aanklikt. Bellen is dus niet wat deze bezoekers willen.
+        //
+        // Daarom staat de afspraakknop nu bovenaan, is de kostenvraag een echte
+        // knop geworden (18% van de zoekopdrachten op de site gaat daarover), en
+        // is het telefoonnummer een leesbare regel in plaats van de grootste
+        // knop op het scherm. Wie wil bellen kan dat nog steeds.
         '<div class="cf-exit__step" data-step="no" hidden>' +
           baken('hulp') +
           '<h2 class="cf-exit__title">' + t.noTitle + '</h2>' +
           '<p class="cf-exit__body">' + t.noBody + '</p>' +
           '<div class="cf-exit__actions cf-exit__actions--stack">' +
-            '<a class="cf-exit__btn cf-exit__btn--call" data-cf="call" href="tel:' + CONFIG.phoneHref + '">' +
-              '<svg class="cf-exit__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-              '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>' +
-              '</svg><span>' + t.callLabel + ' ' + CONFIG.phoneDisplay + '</span></a>' +
+            appointmentBtn +
+            (CONFIG.helpUrl
+              ? '<a class="cf-exit__btn cf-exit__btn--ghost" data-cf="help" href="' + CONFIG.helpUrl + '">' +
+                CONFIG.helpLabel + '</a>'
+              : '') +
             whatsappBtn +
           '</div>' +
-          (CONFIG.helpUrl
-            ? '<a class="cf-exit__help" data-cf="help" href="' + CONFIG.helpUrl + '">' +
-              CONFIG.helpLabel + '</a>'
-            : '') +
+          '<p class="cf-exit__phone">' +
+            '<a data-cf="call" href="tel:' + CONFIG.phoneHref + '">' +
+              '<svg class="cf-exit__phoneicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+              '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>' +
+              '</svg>' + t.callLabel + ' ' + CONFIG.phoneDisplay +
+            '</a>' +
+          '</p>' +
           '<p class="cf-exit__note">' + t.hours + '</p>' +
         '</div>' +
       '</div>';
@@ -489,6 +518,11 @@
   }
 
   function showStep(name) {
+    // Onthouden waar de bezoeker is, zodat we bij het sluiten kunnen melden
+    // welk scherm er stond. Zonder dat is "geen antwoord gegeven" één grote
+    // bak waarin wegklikken en negeren niet te onderscheiden zijn.
+    huidigeStap = name;
+
     Array.prototype.forEach.call(root.querySelectorAll('.cf-exit__step'), function (step) {
       var match = step.getAttribute('data-step') === name;
       if (match) {
@@ -538,7 +572,7 @@
     if (lastFocused && typeof lastFocused.focus === 'function') {
       lastFocused.focus();
     }
-    track('close', { reason: reason });
+    track('close', { reason: reason, step: huidigeStap });
   }
 
   /* --- Triggers ----------------------------------------------------------- */

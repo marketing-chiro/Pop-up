@@ -59,7 +59,7 @@ class CF_Exit_Popup_Rest {
 			return new WP_REST_Response( null, 400 );
 		}
 
-		$allowed_types = array( 'open', 'answer', 'call', 'whatsapp', 'appointment', 'help' );
+		$allowed_types = array( 'open', 'answer', 'call', 'whatsapp', 'appointment', 'help', 'close' );
 		if ( ! in_array( $type, $allowed_types, true ) ) {
 			return new WP_REST_Response( null, 400 );
 		}
@@ -72,6 +72,8 @@ class CF_Exit_Popup_Rest {
 			'trigger' => self::pick( isset( $body['trigger'] ) ? (string) $body['trigger'] : '', array( 'mouseleave', 'idle', 'scroll-up', 'test', 'handmatig' ) ),
 			'answer'  => self::pick( isset( $body['answer'] ) ? (string) $body['answer'] : '', array( 'ja', 'nee' ) ),
 			'visitor' => self::pick( isset( $body['visitor'] ) ? (string) $body['visitor'] : '', array( 'nieuw', 'terugkerend' ) ),
+			// Bij 'close': op welk scherm de bezoeker stond toen hij wegklikte.
+			'step'    => self::pick( isset( $body['step'] ) ? (string) $body['step'] : '', array( 'ask', 'yes', 'no' ) ),
 		);
 
 		CF_Exit_Popup_Storage::record( $data );

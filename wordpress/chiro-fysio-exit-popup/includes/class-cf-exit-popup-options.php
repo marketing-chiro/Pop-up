@@ -32,7 +32,9 @@ class CF_Exit_Popup_Options {
 			'whatsapp_text'   => 'Hallo, ik heb een vraag naar aanleiding van jullie website.',
 			'appointment_url' => '/uw-afspraak/',
 			'help_url'        => '/kosten-en-vergoedingen/',
-			'help_label'      => 'Gaat uw vraag over kosten of vergoeding?',
+			// Was een vraagzin toen dit nog een klein tekstlinkje was. Nu het een
+			// knop is, hoort er een handeling op te staan.
+			'help_label'      => 'Kosten en vergoeding bekijken',
 
 			/* --- Teksten ------------------------------------------------- */
 			'txt_question'      => 'Heeft u gevonden wat u zocht?',
@@ -45,7 +47,8 @@ class CF_Exit_Popup_Options {
 			'txt_yes_body'      => 'Bedankt voor uw bezoek. Tot ziens in de praktijk.',
 			'txt_appointment'   => 'Direct een afspraak maken',
 			'txt_no_title'      => 'Dat lossen we even op',
-			'txt_no_body'       => 'Bel ons gerust, dan denken we direct met u mee. U krijgt gewoon iemand van de praktijk aan de lijn.',
+			// Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen.
+			'txt_no_body'       => 'Plan gerust direct een afspraak, of stel uw vraag - we denken graag met u mee.',
 			'txt_call'          => 'Bel',
 			'txt_whatsapp'      => 'Stuur een WhatsApp',
 			'txt_hours'         => 'Maandag t/m vrijdag bereikbaar tijdens openingstijden.',

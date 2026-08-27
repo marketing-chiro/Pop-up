@@ -200,30 +200,49 @@
   opacity: 0.85;
 }
 
-/* Hulplink voor de vraag die het vaakst onbeantwoord blijft. Bewust rustiger
-   dan de knoppen: bellen blijft het hoofdaanbod. */
-.cf-exit__help {
-  display: inline-block;
+/* Het telefoonnummer, als leesbare regel onder de knoppen.
+   Stond hier eerst als de grootste knop van het scherm. In 30 dagen kreeg die
+   37 bezoekers te zien die zeiden dat ze iets niet konden vinden, en werd hij
+   nul keer aangeklikt. Wie wil bellen kan dat nog steeds - het hoeft alleen
+   niet het eerste te zijn wat iemand ziet. */
+.cf-exit__phone {
   margin: 16px 0 0;
-  font-size: 0.92rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Minder nadruk, maar wel gewoon aan te tikken: 44px hoog, ruim boven de 24px
+   die de richtlijn als ondergrens stelt. Een knop degraderen mag hem niet
+   onbruikbaar maken op een telefoon. */
+.cf-exit__phone a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--cf-btn-radius);
+  font-weight: 600;
   color: var(--cf-primary);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  transition: color 0.15s ease;
+  text-decoration: none;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
-.cf-exit__help:hover,
-.cf-exit__help:focus-visible {
+.cf-exit__phone a:hover,
+.cf-exit__phone a:focus-visible {
   color: var(--cf-primary-dark);
-  text-decoration-thickness: 2px;
+  background: var(--cf-accent);
 }
 
-.cf-exit__help:focus-visible {
+.cf-exit__phone a:focus-visible {
   outline: 3px solid var(--cf-primary);
   outline-offset: 3px;
-  border-radius: 3px;
+  border-radius: 4px;
+}
+
+.cf-exit__phoneicon {
+  width: 17px;
+  height: 17px;
+  flex: none;
 }
 
 /* --- Knoppen -------------------------------------------------------------- */
@@ -408,8 +427,8 @@ body.cf-exit-lock {
      bovenaan, dan lag juist "Ja, gelukt" - het wegtikken - het handigst, en dat
      kost je precies de gesprekken waar het om begonnen was.
 
-     Alleen voor deze twee knoppen; de contactknoppen staan al onder elkaar in
-     de goede volgorde, met bellen als hoofdaanbod. */
+     Alleen voor deze twee knoppen; de hulpknoppen staan al onder elkaar in de
+     goede volgorde, met de afspraak bovenaan. */
   .cf-exit__actions:not(.cf-exit__actions--stack) {
     flex-direction: column;
   }
@@ -422,7 +441,7 @@ body.cf-exit-lock {
   .cf-exit__dialog,
   .cf-exit__btn,
   .cf-exit__close,
-  .cf-exit__help {
+  .cf-exit__phone a {
     transition: none;
   }
 

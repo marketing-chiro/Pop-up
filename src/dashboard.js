@@ -92,6 +92,32 @@
 
 	/* --- 1. Hoe liep het af? (gestapelde balk) ------------------------------ */
 
+	// Splitst "geen antwoord gegeven" in wegklikken en negeren.
+	//
+	// Dat onderscheid ontbrak lang: alles zonder antwoord viel in één bak, en
+	// daarmee was niet te zien of de pop-up stoorde of dat mensen hem simpelweg
+	// niet zagen. Wegklikken betekent gezien en afgewezen; niets doen betekent
+	// meestal dat iemand al vertrokken was.
+	function vulGeenAntwoord(t) {
+		var vak = document.getElementById('cf-outcome-note');
+		if (!vak) return;
+
+		var weg = Number(t.dismissed || 0);
+		var niets = Number(t.ignored || 0);
+
+		// Oude metingen hebben deze splitsing nog niet. Dan liever niets tonen
+		// dan een regel die suggereert dat iedereen de pop-up negeerde.
+		if (weg + niets === 0) {
+			vak.hidden = true;
+			return;
+		}
+
+		vak.hidden = false;
+		vak.textContent = 'Van wie geen antwoord gaf: ' + nl(weg) +
+			(1 === weg ? ' klikte de pop-up weg, ' : ' klikten de pop-up weg, ') +
+			nl(niets) + ' liet hem staan.';
+	}
+
 	function drawOutcome() {
 		var host = document.getElementById('cf-chart-outcome');
 		if (!host) return;
@@ -99,6 +125,8 @@
 		var t = DATA.totals;
 		var total = t.shown;
 		if (!total) return;
+
+		vulGeenAntwoord(t);
 
 		var segments = [
 			{ key: 'found',     label: 'Gevonden wat ze zochten', value: t.found,     cls: 'cf-fill--found' },

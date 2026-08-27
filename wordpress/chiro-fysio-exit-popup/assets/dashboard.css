@@ -154,6 +154,17 @@
 	color: var(--cf-ink-2);
 }
 
+/* Toelichtingsregel onder een grafiek, voor een splitsing die als extra
+   balkje te weinig onderscheid zou geven. */
+.cf-chart__note {
+	margin: 12px 0 0;
+	font-size: 0.86rem;
+	color: var(--cf-ink-2);
+	line-height: 1.5;
+}
+
+.cf-chart__note[hidden] { display: none; }
+
 /* --- Statuskaart ----------------------------------------------------------- */
 
 .cf-health {

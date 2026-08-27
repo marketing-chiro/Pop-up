@@ -79,9 +79,13 @@
 			'<circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2.1"/>',
 		goed: '<path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" ' +
 			'stroke-linejoin="round" d="M20 6.5 9.4 17 4 11.7"/>',
-		hulp: '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 ' +
-			'1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 ' +
-			'1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>'
+		// Gespreksballon; zie de toelichting in exit-intent-popup.js.
+		hulp: '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+			'stroke-linejoin="round" d="M20.5 11.7c0 4.3-3.8 7.8-8.5 7.8-1 0-2-.16-2.9-.45L4 20.5l1.3-4.2' +
+			'a7.4 7.4 0 0 1-1.3-4.6C4 7.4 7.8 3.9 12.5 3.9s8 3.5 8 7.8Z"/>' +
+			'<circle cx="9.3" cy="11.7" r="1.05" fill="currentColor"/>' +
+			'<circle cx="12.5" cy="11.7" r="1.05" fill="currentColor"/>' +
+			'<circle cx="15.7" cy="11.7" r="1.05" fill="currentColor"/>'
 	};
 
 	function baken(soort) {
@@ -118,7 +122,20 @@
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_yes_body')) + '</p>' + knop;
 	}
 
+	// Zelfde volgorde als het echte nee-scherm: afspraak bovenaan, dan de
+	// kostenknop, dan WhatsApp, en het telefoonnummer als leesbare regel
+	// eronder in plaats van als grootste knop.
 	function schermNee() {
+		var afspraak = tekst('appointment_url')
+			? '<span class="cf-exit__btn cf-exit__btn--primary">' +
+				ontsnap(tekst('txt_appointment')) + '</span>'
+			: '';
+
+		var hulp = (tekst('help_url') && tekst('help_label'))
+			? '<span class="cf-exit__btn cf-exit__btn--ghost">' +
+				ontsnap(tekst('help_label')) + '</span>'
+			: '';
+
 		var wa = tekst('whatsapp')
 			? '<span class="cf-exit__btn cf-exit__btn--whatsapp">' +
 				'<svg class="cf-exit__icon" viewBox="0 0 24 24" aria-hidden="true">' +
@@ -126,20 +143,17 @@
 				'</svg><span>' + ontsnap(tekst('txt_whatsapp')) + '</span></span>'
 			: '';
 
-		var hulp = (tekst('help_url') && tekst('help_label'))
-			? '<span class="cf-exit__help">' + ontsnap(tekst('help_label')) + '</span>'
-			: '';
-
 		return baken('hulp') +
 			'<h2 class="cf-exit__title">' + ontsnap(tekst('txt_no_title')) + '</h2>' +
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_no_body')) + '</p>' +
 			'<div class="cf-exit__actions cf-exit__actions--stack">' +
-				'<span class="cf-exit__btn cf-exit__btn--call">' +
-					'<svg class="cf-exit__icon" viewBox="0 0 24 24" aria-hidden="true">' +
-					'<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>' +
-					'</svg><span>' + ontsnap(tekst('txt_call') + ' ' + tekst('phone_display')) + '</span></span>' +
-				wa +
-			'</div>' + hulp +
+				afspraak + hulp + wa +
+			'</div>' +
+			'<p class="cf-exit__phone"><a href="#" onclick="return false">' +
+				'<svg class="cf-exit__phoneicon" viewBox="0 0 24 24" aria-hidden="true">' +
+				'<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>' +
+				'</svg>' + ontsnap(tekst('txt_call') + ' ' + tekst('phone_display')) +
+			'</a></p>' +
 			'<p class="cf-exit__note">' + ontsnap(tekst('txt_hours')) + '</p>';
 	}
 

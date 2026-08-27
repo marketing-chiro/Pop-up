@@ -50,6 +50,7 @@ class CF_Exit_Popup_Storage {
 			answer varchar(10) NOT NULL DEFAULT '',
 			action_taken varchar(20) NOT NULL DEFAULT '',
 			visitor varchar(20) NOT NULL DEFAULT '',
+			closed varchar(10) NOT NULL DEFAULT '',
 			PRIMARY KEY  (id),
 			UNIQUE KEY sid (sid),
 			KEY created_at (created_at),
@@ -111,8 +112,23 @@ class CF_Exit_Popup_Storage {
 			);
 		}
 
-		// 'close' slaan we bewust niet op: het voegt niets toe aan het beeld dat
-		// de andere gebeurtenissen al geven.
+		// Wegklikken leggen we wel vast, met het scherm waar de bezoeker op stond.
+		//
+		// Dat is eerder bewust overgeslagen, met het idee dat het niets toevoegt.
+		// Dat bleek verkeerd gedacht: 87% van de vertoningen kwam in de bak
+		// "geen antwoord gegeven" terecht, en daarin was niet te zien of iemand
+		// de pop-up wegklikte of hem simpelweg negeerde. Dat verschil bepaalt
+		// juist of het aan het moment ligt of aan de vraag.
+		if ( 'close' === $type && in_array( $data['step'], array( 'ask', 'yes', 'no' ), true ) ) {
+			return (bool) $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$table,
+				array( 'closed' => $data['step'] ),
+				array( 'sid' => $sid ),
+				array( '%s' ),
+				array( '%s' )
+			);
+		}
+
 		return false;
 	}
 
@@ -137,6 +153,8 @@ class CF_Exit_Popup_Storage {
 					SUM(CASE WHEN answer = 'nee' AND action_taken <> '' THEN 1 ELSE 0 END) AS rescued,
 					SUM(CASE WHEN answer = 'nee' AND action_taken = '' THEN 1 ELSE 0 END) AS lost,
 					SUM(CASE WHEN answer = '' THEN 1 ELSE 0 END) AS no_answer,
+					SUM(CASE WHEN answer = '' AND closed <> '' THEN 1 ELSE 0 END) AS dismissed,
+					SUM(CASE WHEN answer = '' AND closed = '' THEN 1 ELSE 0 END) AS ignored,
 					SUM(CASE WHEN action_taken = 'call' THEN 1 ELSE 0 END) AS calls,
 					SUM(CASE WHEN action_taken = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapps,
 					SUM(CASE WHEN action_taken = 'appointment' THEN 1 ELSE 0 END) AS appointments,
@@ -162,7 +180,7 @@ class CF_Exit_Popup_Storage {
 		}
 
 		// SUM() geeft NULL terug op een lege tabel; nul leest prettiger.
-		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'calls', 'whatsapps', 'appointments', 'repeat_shown', 'repeat_not_found' ) as $key ) {
+		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'dismissed', 'ignored', 'calls', 'whatsapps', 'appointments', 'repeat_shown', 'repeat_not_found' ) as $key ) {
 			$row[ $key ] = isset( $row[ $key ] ) ? (int) $row[ $key ] : 0;
 		}
 
