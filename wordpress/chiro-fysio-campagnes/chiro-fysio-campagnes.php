@@ -31,8 +31,10 @@ define( 'CF_CAMPAGNE_FILE', __FILE__ );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-campagne-laposta.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-campagne-admin.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-campagne-updater.php';
 
 CF_Campagne_Admin::init();
+CF_Campagne_Updater::init();
 
 /**
  * Snelkoppeling naar de instellingen op de pluginpagina.

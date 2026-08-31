@@ -39,6 +39,41 @@ for PLUGIN in chiro-fysio-exit-popup chiro-fysio-campagnes; do
 	echo "    $PLUGIN.zip"
 done
 
+echo "==> Versiebestanden voor automatisch bijwerken"
+# Deze bestanden vertellen de plugins op de site welke versie de laatste is.
+# Het versienummer wordt uit de plugin zelf gelezen, zodat de twee nooit uit
+# de pas kunnen lopen - dat zou stille mislukte updates opleveren.
+RAW="https://raw.githubusercontent.com/marketing-chiro/pop-up/claude/chiro-fysio-exit-popup-eahq6b/dist"
+
+schrijf_manifest() {
+	local map="$1" naam="$2" bestand="$3"
+	local versie
+	versie="$(sed -n 's/^ \* Version: *\(.*\)$/\1/p' "wordpress/$map/$map.php" | head -1 | tr -d ' ')"
+
+	if [ -z "$versie" ]; then
+		echo "    FOUT: geen versie gevonden in $map" >&2
+		exit 1
+	fi
+
+	cat > "$DIST/$bestand" <<JSON
+{
+  "name": "$naam",
+  "slug": "$map",
+  "version": "$versie",
+  "author": "Chiro-Fysio",
+  "requires": "5.5",
+  "requires_php": "7.0",
+  "tested": "7.1",
+  "last_updated": "$(date -u '+%Y-%m-%d %H:%M:%S')",
+  "download_url": "$RAW/$map.zip"
+}
+JSON
+	echo "    $bestand (versie $versie)"
+}
+
+schrijf_manifest chiro-fysio-exit-popup "Chiro-Fysio exit-intent pop-up" update-exit-popup.json
+schrijf_manifest chiro-fysio-campagnes "Chiro-Fysio e-mailcampagnes" update-campagnes.json
+
 echo "==> Plak-snippet maken"
 {
 	echo "<!--"

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Chiro-Fysio exit-intent pop-up
  * Description:       Vraagt bezoekers die de site dreigen te verlaten of ze gevonden hebben wat ze zochten, toont anders het telefoonnummer van de praktijk, en houdt in een eigen dashboard bij hoe vaak dat gebeurt.
- * Version:           1.8.0
+ * Version:           1.9.0
  * Requires at least: 5.5
  * Requires PHP:      7.0
  * Author:            Chiro-Fysio
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CF_EXIT_POPUP_VERSION', '1.8.0' );
+define( 'CF_EXIT_POPUP_VERSION', '1.9.0' );
 define( 'CF_EXIT_POPUP_DB_VERSION', '3' );
 define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 
@@ -29,6 +29,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-view.ph
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-app.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-editor.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-updater.php';
 
 CF_Exit_Popup_Rest::init();
 CF_Exit_Popup_Admin::init();
@@ -36,6 +37,7 @@ CF_Exit_Popup_Health::init();
 CF_Exit_Popup_App::init();
 CF_Exit_Popup_Settings::init();
 CF_Exit_Popup_Editor::init();
+CF_Exit_Popup_Updater::init();
 
 /**
  * Bij activatie: tabel klaarzetten en de opruimtaak inplannen.
