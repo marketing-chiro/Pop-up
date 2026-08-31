@@ -149,6 +149,68 @@ class CF_Exit_Popup_View {
 	}
 
 	/**
+	 * Openstaande terugbelverzoeken, bovenaan het dashboard.
+	 *
+	 * Bewust boven de cijfers: dit is het enige onderdeel waar iemand op wacht.
+	 * Een grafiek kan tot morgen wachten, een patiënt die zijn nummer achterliet
+	 * niet.
+	 */
+	public static function callbacks( $verzoeken ) {
+		if ( empty( $verzoeken ) ) {
+			return;
+		}
+
+		$onderwerpen = array(
+			'kosten'   => 'kosten of vergoeding',
+			'klacht'   => 'een klacht of behandeling',
+			'afspraak' => 'een afspraak maken',
+			'anders'   => 'iets anders',
+		);
+		?>
+		<section class="cf-terugbel">
+			<h2 class="cf-terugbel__kop">
+				<?php
+				printf(
+					'%d %s',
+					count( $verzoeken ),
+					count( $verzoeken ) === 1 ? 'iemand wacht op een telefoontje' : 'mensen wachten op een telefoontje'
+				);
+				?>
+			</h2>
+
+			<ul class="cf-terugbel__lijst">
+				<?php foreach ( $verzoeken as $v ) : ?>
+					<li class="cf-terugbel__rij">
+						<div class="cf-terugbel__wie">
+							<strong><?php echo esc_html( $v['name'] ); ?></strong>
+							<a class="cf-terugbel__nr" href="tel:<?php echo esc_attr( $v['phone'] ); ?>">
+								<?php echo esc_html( $v['phone'] ); ?>
+							</a>
+						</div>
+						<div class="cf-terugbel__meta">
+							<?php
+							$wanneer = human_time_diff( strtotime( $v['created_at'] ), (int) current_time( 'timestamp' ) );
+							echo esc_html( $wanneer . ' geleden' );
+
+							if ( isset( $onderwerpen[ $v['reason'] ] ) ) {
+								echo ' &middot; vraag over ' . esc_html( $onderwerpen[ $v['reason'] ] );
+							}
+							?>
+						</div>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="cf_exit_popup_callback_status">
+							<input type="hidden" name="verzoek" value="<?php echo esc_attr( $v['id'] ); ?>">
+							<?php wp_nonce_field( 'cf_exit_popup_callback_status' ); ?>
+							<button type="submit" class="button">Afgehandeld</button>
+						</form>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+		<?php
+	}
+
+	/**
 	 * De grafieken. De vakken worden hier alleen neergezet; dashboard.js vult ze.
 	 */
 	public static function charts( $totals ) {

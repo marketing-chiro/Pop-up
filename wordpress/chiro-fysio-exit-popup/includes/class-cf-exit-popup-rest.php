@@ -33,6 +33,70 @@ class CF_Exit_Popup_Rest {
 				'permission_callback' => '__return_true', // openbaar, zie toelichting bovenaan
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE_V1,
+			'/callback',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'handle_callback' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Neemt een terugbelverzoek aan.
+	 *
+	 * Hier komt wél een naam en telefoonnummer binnen, dus dit adres is
+	 * aantrekkelijker voor misbruik dan het meetpunt. Drie drempels, alle drie
+	 * onzichtbaar voor een echte bezoeker:
+	 *
+	 * 1. Een veld dat in beeld verborgen is. Een mens laat het leeg, een
+	 *    invulrobot niet.
+	 * 2. De tijd tussen het openen en het versturen van het formulier. Onder de
+	 *    drie seconden heeft niemand twee velden ingevuld.
+	 * 3. Dezelfde uurlimiet per IP-adres als het meetpunt.
+	 *
+	 * Bij alle drie geven we netjes 204 terug in plaats van een foutmelding: een
+	 * robot hoeft niet te weten waaróp hij vastliep.
+	 */
+	public static function handle_callback( WP_REST_Request $request ) {
+		if ( self::rate_limited() ) {
+			return new WP_REST_Response( null, 429 );
+		}
+
+		$body = $request->get_json_params();
+		if ( ! is_array( $body ) ) {
+			return new WP_REST_Response( null, 400 );
+		}
+
+		// Drempel 1: het verborgen veld.
+		if ( ! empty( $body['website'] ) ) {
+			return new WP_REST_Response( array( 'ok' => true ), 204 );
+		}
+
+		// Drempel 2: te snel ingevuld.
+		$duur = isset( $body['elapsed'] ) ? (int) $body['elapsed'] : 0;
+		if ( $duur > 0 && $duur < 3000 ) {
+			return new WP_REST_Response( array( 'ok' => true ), 204 );
+		}
+
+		$resultaat = CF_Exit_Popup_Callbacks::aannemen( array(
+			'name'   => isset( $body['name'] ) ? (string) $body['name'] : '',
+			'phone'  => isset( $body['phone'] ) ? (string) $body['phone'] : '',
+			'reason' => self::pick( isset( $body['reason'] ) ? (string) $body['reason'] : '', array( 'kosten', 'klacht', 'afspraak', 'anders' ) ),
+			'page'   => self::clean_path( isset( $body['page'] ) ? (string) $body['page'] : '' ),
+		) );
+
+		if ( is_wp_error( $resultaat ) ) {
+			return new WP_REST_Response(
+				array( 'error' => $resultaat->get_error_message() ),
+				422
+			);
+		}
+
+		return new WP_REST_Response( array( 'ok' => true ), 200 );
 	}
 
 	/**

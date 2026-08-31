@@ -53,6 +53,19 @@ class CF_Exit_Popup_Options {
 			'txt_reason_compl'  => 'Een klacht of behandeling',
 			'txt_reason_appt'   => 'Een afspraak maken',
 			'txt_reason_other'  => 'Iets anders',
+			// Terugbelverzoek. De enige uitweg waarbij de bezoeker niets hoeft
+			// te durven: geen gesprek, geen openingstijden.
+			'callback_on'       => 1,
+			'txt_callback_btn'  => 'Laat uw nummer achter',
+			'txt_callback_title'=> 'Dan bellen wij u',
+			'txt_callback_body' => 'Laat uw naam en nummer achter. We bellen u terug, meestal nog dezelfde werkdag.',
+			'txt_callback_name' => 'Uw naam',
+			'txt_callback_tel'  => 'Uw telefoonnummer',
+			'txt_callback_send' => 'Bel mij terug',
+			'txt_callback_note' => 'We bewaren alleen uw naam en nummer, en gebruiken die om u terug te bellen.',
+			'txt_callback_ok'   => 'Genoteerd',
+			'txt_callback_okbd' => 'We bellen u zo snel mogelijk terug. Tot straks.',
+			'txt_callback_err'  => 'Dat lukte niet. Probeert u het opnieuw, of bel ons gerust.',
 			'txt_no_title'      => 'Dat lossen we even op',
 			// Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen.
 			'txt_no_body'       => 'Plan gerust direct een afspraak, of stel uw vraag - we denken graag met u mee.',
@@ -121,6 +134,9 @@ class CF_Exit_Popup_Options {
 			'phone_display', 'whatsapp_text', 'help_label',
 			'txt_question', 'txt_question_sub', 'txt_question_ret', 'txt_question_ret_sub',
 			'txt_yes', 'txt_no', 'txt_yes_title', 'txt_yes_body', 'txt_appointment',
+			'txt_callback_btn', 'txt_callback_title', 'txt_callback_body', 'txt_callback_name',
+			'txt_callback_tel', 'txt_callback_send', 'txt_callback_note', 'txt_callback_ok',
+			'txt_callback_okbd', 'txt_callback_err',
 			'txt_reason_title', 'txt_reason_sub', 'txt_reason_costs', 'txt_reason_compl',
 			'txt_reason_appt', 'txt_reason_other',
 			'txt_no_title', 'txt_no_body', 'txt_call', 'txt_whatsapp', 'txt_hours', 'txt_close',
@@ -171,7 +187,7 @@ class CF_Exit_Popup_Options {
 		}
 
 		// Schakelaars: aanwezig betekent aan.
-		foreach ( array( 'require_interaction', 'enable_mobile', 'enabled' ) as $veld ) {
+		foreach ( array( 'require_interaction', 'enable_mobile', 'enabled', 'callback_on' ) as $veld ) {
 			$schoon[ $veld ] = isset( $ruw[ $veld ] ) ? 1 : 0;
 		}
 
@@ -265,6 +281,17 @@ class CF_Exit_Popup_Options {
 				'reasonComplaint'      => $o['txt_reason_compl'],
 				'reasonAppointment'    => $o['txt_reason_appt'],
 				'reasonOther'          => $o['txt_reason_other'],
+				'callbackOn'           => (bool) $o['callback_on'],
+				'callbackLabel'        => $o['txt_callback_btn'],
+				'callbackTitle'        => $o['txt_callback_title'],
+				'callbackBody'         => $o['txt_callback_body'],
+				'callbackName'         => $o['txt_callback_name'],
+				'callbackPhone'        => $o['txt_callback_tel'],
+				'callbackSend'         => $o['txt_callback_send'],
+				'callbackNote'         => $o['txt_callback_note'],
+				'callbackOk'           => $o['txt_callback_ok'],
+				'callbackOkBody'       => $o['txt_callback_okbd'],
+				'callbackError'        => $o['txt_callback_err'],
 				'noTitle'              => $o['txt_no_title'],
 				'noBody'               => $o['txt_no_body'],
 				'callLabel'            => $o['txt_call'],

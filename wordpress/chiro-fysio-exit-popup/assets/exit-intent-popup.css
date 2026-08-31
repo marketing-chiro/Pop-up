@@ -245,6 +245,75 @@
   flex: none;
 }
 
+/* --- Terugbelformulier ------------------------------------------------------ */
+
+.cf-exit__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.cf-exit__veld {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cf-exit__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cf-muted);
+}
+
+.cf-exit__form input[type="text"],
+.cf-exit__form input[type="tel"] {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1.5px solid color-mix(in srgb, var(--cf-muted) 35%, transparent);
+  border-radius: var(--cf-btn-radius);
+  background: var(--cf-surface);
+  color: var(--cf-text);
+  font-family: var(--cf-font);
+  font-size: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cf-exit__form input:focus {
+  outline: none;
+  border-color: var(--cf-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cf-primary) 20%, transparent);
+}
+
+/* Het lokvak voor invulrobots. Uit beeld, maar niet met display:none - dat
+   slaan sommige robots juist over. Ook uit de voorleesvolgorde gehaald, zodat
+   een schermlezer er niet over struikelt. */
+.cf-exit__val {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.cf-exit__fout {
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(190, 60, 45, 0.1);
+  color: #9c2f22;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.cf-exit__fout[hidden] { display: none; }
+
+.cf-exit__form button[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 /* --- Knoppen -------------------------------------------------------------- */
 
 .cf-exit__actions {

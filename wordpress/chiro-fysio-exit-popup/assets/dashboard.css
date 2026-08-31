@@ -287,6 +287,69 @@
 	line-height: 1.5;
 }
 
+/* --- Terugbelverzoeken ------------------------------------------------------ */
+
+/* Staat boven de cijfers, met de enige opvallende kleur op het dashboard.
+   Alles hier is een grafiek die tot morgen kan wachten; dit is een mens die
+   op een telefoontje zit te wachten. */
+.cf-terugbel {
+	margin: 0 0 18px;
+	padding: 18px 22px 8px;
+	border: 1px solid var(--cf-border);
+	border-left: 4px solid var(--cf-rescued);
+	border-radius: 12px;
+	background: rgba(237, 161, 0, 0.06);
+}
+
+.cf-terugbel__kop {
+	margin: 0 0 12px;
+	padding: 0;
+	font-size: 1.02rem;
+	font-weight: 700;
+	color: var(--cf-ink);
+}
+
+.cf-terugbel__lijst {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cf-terugbel__rij {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 18px;
+	padding: 11px 0;
+	border-top: 1px solid rgba(20, 32, 31, 0.08);
+}
+
+.cf-terugbel__wie {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 10px;
+	min-width: 240px;
+}
+
+.cf-terugbel__nr {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.95rem;
+	font-weight: 600;
+	text-decoration: none;
+	color: var(--cf-found);
+}
+
+.cf-terugbel__nr:hover { text-decoration: underline; }
+
+.cf-terugbel__meta {
+	flex: 1 1 auto;
+	font-size: 0.85rem;
+	color: var(--cf-muted);
+}
+
+.cf-terugbel__rij form { margin: 0; }
+
 /* --- Kerncijfers ----------------------------------------------------------- */
 
 .cf-dash__tiles {

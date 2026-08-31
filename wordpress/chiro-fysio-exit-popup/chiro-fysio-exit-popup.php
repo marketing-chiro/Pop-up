@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Chiro-Fysio exit-intent pop-up
  * Description:       Vraagt bezoekers die de site dreigen te verlaten of ze gevonden hebben wat ze zochten, toont anders het telefoonnummer van de praktijk, en houdt in een eigen dashboard bij hoe vaak dat gebeurt.
- * Version:           1.10.0
+ * Version:           1.11.0
  * Requires at least: 5.5
  * Requires PHP:      7.0
  * Author:            Chiro-Fysio
@@ -15,13 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'CF_EXIT_POPUP_VERSION', '1.10.0' );
-define( 'CF_EXIT_POPUP_DB_VERSION', '4' );
+define( 'CF_EXIT_POPUP_VERSION', '1.11.0' );
+define( 'CF_EXIT_POPUP_DB_VERSION', '5' );
 define( 'CF_EXIT_POPUP_FILE', __FILE__ );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-options.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-cache.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-storage.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-callbacks.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-admin.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-health.php';
@@ -32,6 +33,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-editor.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-cf-exit-popup-updater.php';
 
 CF_Exit_Popup_Rest::init();
+CF_Exit_Popup_Callbacks::init();
 CF_Exit_Popup_Admin::init();
 CF_Exit_Popup_Health::init();
 CF_Exit_Popup_App::init();
@@ -44,6 +46,7 @@ CF_Exit_Popup_Updater::init();
  */
 function cf_exit_popup_activate() {
 	CF_Exit_Popup_Storage::install();
+	CF_Exit_Popup_Callbacks::install();
 	CF_Exit_Popup_App::setup_roles();
 
 	// De adressen van de app moeten bekend zijn voordat ze werken.
@@ -95,6 +98,7 @@ add_action( 'cf_exit_popup_cleanup', array( 'CF_Exit_Popup_Storage', 'cleanup' )
 function cf_exit_popup_maybe_upgrade() {
 	if ( get_option( 'cf_exit_popup_db_version' ) !== CF_EXIT_POPUP_DB_VERSION ) {
 		CF_Exit_Popup_Storage::install();
+		CF_Exit_Popup_Callbacks::install();
 		CF_Exit_Popup_App::setup_roles();
 		flush_rewrite_rules();
 	}
@@ -161,8 +165,9 @@ function cf_exit_popup_enqueue_assets() {
 		'cf-exit-popup',
 		'window.CF_EXIT_POPUP = ' . wp_json_encode(
 			array(
-				'endpoint' => esc_url_raw( rest_url( 'cf-exit-popup/v1/event' ) ),
-				'config'   => CF_Exit_Popup_Options::for_script(),
+				'endpoint'         => esc_url_raw( rest_url( 'cf-exit-popup/v1/event' ) ),
+				'callbackEndpoint' => esc_url_raw( rest_url( 'cf-exit-popup/v1/callback' ) ),
+				'config'           => CF_Exit_Popup_Options::for_script(),
 			)
 		) . ';',
 		'before'

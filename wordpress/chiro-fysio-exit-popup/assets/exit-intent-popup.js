@@ -120,6 +120,9 @@
     // geen omzet van.
     returningFromVisit: 2,
 
+    // Terugbelverzoek aan of uit.
+    callbackOn: true,
+
     // Teksten. Pas gerust aan naar de toon van de praktijk.
     text: {
       question: 'Heeft u gevonden wat u zocht?',
@@ -147,6 +150,20 @@
       reasonComplaint: 'Een klacht of behandeling',
       reasonAppointment: 'Een afspraak maken',
       reasonOther: 'Iets anders',
+
+      // Terugbelverzoek: de enige uitweg waarbij de bezoeker niets hoeft te
+      // durven. Nul van de 37 mensen belde uit zichzelf; een nummer
+      // achterlaten kost drie seconden en kan buiten openingstijden.
+      callbackLabel: 'Laat uw nummer achter',
+      callbackTitle: 'Dan bellen wij u',
+      callbackBody: 'Laat uw naam en nummer achter. We bellen u terug, meestal nog dezelfde werkdag.',
+      callbackName: 'Uw naam',
+      callbackPhone: 'Uw telefoonnummer',
+      callbackSend: 'Bel mij terug',
+      callbackNote: 'We bewaren alleen uw naam en nummer, en gebruiken die om u terug te bellen.',
+      callbackOk: 'Genoteerd',
+      callbackOkBody: 'We bellen u zo snel mogelijk terug. Tot straks.',
+      callbackError: 'Dat lukte niet. Probeert u het opnieuw, of bel ons gerust.',
 
       noTitle: 'Dat lossen we even op',
       // Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen:
@@ -229,6 +246,11 @@
 
   // Waar de vraag over ging, als de bezoeker dat heeft aangetikt.
   var gekozenReden = '';
+
+  // Wanneer het terugbelformulier geopend werd. Een invulrobot is binnen een
+  // seconde klaar; een mens niet.
+  var formulierGeopendOp = 0;
+  var bezigMetVersturen = false;
 
   // Willekeurige code per vertoning, zodat het dashboard de gebeurtenissen van
   // één bezoek aan elkaar kan knopen. Bevat geen enkel persoonsgegeven en
@@ -402,6 +424,10 @@
       '<circle cx="15.7" cy="11.7" r="1.05" fill="currentColor"/>'
   };
 
+  ICONEN.bellen = '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 ' +
+    '1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 ' +
+    '1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>';
+
   function baken(soort) {
     var extra = 'goed' === soort ? ' cf-exit__mark--goed' : '';
 
@@ -508,6 +534,10 @@
                 CONFIG.helpLabel + '</a>'
               : '') +
             whatsappBtn +
+            (CONFIG.callbackOn
+              ? '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="callback-open">' +
+                t.callbackLabel + '</button>'
+              : '') +
           '</div>' +
           '<p class="cf-exit__phone">' +
             '<a data-cf="call" href="tel:' + CONFIG.phoneHref + '">' +
@@ -517,6 +547,43 @@
             '</a>' +
           '</p>' +
           '<p class="cf-exit__note">' + t.hours + '</p>' +
+        '</div>' +
+
+        // Stap 3: het terugbelverzoek.
+        //
+        // Twee velden, meer niet. We vragen met opzet niet waar de vraag over
+        // gaat: zou iemand daar een klacht invullen, dan staat er een
+        // gezondheidsgegeven in de database van een marketingtool. Het
+        // onderwerp kennen we al grofweg uit de vorige stap.
+        '<div class="cf-exit__step" data-step="callback" hidden>' +
+          baken('bellen') +
+          '<h2 class="cf-exit__title">' + t.callbackTitle + '</h2>' +
+          '<p class="cf-exit__body">' + t.callbackBody + '</p>' +
+          '<form class="cf-exit__form" data-cf="callback-form" novalidate>' +
+            '<label class="cf-exit__veld">' +
+              '<span class="cf-exit__label">' + t.callbackName + '</span>' +
+              '<input type="text" name="naam" autocomplete="name" required>' +
+            '</label>' +
+            '<label class="cf-exit__veld">' +
+              '<span class="cf-exit__label">' + t.callbackPhone + '</span>' +
+              '<input type="tel" name="telefoon" autocomplete="tel" inputmode="tel" required>' +
+            '</label>' +
+            // Onzichtbaar voor mensen, aantrekkelijk voor invulrobots.
+            '<div class="cf-exit__val" aria-hidden="true">' +
+              '<label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>' +
+            '</div>' +
+            '<p class="cf-exit__fout" data-cf="callback-fout" role="alert" hidden></p>' +
+            '<button type="submit" class="cf-exit__btn cf-exit__btn--primary">' +
+              t.callbackSend + '</button>' +
+          '</form>' +
+          '<p class="cf-exit__note">' + t.callbackNote + '</p>' +
+        '</div>' +
+
+        // Stap 4: bevestiging.
+        '<div class="cf-exit__step" data-step="callback-ok" hidden>' +
+          baken('goed') +
+          '<h2 class="cf-exit__title">' + t.callbackOk + '</h2>' +
+          '<p class="cf-exit__body">' + t.callbackOkBody + '</p>' +
         '</div>' +
       '</div>';
 
@@ -773,7 +840,79 @@
 
   /* --- Start -------------------------------------------------------------- */
 
+  // Verstuurt het terugbelverzoek.
+  //
+  // Hier gebruiken we bewust géén sendBeacon: dat vertelt niet of het gelukt
+  // is, en juist hier moet de bezoeker een bevestiging krijgen. Iemand die zijn
+  // nummer achterlaat en niets terugziet, gaat ervan uit dat het mislukt is.
+  function verstuurTerugbelverzoek(form) {
+    if (bezigMetVersturen) return;
+
+    var foutvak = root.querySelector('[data-cf="callback-fout"]');
+    var knop = form.querySelector('button[type="submit"]');
+
+    function toonFout(bericht) {
+      if (!foutvak) return;
+      foutvak.textContent = bericht;
+      foutvak.hidden = false;
+    }
+
+    if (foutvak) foutvak.hidden = true;
+
+    var naam = String(form.naam.value || '').trim();
+    var telefoon = String(form.telefoon.value || '').trim();
+
+    if (!naam || !telefoon) {
+      toonFout(CONFIG.text.callbackError);
+      return;
+    }
+
+    if (!SETTINGS.callbackEndpoint) {
+      // Buiten WordPress (demo, testpagina) is er niets om naartoe te sturen.
+      showStep('callback-ok');
+      return;
+    }
+
+    bezigMetVersturen = true;
+    if (knop) knop.disabled = true;
+
+    window.fetch(SETTINGS.callbackEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: naam,
+        phone: telefoon,
+        website: String(form.website.value || ''),
+        elapsed: formulierGeopendOp ? Date.now() - formulierGeopendOp : 0,
+        reason: gekozenReden,
+        page: window.location.pathname
+      })
+    }).then(function (antwoord) {
+      bezigMetVersturen = false;
+      if (knop) knop.disabled = false;
+
+      if (antwoord.ok || 204 === antwoord.status) {
+        track('callback', { reason: gekozenReden });
+        showStep('callback-ok');
+        return;
+      }
+
+      toonFout(CONFIG.text.callbackError);
+    }).catch(function () {
+      bezigMetVersturen = false;
+      if (knop) knop.disabled = false;
+      toonFout(CONFIG.text.callbackError);
+    });
+  }
+
   function bindUi() {
+    root.addEventListener('submit', function (e) {
+      var form = e.target.closest ? e.target.closest('[data-cf="callback-form"]') : null;
+      if (!form) return;
+      e.preventDefault();
+      verstuurTerugbelverzoek(form);
+    });
+
     root.addEventListener('click', function (e) {
       var el = e.target.closest ? e.target.closest('[data-cf]') : null;
       if (!el) return;
@@ -806,6 +945,13 @@
           break;
         case 'help':
           track('help', {});
+          break;
+        case 'callback-open':
+          formulierGeopendOp = Date.now();
+          track('callback-open', {});
+          showStep('callback');
+          var eersteVeld = root.querySelector('[data-step="callback"] input[name="naam"]');
+          if (eersteVeld) eersteVeld.focus();
           break;
         case 'appointment':
           track('appointment', {});

@@ -144,7 +144,10 @@ class CF_Exit_Popup_Admin {
 				</div>
 			</div>
 
-			<?php CF_Exit_Popup_View::health_card( $health ); ?>
+			<?php
+			CF_Exit_Popup_View::health_card( $health );
+			CF_Exit_Popup_View::callbacks( CF_Exit_Popup_Callbacks::openstaand() );
+			?>
 
 			<p class="cf-appbanner">
 				<span class="cf-appbanner__text">
