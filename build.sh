@@ -33,10 +33,35 @@ mkdir -p "$DIST"
 
 # Twee losse plugins, bewust. De pop-up en de e-mailcampagnes hebben elkaar
 # niet nodig: zet je de een uit, dan hoort de ander door te draaien.
+plugin_versie() {
+	sed -n 's/^ \* Version: *\(.*\)$/\1/p' "wordpress/$1/$1.php" | head -1 | tr -d ' '
+}
+
 for PLUGIN in chiro-fysio-exit-popup chiro-fysio-campagnes; do
+	VERSIE="$(plugin_versie "$PLUGIN")"
+
+	if [ -z "$VERSIE" ]; then
+		echo "    FOUT: geen versie gevonden in $PLUGIN" >&2
+		exit 1
+	fi
+
 	rm -f "$DIST/$PLUGIN.zip"
 	( cd wordpress && zip -qr "../$DIST/$PLUGIN.zip" "$PLUGIN" -x '*.DS_Store' )
-	echo "    $PLUGIN.zip"
+
+	# Ook onder een naam met het versienummer erin. Dat is wat de automatische
+	# update ophaalt, en het is geen overbodige kopie:
+	#
+	# GitHub serveert bestanden via een CDN die een pad minutenlang vasthoudt.
+	# Duwde je een nieuwe zip onder dezelfde naam, dan kreeg de site nog de
+	# oude - inclusief het oude versienummer. WordPress denkt dan bijgewerkt te
+	# hebben, ziet daarna weer dezelfde update staan, en je zit in een rondje
+	# zonder dat er iets misgaat wat je opvalt. Dit is nagemeten: vlak na een
+	# push kwam de vorige versie terug, ook met een cache-buster erachter.
+	#
+	# Een pad dat nog nooit bestond, kan niet uit een cache komen.
+	cp "$DIST/$PLUGIN.zip" "$DIST/$PLUGIN-$VERSIE.zip"
+
+	echo "    $PLUGIN.zip  +  $PLUGIN-$VERSIE.zip"
 done
 
 echo "==> Versiebestanden voor automatisch bijwerken"
@@ -48,7 +73,7 @@ RAW="https://raw.githubusercontent.com/marketing-chiro/pop-up/claude/chiro-fysio
 schrijf_manifest() {
 	local map="$1" naam="$2" bestand="$3"
 	local versie
-	versie="$(sed -n 's/^ \* Version: *\(.*\)$/\1/p' "wordpress/$map/$map.php" | head -1 | tr -d ' ')"
+	versie="$(plugin_versie "$map")"
 
 	if [ -z "$versie" ]; then
 		echo "    FOUT: geen versie gevonden in $map" >&2
@@ -65,7 +90,7 @@ schrijf_manifest() {
   "requires_php": "7.0",
   "tested": "7.1",
   "last_updated": "$(date -u '+%Y-%m-%d %H:%M:%S')",
-  "download_url": "$RAW/$map.zip"
+  "download_url": "$RAW/$map-$versie.zip"
 }
 JSON
 	echo "    $bestand (versie $versie)"
