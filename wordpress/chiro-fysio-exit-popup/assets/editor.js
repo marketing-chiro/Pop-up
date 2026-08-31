@@ -122,6 +122,23 @@
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_yes_body')) + '</p>' + knop;
 	}
 
+	// Zelfde tussenstap als in de echte pop-up: vier brede knoppen, zodat een
+	// reden aantikken bijna niets kost.
+	function schermReden() {
+		var knop = function (veld) {
+			return '<button type="button" class="cf-exit__btn cf-exit__btn--ghost">' +
+				ontsnap(tekst(veld)) + '</button>';
+		};
+
+		return baken('vraag') +
+			'<h2 class="cf-exit__title">' + ontsnap(tekst('txt_reason_title')) + '</h2>' +
+			'<p class="cf-exit__body">' + ontsnap(tekst('txt_reason_sub')) + '</p>' +
+			'<div class="cf-exit__actions cf-exit__actions--stack">' +
+				knop('txt_reason_costs') + knop('txt_reason_compl') +
+				knop('txt_reason_appt') + knop('txt_reason_other') +
+			'</div>';
+	}
+
 	// Zelfde volgorde als het echte nee-scherm: afspraak bovenaan, dan de
 	// kostenknop, dan WhatsApp, en het telefoonnummer als leesbare regel
 	// eronder in plaats van als grootste knop.
@@ -160,7 +177,10 @@
 	function teken() {
 		huisstijl();
 
-		var binnen = stap === 'yes' ? schermJa() : (stap === 'no' ? schermNee() : schermVraag());
+		var binnen = 'yes' === stap ? schermJa()
+			: 'no' === stap ? schermNee()
+			: 'reason' === stap ? schermReden()
+			: schermVraag();
 
 		popup.innerHTML =
 			'<div class="cf-exit__dialog">' +

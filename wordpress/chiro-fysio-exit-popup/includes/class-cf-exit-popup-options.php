@@ -46,6 +46,13 @@ class CF_Exit_Popup_Options {
 			'txt_yes_title'     => 'Fijn om te horen!',
 			'txt_yes_body'      => 'Bedankt voor uw bezoek. Tot ziens in de praktijk.',
 			'txt_appointment'   => 'Direct een afspraak maken',
+			// Tussenstap na "nee": waar ging de vraag over?
+			'txt_reason_title'  => 'Waar ging uw vraag over?',
+			'txt_reason_sub'    => 'Dan wijzen we u meteen de goede kant op.',
+			'txt_reason_costs'  => 'Kosten of vergoeding',
+			'txt_reason_compl'  => 'Een klacht of behandeling',
+			'txt_reason_appt'   => 'Een afspraak maken',
+			'txt_reason_other'  => 'Iets anders',
 			'txt_no_title'      => 'Dat lossen we even op',
 			// Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen.
 			'txt_no_body'       => 'Plan gerust direct een afspraak, of stel uw vraag - we denken graag met u mee.',
@@ -114,6 +121,8 @@ class CF_Exit_Popup_Options {
 			'phone_display', 'whatsapp_text', 'help_label',
 			'txt_question', 'txt_question_sub', 'txt_question_ret', 'txt_question_ret_sub',
 			'txt_yes', 'txt_no', 'txt_yes_title', 'txt_yes_body', 'txt_appointment',
+			'txt_reason_title', 'txt_reason_sub', 'txt_reason_costs', 'txt_reason_compl',
+			'txt_reason_appt', 'txt_reason_other',
 			'txt_no_title', 'txt_no_body', 'txt_call', 'txt_whatsapp', 'txt_hours', 'txt_close',
 		);
 
@@ -250,6 +259,12 @@ class CF_Exit_Popup_Options {
 				'yesTitle'             => $o['txt_yes_title'],
 				'yesBody'              => $o['txt_yes_body'],
 				'appointmentLabel'     => $o['txt_appointment'],
+				'reasonTitle'          => $o['txt_reason_title'],
+				'reasonSub'            => $o['txt_reason_sub'],
+				'reasonCosts'          => $o['txt_reason_costs'],
+				'reasonComplaint'      => $o['txt_reason_compl'],
+				'reasonAppointment'    => $o['txt_reason_appt'],
+				'reasonOther'          => $o['txt_reason_other'],
 				'noTitle'              => $o['txt_no_title'],
 				'noBody'               => $o['txt_no_body'],
 				'callLabel'            => $o['txt_call'],

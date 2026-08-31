@@ -59,9 +59,17 @@ for PLUGIN in chiro-fysio-exit-popup chiro-fysio-campagnes; do
 	# push kwam de vorige versie terug, ook met een cache-buster erachter.
 	#
 	# Een pad dat nog nooit bestond, kan niet uit een cache komen.
-	cp "$DIST/$PLUGIN.zip" "$DIST/$PLUGIN-$VERSIE.zip"
-
-	echo "    $PLUGIN.zip  +  $PLUGIN-$VERSIE.zip"
+	#
+	# En zo'n bestand schrijven we maar één keer. Zou je hem bij elke build
+	# overschrijven, dan krijgt iemand die 1.9.0 downloadt op maandag iets
+	# anders dan op dinsdag - terwijl het nummer zegt dat het hetzelfde is.
+	# Wie code wijzigt, hoogt het versienummer op; dat is de bedoeling.
+	if [ -e "$DIST/$PLUGIN-$VERSIE.zip" ]; then
+		echo "    $PLUGIN.zip  ($PLUGIN-$VERSIE.zip bestaat al, blijft ongemoeid)"
+	else
+		cp "$DIST/$PLUGIN.zip" "$DIST/$PLUGIN-$VERSIE.zip"
+		echo "    $PLUGIN.zip  +  $PLUGIN-$VERSIE.zip"
+	fi
 done
 
 echo "==> Versiebestanden voor automatisch bijwerken"

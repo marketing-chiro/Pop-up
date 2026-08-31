@@ -611,6 +611,18 @@ body.cf-exit-lock {
       yesBody: 'Bedankt voor uw bezoek. Tot ziens in de praktijk.',
       appointmentLabel: 'Direct een afspraak maken',
 
+      // Tussenstap na "nee". Zonder deze vraag weten we alleen dát iemand niets
+      // kon vinden, niet wat. In de eerste 30 dagen vertrokken 35 van de 37
+      // mensen zonder ergens op te klikken - van die 35 wisten we dus niets.
+      // Een reden aantikken kost bijna niets, en levert wel het lijstje op
+      // waar je de site echt mee kunt verbeteren.
+      reasonTitle: 'Waar ging uw vraag over?',
+      reasonSub: 'Dan wijzen we u meteen de goede kant op.',
+      reasonCosts: 'Kosten of vergoeding',
+      reasonComplaint: 'Een klacht of behandeling',
+      reasonAppointment: 'Een afspraak maken',
+      reasonOther: 'Iets anders',
+
       noTitle: 'Dat lossen we even op',
       // Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen:
       // die plannen liever zelf een afspraak dan dat ze de telefoon pakken.
@@ -686,8 +698,12 @@ body.cf-exit-lock {
   var lastFocused = null;
   var root = null;
 
-  // Welk scherm er nu staat: 'ask', 'yes' of 'no'. Gaat mee bij het sluiten.
+  // Welk scherm er nu staat: 'ask', 'reason', 'yes' of 'no'. Gaat mee bij het
+  // sluiten, zodat we zien waar iemand afhaakte.
   var huidigeStap = 'ask';
+
+  // Waar de vraag over ging, als de bezoeker dat heeft aangetikt.
+  var gekozenReden = '';
 
   // Willekeurige code per vertoning, zodat het dashboard de gebeurtenissen van
   // één bezoek aan elkaar kan knopen. Bevat geen enkel persoonsgegeven en
@@ -795,6 +811,8 @@ body.cf-exit-lock {
       answer: detail.answer || '',
       // Bij het sluiten: op welk scherm de bezoeker toen stond.
       step: detail.step || '',
+      // Waar de vraag over ging, zodra de bezoeker dat heeft aangetikt.
+      reason: detail.reason || gekozenReden || '',
       // Alleen 'nieuw' of 'terugkerend', nooit het precieze aantal bezoeken.
       // Een teller van bijvoorbeeld 47 zou een browser onderscheidend maken.
       visitor: isReturning() ? 'terugkerend' : 'nieuw'
@@ -921,7 +939,28 @@ body.cf-exit-lock {
           (appointmentBtn ? '<div class="cf-exit__actions">' + appointmentBtn + '</div>' : '') +
         '</div>' +
 
-        // Stap 2b: bezoeker heeft het niet gevonden -> hulp aanbieden.
+        // Stap 2b: eerst vragen waar de vraag over ging.
+        //
+        // Bewust vier brede knoppen en geen invoerveld: tikken kost een moment,
+        // typen kost een besluit. En elk antwoord wordt meteen vastgelegd, dus
+        // ook als iemand daarna alsnog wegklikt weten we wat die zocht.
+        '<div class="cf-exit__step" data-step="reason" hidden>' +
+          baken('vraag') +
+          '<h2 class="cf-exit__title">' + t.reasonTitle + '</h2>' +
+          '<p class="cf-exit__body">' + t.reasonSub + '</p>' +
+          '<div class="cf-exit__actions cf-exit__actions--stack">' +
+            '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="reason" data-reason="kosten">' +
+              t.reasonCosts + '</button>' +
+            '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="reason" data-reason="klacht">' +
+              t.reasonComplaint + '</button>' +
+            '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="reason" data-reason="afspraak">' +
+              t.reasonAppointment + '</button>' +
+            '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="reason" data-reason="anders">' +
+              t.reasonOther + '</button>' +
+          '</div>' +
+        '</div>' +
+
+        // Stap 2c: bezoeker heeft het niet gevonden -> hulp aanbieden.
         //
         // De volgorde hier is niet willekeurig. In de eerste 30 dagen zeiden 37
         // mensen "niet gevonden", kreeg ieder van hen een grote belknop te zien,
@@ -992,6 +1031,36 @@ body.cf-exit-lock {
     trapFocus(e);
   }
 
+  // Zet de knop die bij de gekozen reden hoort bovenaan, en geef hem het
+  // hoofdaccent. Wie op "kosten" tikte, hoort geen afspraakknop als eerste te
+  // zien - dan heb je de vraag wel gesteld maar er niets mee gedaan.
+  function benadruk(reden) {
+    if (!root) return;
+
+    var rij = root.querySelector('[data-step="no"] .cf-exit__actions');
+    if (!rij) return;
+
+    var doel = 'kosten' === reden ? 'help'
+      : ( 'klacht' === reden || 'afspraak' === reden ) ? 'appointment'
+      : '';
+
+    if (!doel) return;
+
+    var knop = rij.querySelector('[data-cf="' + doel + '"]');
+    if (!knop || knop === rij.firstChild) return;
+
+    // De vorige hoofdknop wordt bijzaak, de nieuwe krijgt het accent.
+    var vorige = rij.querySelector('.cf-exit__btn--primary');
+    if (vorige && vorige !== knop) {
+      vorige.classList.remove('cf-exit__btn--primary');
+      vorige.classList.add('cf-exit__btn--ghost');
+    }
+
+    knop.classList.remove('cf-exit__btn--ghost');
+    knop.classList.add('cf-exit__btn--primary');
+    rij.insertBefore(knop, rij.firstChild);
+  }
+
   function showStep(name) {
     // Onthouden waar de bezoeker is, zodat we bij het sluiten kunnen melden
     // welk scherm er stond. Zonder dat is "geen antwoord gegeven" één grote
@@ -1018,6 +1087,7 @@ body.cf-exit-lock {
 
     // Altijd bij de vraag beginnen, ook als een vorige keer op een later
     // scherm geëindigd is.
+    gekozenReden = '';
     showStep('ask');
 
     lastFocused = document.activeElement;
@@ -1195,6 +1265,12 @@ body.cf-exit-lock {
           break;
         case 'answer-no':
           track('answer', { answer: 'nee' });
+          showStep('reason');
+          break;
+        case 'reason':
+          gekozenReden = el.getAttribute('data-reason') || 'anders';
+          track('reason', { reason: gekozenReden });
+          benadruk(gekozenReden);
           showStep('no');
           break;
         case 'call':

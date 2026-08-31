@@ -55,21 +55,30 @@ function fireExit(page) {
   await page.waitForTimeout(400);
   check('na 6,8s wel scherp', await page.locator('.cf-exit__dialog').isVisible());
 
-  // --- 3. Hulplink naar kosten en vergoedingen ---------------------------
-  console.log('\n[3] Hulplink in het nee-scherm');
+  // --- 3. Kostenknop in het nee-scherm -----------------------------------
+  console.log('\n[3] Kostenknop in het nee-scherm');
   await page.click('[data-cf="answer-no"]');
   await page.waitForTimeout(250);
+  await page.click('[data-reason="anders"]');
+  await page.waitForTimeout(250);
   const help = page.locator('[data-cf="help"]');
-  check('hulplink aanwezig', await help.isVisible());
-  check('hulplink wijst naar kosten en vergoedingen',
+  check('kostenknop aanwezig', await help.isVisible());
+  check('kostenknop wijst naar kosten en vergoedingen',
     (await help.getAttribute('href')) === '/kosten-en-vergoedingen/');
-  check('hulplink noemt kosten of vergoeding',
+  check('kostenknop noemt kosten of vergoeding',
     /kosten|vergoeding/i.test(await help.textContent()));
-  check('bellen blijft het hoofdaanbod (knop staat boven de link)',
+
+  // Deze controle stond eerst omgekeerd: bellen moest bovenaan staan. Dertig
+  // dagen meten gaf 37 mensen die iets niet konden vinden en nul belkliks,
+  // terwijl 19% van de sessies wel online een afspraak start. Vandaar dat de
+  // volgorde nu andersom is, en deze controle dat vastlegt.
+  check('afspraak staat bovenaan, telefoon onderaan',
     await page.evaluate(() => {
-      const btn = document.querySelector('[data-cf="call"]').getBoundingClientRect();
-      const lnk = document.querySelector('[data-cf="help"]').getBoundingClientRect();
-      return btn.top < lnk.top;
+      const q = s => document.querySelector('[data-step="no"] [data-cf="' + s + '"]');
+      const a = q('appointment'), h = q('help'), b = q('call');
+      if (!a || !h || !b) return false;
+      return a.getBoundingClientRect().top < h.getBoundingClientRect().top
+        && h.getBoundingClientRect().top < b.getBoundingClientRect().top;
     }));
   await page.screenshot({ path: SHOTS + '/na-rapport-nee.png' });
 

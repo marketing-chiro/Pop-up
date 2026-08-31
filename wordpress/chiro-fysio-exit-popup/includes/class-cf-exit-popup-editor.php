@@ -297,6 +297,20 @@ class CF_Exit_Popup_Editor {
 							self::tekst( 'txt_appointment', 'Knop naar afspraak maken', $o, '', true );
 							?>
 
+							<h2 class="cf-card__title cf-mt">De vraag waar het over ging</h2>
+							<p class="cf-card__sub">
+								Verschijnt direct na "nee". Dit levert je het lijstje op waar je de site
+								mee kunt verbeteren, ook van bezoekers die daarna toch vertrekken.
+							</p>
+							<?php
+							self::tekst( 'txt_reason_title', 'Kop', $o, '', true );
+							self::tekst( 'txt_reason_sub', 'Regel eronder', $o, '', true );
+							self::tekst( 'txt_reason_costs', 'Knop 1', $o, 'Wordt vastgelegd als "kosten".' );
+							self::tekst( 'txt_reason_compl', 'Knop 2', $o, 'Wordt vastgelegd als "klacht".' );
+							self::tekst( 'txt_reason_appt', 'Knop 3', $o, 'Wordt vastgelegd als "afspraak".' );
+							self::tekst( 'txt_reason_other', 'Knop 4', $o, 'Wordt vastgelegd als "anders".' );
+							?>
+
 							<h2 class="cf-card__title cf-mt">Als het niet gelukt is</h2>
 							<p class="cf-card__sub">Dit scherm bepaalt of iemand alsnog contact opneemt.</p>
 							<?php
@@ -423,6 +437,7 @@ class CF_Exit_Popup_Editor {
 								<span class="cf-preview__titel">Voorbeeld</span>
 								<span class="cf-preview__stappen">
 									<button type="button" class="cf-preview__stap is-active" data-stap="ask">Vraag</button>
+									<button type="button" class="cf-preview__stap" data-stap="reason">Waar over?</button>
 									<button type="button" class="cf-preview__stap" data-stap="no">Niet gevonden</button>
 									<button type="button" class="cf-preview__stap" data-stap="yes">Wel gevonden</button>
 								</span>

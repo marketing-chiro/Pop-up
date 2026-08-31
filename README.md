@@ -4,7 +4,12 @@ Herkent wanneer een bezoeker de site dreigt te verlaten en vraagt dan één kort
 vraag: **"Heeft u gevonden wat u zocht?"**
 
 - **Ja** → korte bedankboodschap, met een knop om direct een afspraak te maken.
-- **Nee** → het telefoonnummer van de praktijk als grote belknop (en optioneel WhatsApp).
+- **Nee** → eerst één vraag terug: *waar ging uw vraag over?* Vier knoppen (kosten,
+  klacht, afspraak, iets anders). Die keuze wordt meteen vastgelegd, dus ook als
+  iemand daarna alsnog vertrekt weet je wat die zocht.
+- **Daarna** → hulp, met de knop die bij het gekozen onderwerp hoort bovenaan:
+  een afspraak maken, de kostenpagina, WhatsApp, en het telefoonnummer als
+  leesbare regel eronder.
 
 Daarbij hoort een dashboard in WordPress dat laat zien hoe vaak dit gebeurt, op
 welke pagina's, en hoeveel van die bezoekers alsnog contact opnemen.
@@ -264,6 +269,10 @@ die meetellen zou het beeld vertekenen.
 
 - **Hoe liep het af** — alle vertoningen verdeeld over de vier uitkomsten.
 - **Verloop per dag** — getoond tegenover "niet gevonden", met details bij hover.
+- **Waar ging hun vraag over** — vier onderwerpen, aangetikt door de bezoeker
+  zelf. Een onderwerp dat vaak voorkomt en zelden tot contact leidt, wijst op een
+  pagina die zijn werk niet doet. Dit is het lijstje dat vertelt *waarom* mensen
+  vastliepen, en niet alleen *waar*.
 - **Op welke pagina's liepen bezoekers vast** — het meest bruikbare lijstje van
   het hele dashboard. Hier stelden bezoekers een vraag die de pagina niet
   beantwoordde, dus dit is meteen je verbeterlijstje.

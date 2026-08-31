@@ -51,6 +51,7 @@ class CF_Exit_Popup_Storage {
 			action_taken varchar(20) NOT NULL DEFAULT '',
 			visitor varchar(20) NOT NULL DEFAULT '',
 			closed varchar(10) NOT NULL DEFAULT '',
+			reason varchar(20) NOT NULL DEFAULT '',
 			PRIMARY KEY  (id),
 			UNIQUE KEY sid (sid),
 			KEY created_at (created_at),
@@ -112,6 +113,19 @@ class CF_Exit_Popup_Storage {
 			);
 		}
 
+		// Waar de vraag over ging. Dit is het antwoord op "waarom liepen ze vast",
+		// en het wordt vastgelegd op het moment van aantikken - dus ook als
+		// iemand daarna alsnog vertrekt zonder contact op te nemen.
+		if ( 'reason' === $type && in_array( $data['reason'], array( 'kosten', 'klacht', 'afspraak', 'anders' ), true ) ) {
+			return (bool) $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$table,
+				array( 'reason' => $data['reason'] ),
+				array( 'sid' => $sid ),
+				array( '%s' ),
+				array( '%s' )
+			);
+		}
+
 		// Wegklikken leggen we wel vast, met het scherm waar de bezoeker op stond.
 		//
 		// Dat is eerder bewust overgeslagen, met het idee dat het niets toevoegt.
@@ -155,6 +169,7 @@ class CF_Exit_Popup_Storage {
 					SUM(CASE WHEN answer = '' THEN 1 ELSE 0 END) AS no_answer,
 					SUM(CASE WHEN answer = '' AND closed <> '' THEN 1 ELSE 0 END) AS dismissed,
 					SUM(CASE WHEN answer = '' AND closed = '' THEN 1 ELSE 0 END) AS ignored,
+					SUM(CASE WHEN reason <> '' THEN 1 ELSE 0 END) AS with_reason,
 					SUM(CASE WHEN action_taken = 'call' THEN 1 ELSE 0 END) AS calls,
 					SUM(CASE WHEN action_taken = 'whatsapp' THEN 1 ELSE 0 END) AS whatsapps,
 					SUM(CASE WHEN action_taken = 'appointment' THEN 1 ELSE 0 END) AS appointments,
@@ -180,7 +195,7 @@ class CF_Exit_Popup_Storage {
 		}
 
 		// SUM() geeft NULL terug op een lege tabel; nul leest prettiger.
-		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'dismissed', 'ignored', 'calls', 'whatsapps', 'appointments', 'repeat_shown', 'repeat_not_found' ) as $key ) {
+		foreach ( array( 'shown', 'found', 'not_found', 'rescued', 'lost', 'no_answer', 'dismissed', 'ignored', 'with_reason', 'calls', 'whatsapps', 'appointments', 'repeat_shown', 'repeat_not_found' ) as $key ) {
 			$row[ $key ] = isset( $row[ $key ] ) ? (int) $row[ $key ] : 0;
 		}
 
@@ -255,6 +270,34 @@ class CF_Exit_Popup_Storage {
 				 LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				self::since( $days ),
 				$limit
+			),
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Waar de vragen over gingen.
+	 *
+	 * Dit is het lijstje waar je de site mee verbetert. Het telt niet alleen
+	 * hoe vaak een onderwerp genoemd is, maar ook hoe vaak dat alsnog tot
+	 * contact leidde - een onderwerp dat vaak genoemd wordt en zelden tot
+	 * contact, is een pagina die zijn werk niet doet.
+	 */
+	public static function reasons( $days ) {
+		global $wpdb;
+
+		$table = self::table();
+
+		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				"SELECT reason AS label,
+					COUNT(*) AS total,
+					SUM(CASE WHEN action_taken <> '' THEN 1 ELSE 0 END) AS acted
+				 FROM {$table}
+				 WHERE created_at >= %s AND reason <> ''
+				 GROUP BY reason
+				 ORDER BY total DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				self::since( $days )
 			),
 			ARRAY_A
 		);

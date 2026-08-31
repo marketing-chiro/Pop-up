@@ -56,6 +56,12 @@ function check(name, cond) {
   console.log('\n[2] Antwoord: nee');
   await page.click('[data-cf="answer-no"]');
   await page.waitForTimeout(250);
+  // Sinds er eerst gevraagd wordt waar de vraag over ging, komt het hulpscherm
+  // pas na die keuze. "Iets anders" laat de standaardvolgorde staan.
+  check('eerst de vraag waar het over ging',
+    await page.locator('[data-step="reason"]').isVisible());
+  await page.click('[data-reason="anders"]');
+  await page.waitForTimeout(250);
   check('contact-stap zichtbaar', await page.locator('[data-step="no"]').isVisible());
   const tel = await page.getAttribute('[data-cf="call"]', 'href');
   check('belknop heeft tel: link (' + tel + ')', tel === 'tel:+31243558830');
@@ -89,7 +95,9 @@ function check(name, cond) {
   await page.click('[data-cf="answer-yes"]');
   await page.waitForTimeout(250);
   check('bedank-stap zichtbaar', await page.locator('[data-step="yes"]').isVisible());
-  check('afspraakknop aanwezig', await page.locator('[data-cf="appointment"]').isVisible());
+  // De afspraakknop staat nu op twee schermen, dus hier die van het ja-scherm.
+  check('afspraakknop aanwezig',
+    await page.locator('[data-step="yes"] [data-cf="appointment"]').isVisible());
   await page.screenshot({ path: SHOTS + '/3-bedankt-desktop.png' });
 
   // ---- 5. Uitgesloten pagina ------------------------------------------------
@@ -118,8 +126,12 @@ function check(name, cond) {
   check('pop-up werkt op mobiel', await page.locator('.cf-exit__dialog').isVisible());
   await page.click('[data-cf="answer-no"]');
   await page.waitForTimeout(250);
+  await page.click('[data-reason="anders"]');
+  await page.waitForTimeout(250);
+  // Het telefoonnummer is geen hoofdknop meer, maar moet wel aan te tikken
+  // blijven: ruim boven de 24px die de richtlijn als ondergrens stelt.
   const box = await page.locator('[data-cf="call"]').boundingBox();
-  check('belknop is groot genoeg voor een duim (' + Math.round(box.height) + 'px)', box.height >= 44);
+  check('telefoonregel is aan te tikken (' + Math.round(box.height) + 'px)', box.height >= 44);
   check('dialoog past binnen de schermbreedte', box.width <= 390);
   await page.screenshot({ path: SHOTS + '/4-contact-mobiel.png' });
 

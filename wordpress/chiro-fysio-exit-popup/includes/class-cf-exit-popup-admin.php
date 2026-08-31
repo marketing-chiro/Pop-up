@@ -102,6 +102,7 @@ class CF_Exit_Popup_Admin {
 			'totals'   => CF_Exit_Popup_Storage::totals( $days ),
 			'perDay'   => CF_Exit_Popup_Storage::per_day( min( $days, 90 ) ),
 			'topPages' => CF_Exit_Popup_Storage::top_pages( $days ),
+			'reasons'  => CF_Exit_Popup_Storage::reasons( $days ),
 			'devices'  => CF_Exit_Popup_Storage::breakdown( $days, 'device' ),
 			'triggers' => CF_Exit_Popup_Storage::breakdown( $days, 'trigger_type' ),
 			'visitors' => CF_Exit_Popup_Storage::breakdown( $days, 'visitor' ),

@@ -179,6 +179,16 @@ class CF_Exit_Popup_View {
 		</div>
 
 		<section class="cf-card">
+			<h2 class="cf-card__title">Waar ging hun vraag over?</h2>
+			<p class="cf-card__sub">
+				Aangetikt door de bezoeker zelf, direct nadat die aangaf iets niet gevonden te
+				hebben. Een onderwerp dat vaak voorkomt en zelden tot contact leidt, wijst op een
+				pagina die zijn werk niet doet.
+			</p>
+			<div id="cf-chart-reasons" class="cf-chart"></div>
+		</section>
+
+		<section class="cf-card">
 			<h2 class="cf-card__title">Op welke pagina's liepen bezoekers vast?</h2>
 			<p class="cf-card__sub">
 				Dit is het lijstje om mee aan de slag te gaan: hier stelden bezoekers een vraag

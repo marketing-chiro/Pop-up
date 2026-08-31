@@ -283,6 +283,58 @@
 
 	/* --- 3. Pagina's waar bezoekers vastliepen ------------------------------ */
 
+	/* --- Waar ging hun vraag over? ------------------------------------------ */
+
+	var REDEN_NAMEN = {
+		kosten: 'Kosten of vergoeding',
+		klacht: 'Een klacht of behandeling',
+		afspraak: 'Een afspraak maken',
+		anders: 'Iets anders'
+	};
+
+	function drawReasons() {
+		var host = document.getElementById('cf-chart-reasons');
+		if (!host) return;
+
+		var rows = DATA.reasons || [];
+		if (!rows.length) {
+			host.innerHTML = '<p class="cf-empty">Nog niemand die een onderwerp heeft aangetikt. ' +
+				'Dit vult zich vanaf het moment dat bezoekers de nieuwe vraag te zien krijgen.</p>';
+			return;
+		}
+
+		var max = rows.reduce(function (m, r) { return Math.max(m, Number(r.total)); }, 0);
+
+		var lijst = document.createElement('div');
+		lijst.className = 'cf-bars';
+
+		rows.forEach(function (r) {
+			var totaal = Number(r.total);
+			var actie = Number(r.acted);
+			var naam = REDEN_NAMEN[r.label] || r.label;
+			var breedte = (totaal / max) * 100;
+
+			var rij = document.createElement('div');
+			rij.className = 'cf-bars__row';
+			rij.innerHTML =
+				'<span class="cf-bars__label" title="' + naam + '">' + naam + '</span>' +
+				'<span class="cf-bars__track">' +
+					'<span class="cf-bars__fill" style="width:' + breedte.toFixed(1) + '%"></span>' +
+				'</span>' +
+				'<span class="cf-bars__value">' + nl(totaal) + '</span>';
+
+			hoverable(rij,
+				'<strong>' + naam + '</strong><br>' +
+				nl(totaal) + ' keer genoemd<br>' +
+				nl(actie) + ' daarvan nam contact op (' + pct(actie, totaal) + '%)');
+
+			lijst.appendChild(rij);
+		});
+
+		host.innerHTML = '';
+		host.appendChild(lijst);
+	}
+
 	function drawPages() {
 		var host = document.getElementById('cf-chart-pages');
 		if (!host) return;
@@ -422,6 +474,7 @@
 		if (!DATA) return;
 		drawOutcome();
 		drawTrend();
+		drawReasons();
 		drawPages();
 		drawHours();
 		drawDevices();
