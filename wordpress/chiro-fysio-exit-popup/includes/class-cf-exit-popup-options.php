@@ -56,7 +56,8 @@ class CF_Exit_Popup_Options {
 			// Terugbelverzoek. De enige uitweg waarbij de bezoeker niets hoeft
 			// te durven: geen gesprek, geen openingstijden.
 			'callback_on'       => 1,
-			'txt_callback_btn'  => 'Laat uw nummer achter',
+			'txt_callback_btn'  => 'Wij bellen u terug',
+			'txt_direct_label'  => 'of neem direct contact op',
 			'txt_callback_title'=> 'Dan bellen wij u',
 			'txt_callback_body' => 'Laat uw naam en nummer achter. We bellen u terug, meestal nog dezelfde werkdag.',
 			'txt_callback_name' => 'Uw naam',
@@ -134,7 +135,7 @@ class CF_Exit_Popup_Options {
 			'phone_display', 'whatsapp_text', 'help_label',
 			'txt_question', 'txt_question_sub', 'txt_question_ret', 'txt_question_ret_sub',
 			'txt_yes', 'txt_no', 'txt_yes_title', 'txt_yes_body', 'txt_appointment',
-			'txt_callback_btn', 'txt_callback_title', 'txt_callback_body', 'txt_callback_name',
+			'txt_direct_label', 'txt_callback_btn', 'txt_callback_title', 'txt_callback_body', 'txt_callback_name',
 			'txt_callback_tel', 'txt_callback_send', 'txt_callback_note', 'txt_callback_ok',
 			'txt_callback_okbd', 'txt_callback_err',
 			'txt_reason_title', 'txt_reason_sub', 'txt_reason_costs', 'txt_reason_compl',
@@ -282,6 +283,7 @@ class CF_Exit_Popup_Options {
 				'reasonAppointment'    => $o['txt_reason_appt'],
 				'reasonOther'          => $o['txt_reason_other'],
 				'callbackOn'           => (bool) $o['callback_on'],
+				'directLabel'          => $o['txt_direct_label'],
 				'callbackLabel'        => $o['txt_callback_btn'],
 				'callbackTitle'        => $o['txt_callback_title'],
 				'callbackBody'         => $o['txt_callback_body'],

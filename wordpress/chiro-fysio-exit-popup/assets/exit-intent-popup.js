@@ -154,7 +154,8 @@
       // Terugbelverzoek: de enige uitweg waarbij de bezoeker niets hoeft te
       // durven. Nul van de 37 mensen belde uit zichzelf; een nummer
       // achterlaten kost drie seconden en kan buiten openingstijden.
-      callbackLabel: 'Laat uw nummer achter',
+      callbackLabel: 'Wij bellen u terug',
+      directLabel: 'of neem direct contact op',
       callbackTitle: 'Dan bellen wij u',
       callbackBody: 'Laat uw naam en nummer achter. We bellen u terug, meestal nog dezelfde werkdag.',
       callbackName: 'Uw naam',
@@ -527,18 +528,31 @@
           baken('hulp') +
           '<h2 class="cf-exit__title">' + t.noTitle + '</h2>' +
           '<p class="cf-exit__body">' + t.noBody + '</p>' +
-          '<div class="cf-exit__actions cf-exit__actions--stack">' +
+          // Twee groepen, en dat onderscheid doet het werk.
+          //
+          // Boven: wat de vraag oplost. Daaronder het terugbelverzoek, met een
+          // eigen omlijnde vorm zodat het als tweede echte keuze leest en niet
+          // als restknop. Het stond eerst onderaan in vier grijze knoppen, en
+          // dan zie je precies de optie niet die het meest oplevert.
+          //
+          // Onder de streep: de kanalen waarbij de bezoeker zelf moet bellen of
+          // appen. Nuttig, maar niet waar we mee willen openen.
+          '<div class="cf-exit__actions cf-exit__actions--stack" data-groep="hulp">' +
             appointmentBtn +
             (CONFIG.helpUrl
               ? '<a class="cf-exit__btn cf-exit__btn--ghost" data-cf="help" href="' + CONFIG.helpUrl + '">' +
                 CONFIG.helpLabel + '</a>'
               : '') +
-            whatsappBtn +
-            (CONFIG.callbackOn
-              ? '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="callback-open">' +
-                t.callbackLabel + '</button>'
-              : '') +
           '</div>' +
+          (CONFIG.callbackOn
+            ? '<div class="cf-exit__actions cf-exit__actions--stack">' +
+              '<button type="button" class="cf-exit__btn cf-exit__btn--outline" data-cf="callback-open">' +
+              t.callbackLabel + '</button></div>'
+            : '') +
+          (whatsappBtn
+            ? '<p class="cf-exit__scheiding"><span>' + t.directLabel + '</span></p>' +
+              '<div class="cf-exit__actions cf-exit__actions--stack">' + whatsappBtn + '</div>'
+            : '') +
           '<p class="cf-exit__phone">' +
             '<a data-cf="call" href="tel:' + CONFIG.phoneHref + '">' +
               '<svg class="cf-exit__phoneicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
@@ -629,7 +643,7 @@
   function benadruk(reden) {
     if (!root) return;
 
-    var rij = root.querySelector('[data-step="no"] .cf-exit__actions');
+    var rij = root.querySelector('[data-step="no"] [data-groep="hulp"]');
     if (!rij) return;
 
     var doel = 'kosten' === reden ? 'help'

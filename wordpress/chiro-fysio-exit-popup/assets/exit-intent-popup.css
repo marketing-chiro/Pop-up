@@ -245,6 +245,42 @@
   flex: none;
 }
 
+/* Een omlijnde knop: minder gewicht dan de hoofdknop, meer dan een grijze.
+   Precies wat het terugbelverzoek nodig heeft - het is niet de eerste keuze,
+   maar wel een echte, en als vlakke grijze knop onderaan werd hij simpelweg
+   niet gezien. */
+.cf-exit__btn--outline {
+  background: transparent;
+  color: var(--cf-primary);
+  box-shadow: inset 0 0 0 2px var(--cf-primary);
+}
+
+.cf-exit__btn--outline:hover,
+.cf-exit__btn--outline:focus-visible {
+  background: var(--cf-accent);
+  color: var(--cf-primary-dark);
+  box-shadow: inset 0 0 0 2px var(--cf-primary-dark);
+}
+
+/* Scheidt "wij helpen u" van "u neemt contact op". De streep doet hier het
+   werk dat anders vier knoppen op een hoop zouden doen. */
+.cf-exit__scheiding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 14px;
+  font-size: 0.85rem;
+  color: var(--cf-muted);
+}
+
+.cf-exit__scheiding::before,
+.cf-exit__scheiding::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--cf-muted) 28%, transparent);
+}
+
 /* --- Terugbelformulier ------------------------------------------------------ */
 
 .cf-exit__form {
