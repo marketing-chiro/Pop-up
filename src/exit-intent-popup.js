@@ -155,7 +155,7 @@
       // durven. Nul van de 37 mensen belde uit zichzelf; een nummer
       // achterlaten kost drie seconden en kan buiten openingstijden.
       callbackLabel: 'Wij bellen u terug',
-      directLabel: 'of neem direct contact op',
+      directLabel: 'Of direct:',
       callbackTitle: 'Dan bellen wij u',
       callbackBody: 'Laat uw naam en nummer achter. We bellen u terug, meestal nog dezelfde werkdag.',
       callbackName: 'Uw naam',
@@ -167,9 +167,9 @@
       callbackError: 'Dat lukte niet. Probeert u het opnieuw, of bel ons gerust.',
 
       noTitle: 'Dat lossen we even op',
-      // Noemde eerst alleen bellen. Dat sloot niet aan bij wat bezoekers doen:
-      // die plannen liever zelf een afspraak dan dat ze de telefoon pakken.
-      noBody: 'Plan gerust direct een afspraak, of stel uw vraag - we denken graag met u mee.',
+      // Kort houden. De knoppen eronder zeggen het al; een alinea erbij maakt
+      // het scherm alleen zwaarder voor iemand die al bezig was te vertrekken.
+      noBody: 'Kies wat u het beste uitkomt.',
       callLabel: 'Bel',
       whatsappLabel: 'Stuur een WhatsApp',
       hours: 'Maandag t/m vrijdag bereikbaar tijdens openingstijden.',
@@ -528,37 +528,39 @@
           baken('hulp') +
           '<h2 class="cf-exit__title">' + t.noTitle + '</h2>' +
           '<p class="cf-exit__body">' + t.noBody + '</p>' +
-          // Twee groepen, en dat onderscheid doet het werk.
+          // Eén knop die bij het antwoord hoort, en één uitweg. Meer niet.
           //
-          // Boven: wat de vraag oplost. Daaronder het terugbelverzoek, met een
-          // eigen omlijnde vorm zodat het als tweede echte keuze leest en niet
-          // als restknop. Het stond eerst onderaan in vier grijze knoppen, en
-          // dan zie je precies de optie niet die het meest oplevert.
+          // Hier stonden eerst vijf keuzes onder elkaar, waaronder kosten én
+          // afspraak naast elkaar. Maar de bezoeker heeft net verteld wat die
+          // zocht - dan alsnog allebei tonen is de eigen vraag negeren. En vijf
+          // keuzes voor iemand die al bezig was te vertrekken is er vier te
+          // veel.
           //
-          // Onder de streep: de kanalen waarbij de bezoeker zelf moet bellen of
-          // appen. Nuttig, maar niet waar we mee willen openen.
+          // Welke van de twee getoond wordt, bepaalt kiesActie() op basis van
+          // de aangetikte reden.
           '<div class="cf-exit__actions cf-exit__actions--stack" data-groep="hulp">' +
             appointmentBtn +
             (CONFIG.helpUrl
               ? '<a class="cf-exit__btn cf-exit__btn--ghost" data-cf="help" href="' + CONFIG.helpUrl + '">' +
                 CONFIG.helpLabel + '</a>'
               : '') +
+            (CONFIG.callbackOn
+              ? '<button type="button" class="cf-exit__btn cf-exit__btn--outline" data-cf="callback-open">' +
+                t.callbackLabel + '</button>'
+              : '') +
           '</div>' +
-          (CONFIG.callbackOn
-            ? '<div class="cf-exit__actions cf-exit__actions--stack">' +
-              '<button type="button" class="cf-exit__btn cf-exit__btn--outline" data-cf="callback-open">' +
-              t.callbackLabel + '</button></div>'
-            : '') +
-          (whatsappBtn
-            ? '<p class="cf-exit__scheiding"><span>' + t.directLabel + '</span></p>' +
-              '<div class="cf-exit__actions cf-exit__actions--stack">' + whatsappBtn + '</div>'
-            : '') +
-          '<p class="cf-exit__phone">' +
+
+          // Bellen en WhatsApp als één rustige regel. WhatsApp stond hier als
+          // felgroene knop en eiste daarmee de aandacht op, terwijl hij al
+          // permanent op de site staat via de chatknop.
+          '<p class="cf-exit__direct">' +
+            '<span>' + t.directLabel + '</span>' +
             '<a data-cf="call" href="tel:' + CONFIG.phoneHref + '">' +
-              '<svg class="cf-exit__phoneicon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-              '<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>' +
-              '</svg>' + t.callLabel + ' ' + CONFIG.phoneDisplay +
-            '</a>' +
+              CONFIG.phoneDisplay + '</a>' +
+            (CONFIG.whatsapp
+              ? '<a data-cf="whatsapp" rel="noopener" target="_blank" href="https://wa.me/' +
+                CONFIG.whatsapp + '?text=' + encodeURIComponent(CONFIG.whatsappText) + '">WhatsApp</a>'
+              : '') +
           '</p>' +
           '<p class="cf-exit__note">' + t.hours + '</p>' +
         '</div>' +
@@ -637,34 +639,37 @@
     trapFocus(e);
   }
 
-  // Zet de knop die bij de gekozen reden hoort bovenaan, en geef hem het
-  // hoofdaccent. Wie op "kosten" tikte, hoort geen afspraakknop als eerste te
-  // zien - dan heb je de vraag wel gesteld maar er niets mee gedaan.
-  function benadruk(reden) {
+  // Toont de ene knop die bij het antwoord hoort, en verbergt de andere.
+  //
+  // Eerst schoven hier alleen knoppen van plek. Maar wie op "kosten" tikt en
+  // dan alsnog een afspraakknop ziet, krijgt zijn eigen antwoord niet terug.
+  // Dus: kosten leidt naar de kostenpagina, de rest naar een afspraak. Het
+  // terugbelverzoek blijft altijd staan als uitweg.
+  function kiesActie(reden) {
     if (!root) return;
 
     var rij = root.querySelector('[data-step="no"] [data-groep="hulp"]');
     if (!rij) return;
 
-    var doel = 'kosten' === reden ? 'help'
-      : ( 'klacht' === reden || 'afspraak' === reden ) ? 'appointment'
-      : '';
+    var help = rij.querySelector('[data-cf="help"]');
+    var afspraak = rij.querySelector('[data-cf="appointment"]');
 
-    if (!doel) return;
+    // Zonder kostenpagina valt er niets te kiezen.
+    var wilHelp = 'kosten' === reden && help;
 
-    var knop = rij.querySelector('[data-cf="' + doel + '"]');
-    if (!knop || knop === rij.firstChild) return;
+    if (help) help.hidden = !wilHelp;
+    if (afspraak) afspraak.hidden = wilHelp;
 
-    // De vorige hoofdknop wordt bijzaak, de nieuwe krijgt het accent.
-    var vorige = rij.querySelector('.cf-exit__btn--primary');
-    if (vorige && vorige !== knop) {
-      vorige.classList.remove('cf-exit__btn--primary');
-      vorige.classList.add('cf-exit__btn--ghost');
-    }
+    // De zichtbare knop is de hoofdknop; die draagt het accent.
+    var zichtbaar = wilHelp ? help : afspraak;
 
-    knop.classList.remove('cf-exit__btn--ghost');
-    knop.classList.add('cf-exit__btn--primary');
-    rij.insertBefore(knop, rij.firstChild);
+    [help, afspraak].forEach(function (knop) {
+      if (!knop) return;
+      knop.classList.toggle('cf-exit__btn--primary', knop === zichtbaar);
+      knop.classList.toggle('cf-exit__btn--ghost', knop !== zichtbaar);
+    });
+
+    if (zichtbaar) rij.insertBefore(zichtbaar, rij.firstChild);
   }
 
   function showStep(name) {
@@ -948,7 +953,7 @@
         case 'reason':
           gekozenReden = el.getAttribute('data-reason') || 'anders';
           track('reason', { reason: gekozenReden });
-          benadruk(gekozenReden);
+          kiesActie(gekozenReden);
           showStep('no');
           break;
         case 'call':

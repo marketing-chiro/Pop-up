@@ -139,39 +139,35 @@
 			'</div>';
 	}
 
-	// Zelfde volgorde als het echte nee-scherm: afspraak bovenaan, dan de
-	// kostenknop, dan WhatsApp, en het telefoonnummer als leesbare regel
-	// eronder in plaats van als grootste knop.
+	// Zelfde opzet als het echte nee-scherm: één knop die bij het antwoord
+	// hoort, het terugbelverzoek als uitweg, en bellen en WhatsApp op één
+	// rustige regel eronder. In het voorbeeld tonen we de kostenknop, want dat
+	// is het meest voorkomende onderwerp.
 	function schermNee() {
-		var afspraak = tekst('appointment_url')
+		var kosten = (tekst('help_url') && tekst('help_label'))
 			? '<span class="cf-exit__btn cf-exit__btn--primary">' +
-				ontsnap(tekst('txt_appointment')) + '</span>'
-			: '';
-
-		var hulp = (tekst('help_url') && tekst('help_label'))
-			? '<span class="cf-exit__btn cf-exit__btn--ghost">' +
 				ontsnap(tekst('help_label')) + '</span>'
-			: '';
+			: (tekst('appointment_url')
+				? '<span class="cf-exit__btn cf-exit__btn--primary">' +
+					ontsnap(tekst('txt_appointment')) + '</span>'
+				: '');
 
-		var wa = tekst('whatsapp')
-			? '<span class="cf-exit__btn cf-exit__btn--whatsapp">' +
-				'<svg class="cf-exit__icon" viewBox="0 0 24 24" aria-hidden="true">' +
-				'<path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Z"/>' +
-				'</svg><span>' + ontsnap(tekst('txt_whatsapp')) + '</span></span>'
-			: '';
+		var terugbel = '<span class="cf-exit__btn cf-exit__btn--outline">' +
+			ontsnap(tekst('txt_callback_btn')) + '</span>';
+
+		var wa = tekst('whatsapp') ? '<a href="#" onclick="return false">WhatsApp</a>' : '';
 
 		return baken('hulp') +
 			'<h2 class="cf-exit__title">' + ontsnap(tekst('txt_no_title')) + '</h2>' +
 			'<p class="cf-exit__body">' + ontsnap(tekst('txt_no_body')) + '</p>' +
 			'<div class="cf-exit__actions cf-exit__actions--stack">' +
-				afspraak + hulp + wa +
+				kosten + terugbel +
 			'</div>' +
-			'<p class="cf-exit__phone"><a href="#" onclick="return false">' +
-				'<svg class="cf-exit__phoneicon" viewBox="0 0 24 24" aria-hidden="true">' +
-				'<path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2Z"/>' +
-				'</svg>' + ontsnap(tekst('txt_call') + ' ' + tekst('phone_display')) +
-			'</a></p>' +
-			'<p class="cf-exit__note">' + ontsnap(tekst('txt_hours')) + '</p>';
+			'<p class="cf-exit__direct">' +
+				'<span>' + ontsnap(tekst('txt_direct_label')) + '</span>' +
+				'<a href="#" onclick="return false">' + ontsnap(tekst('phone_display')) + '</a>' +
+				wa +
+			'</p>';
 	}
 
 	function teken() {

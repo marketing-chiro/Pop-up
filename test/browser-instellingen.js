@@ -59,8 +59,11 @@ function fireExit(page) {
   console.log('\n[3] Kostenknop in het nee-scherm');
   await page.click('[data-cf="answer-no"]');
   await page.waitForTimeout(250);
-  await page.click('[data-reason="anders"]');
+  // "Kosten" kiezen, want alleen de knop die bij het antwoord hoort verschijnt.
+  // Bij een ander onderwerp zie je juist de afspraakknop.
+  await page.click('[data-reason="kosten"]');
   await page.waitForTimeout(250);
+
   const help = page.locator('[data-cf="help"]');
   check('kostenknop aanwezig', await help.isVisible());
   check('kostenknop wijst naar kosten en vergoedingen',
@@ -68,18 +71,23 @@ function fireExit(page) {
   check('kostenknop noemt kosten of vergoeding',
     /kosten|vergoeding/i.test(await help.textContent()));
 
-  // Deze controle stond eerst omgekeerd: bellen moest bovenaan staan. Dertig
-  // dagen meten gaf 37 mensen die iets niet konden vinden en nul belkliks,
-  // terwijl 19% van de sessies wel online een afspraak start. Vandaar dat de
-  // volgorde nu andersom is, en deze controle dat vastlegt.
-  check('afspraak staat bovenaan, telefoon onderaan',
+  // Het scherm bood eerst vijf keuzes tegelijk, waaronder kosten én afspraak
+  // naast elkaar. Twee knoppen en een rustige contactregel is wat er nu staat,
+  // en deze controle houdt dat zo.
+  check('twee knoppen, niet meer',
+    await page.locator('[data-step="no"] .cf-exit__btn:visible').count() === 2);
+  check('het terugbelverzoek staat eronder',
+    await page.locator('[data-step="no"] [data-cf="callback-open"]').isVisible());
+  check('bellen en WhatsApp staan op één rustige regel',
+    await page.locator('[data-step="no"] .cf-exit__direct [data-cf="call"]').isVisible() &&
+    await page.locator('[data-step="no"] .cf-exit__direct [data-cf="whatsapp"]').isVisible());
+  check('de kostenknop staat boven het terugbelverzoek',
     await page.evaluate(() => {
       const q = s => document.querySelector('[data-step="no"] [data-cf="' + s + '"]');
-      const a = q('appointment'), h = q('help'), b = q('call');
-      if (!a || !h || !b) return false;
-      return a.getBoundingClientRect().top < h.getBoundingClientRect().top
-        && h.getBoundingClientRect().top < b.getBoundingClientRect().top;
+      const h = q('help'), t = q('callback-open');
+      return !!h && !!t && h.getBoundingClientRect().top < t.getBoundingClientRect().top;
     }));
+
   await page.screenshot({ path: SHOTS + '/na-rapport-nee.png' });
 
   // --- 4. Uitgesloten pagina's uit het rapport ---------------------------

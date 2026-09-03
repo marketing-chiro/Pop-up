@@ -74,11 +74,17 @@ function wacht(ms) { return new Promise(r => setTimeout(r, ms)); }
 			reden.length > 0 && reden[0].data.reason === 'kosten',
 			reden.length ? JSON.stringify(reden[0].data) : 'geen melding');
 
-		console.log('\n[3] De bijpassende knop staat daarna bovenaan');
-		const eerste = await page.locator('[data-step="no"] .cf-exit__actions .cf-exit__btn')
-			.first().getAttribute('data-cf');
-		check('na "kosten" staat de kostenknop bovenaan', eerste === 'help', 'nu: ' + eerste);
-		check('en die draagt het hoofdaccent',
+		console.log('\n[3] Alleen de bijpassende knop, niet allebei');
+		// Dit ging eerder mis zonder dat een test het zag: allebei de knoppen
+		// bleven staan omdat de eigen display-regel het [hidden] van de browser
+		// overschreef. Vandaar dat hier op zichtbaarheid getest wordt.
+		check('de kostenknop is zichtbaar',
+			await page.locator('[data-step="no"] [data-cf="help"]').isVisible());
+		check('de afspraakknop is verborgen',
+			!(await page.locator('[data-step="no"] [data-cf="appointment"]').isVisible()));
+		check('precies één hoofdknop op het scherm',
+			await page.locator('[data-step="no"] .cf-exit__btn--primary:visible').count() === 1);
+		check('en dat is de kostenknop',
 			await page.locator('[data-step="no"] .cf-exit__btn--primary')
 				.first().getAttribute('data-cf') === 'help');
 
@@ -90,9 +96,10 @@ function wacht(ms) { return new Promise(r => setTimeout(r, ms)); }
 		await page.waitForSelector('[data-step="reason"]:not([hidden])');
 		await page.click('[data-reason="klacht"]');
 		await page.waitForSelector('[data-step="no"]:not([hidden])');
-		const eerste2 = await page.locator('[data-step="no"] .cf-exit__actions .cf-exit__btn')
-			.first().getAttribute('data-cf');
-		check('na "klacht" staat de afspraakknop bovenaan', eerste2 === 'appointment', 'nu: ' + eerste2);
+		check('na "klacht" is de afspraakknop zichtbaar',
+			await page.locator('[data-step="no"] [data-cf="appointment"]').isVisible());
+		check('en de kostenknop verborgen',
+			!(await page.locator('[data-step="no"] [data-cf="help"]').isVisible()));
 
 		console.log('\n[5] "Iets anders" laat de standaardvolgorde staan');
 		await page.goto(PAGINA, { waitUntil: 'load' });
@@ -101,9 +108,10 @@ function wacht(ms) { return new Promise(r => setTimeout(r, ms)); }
 		await page.click('[data-cf="answer-no"]');
 		await page.click('[data-reason="anders"]');
 		await page.waitForSelector('[data-step="no"]:not([hidden])');
-		const eerste3 = await page.locator('[data-step="no"] .cf-exit__actions .cf-exit__btn')
-			.first().getAttribute('data-cf');
-		check('afspraak blijft de hoofdknop', eerste3 === 'appointment', 'nu: ' + eerste3);
+		check('afspraak blijft de hoofdknop',
+			await page.locator('[data-step="no"] [data-cf="appointment"]').isVisible());
+		check('nog steeds maar één hoofdknop',
+			await page.locator('[data-step="no"] .cf-exit__btn--primary:visible').count() === 1);
 
 		console.log('\n[6] Wegklikken op het redenscherm');
 		await page.goto(PAGINA, { waitUntil: 'load' });
