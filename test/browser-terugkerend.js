@@ -53,6 +53,23 @@ const check = (n,c) => { console.log((c?'  PASS  ':'  FAIL  ')+n); if(!c) fail.p
   check('tweede bezoek: andere vraag ("' + titel3 + '")', /helpen/i.test(titel3));
   const sub3 = await p2.textContent('.cf-exit__body');
   check('tekst verwijst naar het eerdere bezoek', /eerder geweest/i.test(sub3));
+
+  // Bij "kunnen we u ergens mee helpen?" horen andere antwoorden dan bij
+  // "heeft u gevonden wat u zocht?". Ze stonden er eerst nog onder: op de
+  // vraag of we konden helpen antwoordde je dan met "ja, gelukt". En omdat
+  // "ja" hier juist om hulp vraagt, moet die knop ook naar de hulpstap gaan
+  // en niet naar het afscheidsscherm.
+  const knoppen = await p2.$$eval('[data-step="ask"] .cf-exit__btn',
+    els => els.map(e => [e.textContent.trim(), e.getAttribute('data-cf')]));
+  check('eerste antwoord is "Ja graag" (nu: "' + knoppen[0][0] + '")', knoppen[0][0] === 'Ja graag');
+  check('tweede antwoord is "Nee, dankjewel" (nu: "' + knoppen[1][0] + '")', knoppen[1][0] === 'Nee, dankjewel');
+  check('"Ja graag" is de hoofdknop',
+    await p2.$eval('[data-step="ask"] .cf-exit__btn--primary', e => e.textContent.trim()) === 'Ja graag');
+
+  await p2.click('[data-step="ask"] .cf-exit__btn--primary');
+  await p2.waitForTimeout(400);
+  check('"Ja graag" leidt naar de hulpstap, niet naar het afscheid',
+    await p2.isVisible('[data-step="reason"]') && !(await p2.isVisible('[data-step="yes"]')));
   await ctx2.close();
 
   check('geen JS-fouten', errs.length === 0);

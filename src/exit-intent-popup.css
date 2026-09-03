@@ -518,10 +518,15 @@ body.cf-exit-lock {
     margin-bottom: 20px;
   }
 
-  /* Ja/nee onder elkaar. "Nee, nog niet" hoort onderaan, in de duimzone: dat is
-     de knop die naar hulp leidt en ook als hoofdknop is vormgegeven. Stond die
-     bovenaan, dan lag juist "Ja, gelukt" - het wegtikken - het handigst, en dat
-     kost je precies de gesprekken waar het om begonnen was.
+  /* Ja/nee onder elkaar. Bij "heeft u gevonden wat u zocht?" staat "nee, nog
+     niet" onderaan, in de duimzone: dat is de knop die naar hulp leidt en ook
+     als hoofdknop is vormgegeven. Stond die bovenaan, dan lag juist "ja,
+     gelukt" - het wegtikken - het handigst, en dat kost je precies de
+     gesprekken waar het om begonnen was.
+
+     Voor wie er al eerder was luidt de vraag "kunnen we u ergens mee helpen?",
+     en dan is "ja graag" de knop naar hulp. Ja blijft bovenaan staan, dus daar
+     ligt de hoofdknop hoger; de kleur doet dan het werk.
 
      Alleen voor deze twee knoppen; de hulpknoppen staan al onder elkaar in de
      goede volgorde, met de afspraak bovenaan. */

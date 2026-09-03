@@ -43,6 +43,10 @@ class CF_Exit_Popup_Options {
 			'txt_question_ret_sub' => 'U bent hier eerder geweest - stelt u de vraag gerust rechtstreeks.',
 			'txt_yes'           => 'Ja, gelukt',
 			'txt_no'            => 'Nee, nog niet',
+			// Bij de vraag voor terugkerende bezoekers horen andere antwoorden:
+			// daar vraagt "ja" juist om hulp.
+			'txt_yes_ret'       => 'Ja graag',
+			'txt_no_ret'        => 'Nee, dankjewel',
 			'txt_yes_title'     => 'Fijn om te horen!',
 			'txt_yes_body'      => 'Bedankt voor uw bezoek. Tot ziens in de praktijk.',
 			'txt_appointment'   => 'Direct een afspraak maken',
@@ -134,7 +138,8 @@ class CF_Exit_Popup_Options {
 		$tekstvelden = array(
 			'phone_display', 'whatsapp_text', 'help_label',
 			'txt_question', 'txt_question_sub', 'txt_question_ret', 'txt_question_ret_sub',
-			'txt_yes', 'txt_no', 'txt_yes_title', 'txt_yes_body', 'txt_appointment',
+			'txt_yes', 'txt_no', 'txt_yes_ret', 'txt_no_ret',
+			'txt_yes_title', 'txt_yes_body', 'txt_appointment',
 			'txt_direct_label', 'txt_callback_btn', 'txt_callback_title', 'txt_callback_body', 'txt_callback_name',
 			'txt_callback_tel', 'txt_callback_send', 'txt_callback_note', 'txt_callback_ok',
 			'txt_callback_okbd', 'txt_callback_err',
@@ -273,6 +278,8 @@ class CF_Exit_Popup_Options {
 				'questionSubReturning' => $o['txt_question_ret_sub'],
 				'yes'                  => $o['txt_yes'],
 				'no'                   => $o['txt_no'],
+				'yesReturning'         => $o['txt_yes_ret'],
+				'noReturning'          => $o['txt_no_ret'],
 				'yesTitle'             => $o['txt_yes_title'],
 				'yesBody'              => $o['txt_yes_body'],
 				'appointmentLabel'     => $o['txt_appointment'],

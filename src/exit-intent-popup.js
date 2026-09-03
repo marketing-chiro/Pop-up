@@ -135,6 +135,12 @@
       yes: 'Ja, gelukt',
       no: 'Nee, nog niet',
 
+      // Bij de vraag hierboven horen andere antwoorden. Op "kunnen we u ergens
+      // mee helpen?" is "ja" juist het antwoord dat om hulp vraagt, dus daar
+      // draaien de twee knoppen van betekenis om.
+      yesReturning: 'Ja graag',
+      noReturning: 'Nee, dankjewel',
+
       yesTitle: 'Fijn om te horen!',
       yesBody: 'Bedankt voor uw bezoek. Tot ziens in de praktijk.',
       appointmentLabel: 'Direct een afspraak maken',
@@ -456,6 +462,18 @@
         '</svg><span>' + t.whatsappLabel + '</span></a>'
       : '';
 
+    // De vraag heeft twee antwoorden: één dat om hulp vraagt en één dat
+    // afscheid neemt. Welk woord daarbij hoort, hangt van de vraag af. Bij
+    // "heeft u gevonden wat u zocht?" vraagt "nee" om hulp; bij "kunnen we u
+    // ergens mee helpen?" is dat juist "ja". De handeling erachter blijft
+    // dezelfde - alleen het label en de volgorde draaien mee, zodat het
+    // antwoord dat om hulp vraagt altijd de hoofdknop is.
+    var terug = isReturning();
+    var hulpKnop = '<button type="button" class="cf-exit__btn cf-exit__btn--primary" data-cf="answer-no">' +
+      (terug ? t.yesReturning : t.no) + '</button>';
+    var afscheidKnop = '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="answer-yes">' +
+      (terug ? t.noReturning : t.yes) + '</button>';
+
     el.innerHTML =
       '<div class="cf-exit__overlay" data-cf="overlay"></div>' +
       '<div class="cf-exit__dialog" role="dialog" aria-modal="true" aria-labelledby="cf-exit-title">' +
@@ -474,12 +492,11 @@
         '<div class="cf-exit__step" data-step="ask">' +
           baken('vraag') +
           '<h2 class="cf-exit__title" id="cf-exit-title">' +
-            (isReturning() ? t.questionReturning : t.question) + '</h2>' +
+            (terug ? t.questionReturning : t.question) + '</h2>' +
           '<p class="cf-exit__body">' +
-            (isReturning() ? t.questionSubReturning : t.questionSub) + '</p>' +
+            (terug ? t.questionSubReturning : t.questionSub) + '</p>' +
           '<div class="cf-exit__actions">' +
-            '<button type="button" class="cf-exit__btn cf-exit__btn--ghost" data-cf="answer-yes">' + t.yes + '</button>' +
-            '<button type="button" class="cf-exit__btn cf-exit__btn--primary" data-cf="answer-no">' + t.no + '</button>' +
+            (terug ? hulpKnop + afscheidKnop : afscheidKnop + hulpKnop) +
           '</div>' +
         '</div>' +
 
@@ -1022,6 +1039,11 @@
   window.cfExitPopup = {
     toon: function () {
       if (!root) {
+        // init() kan eerder afgehaakt zijn - bij een lopende rustperiode of op
+        // een uitgesloten pagina - en dan is het bezoek nog niet geteld. Zonder
+        // deze regel wordt het venster opgebouwd alsof iedereen nieuw is, en
+        // krijgt een terugkerende bezoeker de verkeerde tekst.
+        visitCount = countVisit();
         root = buildMarkup();
         document.body.appendChild(root);
         bindUi();

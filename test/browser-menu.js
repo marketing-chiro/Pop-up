@@ -20,9 +20,18 @@ const PAGE = `<!doctype html><html lang="nl"><head><meta charset="utf-8">
 
 (async () => {
   const fs = require('fs');
-  const js = fs.readFileSync('/home/user/Pop-up/src/exit-intent-popup.js','utf8');
-  const css = fs.readFileSync('/home/user/Pop-up/src/exit-intent-popup.css','utf8');
-  fs.writeFileSync('menupage.html', PAGE.replace('<script src="SCRIPT"></script>',
+  const os = require('os');
+  const path = require('path');
+
+  const js = fs.readFileSync(path.join(__dirname, '..', 'src', 'exit-intent-popup.js'), 'utf8');
+  const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'exit-intent-popup.css'), 'utf8');
+
+  // In een tijdelijke map, niet in de repo: dit bestand wordt bij elke run
+  // opnieuw gemaakt met de code van dat moment erin. Stond het in de map van
+  // het project, dan meldde git na elke test een wijziging die niemand gemaakt
+  // had.
+  const pagina = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cf-menu-')), 'menupage.html');
+  fs.writeFileSync(pagina, PAGE.replace('<script src="SCRIPT"></script>',
     '<style>'+css+'</style><script>'+js+'</script>'));
 
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
@@ -32,7 +41,7 @@ const PAGE = `<!doctype html><html lang="nl"><head><meta charset="utf-8">
   async function fresh() {
     const ctx = await b.newContext({ viewport: { width: 1280, height: 800 } });
     const p = await ctx.newPage();
-    await p.goto('file://' + process.cwd() + '/menupage.html');
+    await p.goto('file://' + pagina);
     await p.mouse.move(640, 500);         // echte bezoeker beweegt
     await p.waitForTimeout(6400);          // voorbij armAfterMs
     await p.mouse.move(640, 480);

@@ -288,6 +288,11 @@ class CF_Exit_Popup_Editor {
 							<?php
 							self::tekst( 'txt_question_ret', 'Vraag', $o, '', true );
 							self::tekst( 'txt_question_ret_sub', 'Regel eronder', $o, '', true );
+							// Let op de omkering: bij deze vraag is "ja" het antwoord
+							// dat om hulp vraagt, dus dat is hier de knop die naar de
+							// hulpstap gaat.
+							self::tekst( 'txt_yes_ret', 'Knop: wel hulp nodig', $o );
+							self::tekst( 'txt_no_ret', 'Knop: geen hulp nodig', $o );
 							?>
 
 							<h2 class="cf-card__title cf-mt">Als het gelukt is</h2>
