@@ -1,11 +1,11 @@
 {
   "name": "Chiro-Fysio exit-intent pop-up",
   "slug": "chiro-fysio-exit-popup",
-  "version": "1.12.2",
+  "version": "1.13.0",
   "author": "Chiro-Fysio",
   "requires": "5.5",
   "requires_php": "7.0",
   "tested": "7.1",
-  "last_updated": "2026-09-03 09:03:56",
-  "download_url": "https://raw.githubusercontent.com/marketing-chiro/pop-up/claude/chiro-fysio-exit-popup-eahq6b/dist/chiro-fysio-exit-popup-1.12.2.zip"
+  "last_updated": "2026-09-07 09:41:36",
+  "download_url": "https://raw.githubusercontent.com/marketing-chiro/pop-up/claude/chiro-fysio-exit-popup-eahq6b/dist/chiro-fysio-exit-popup-1.13.0.zip"
 }

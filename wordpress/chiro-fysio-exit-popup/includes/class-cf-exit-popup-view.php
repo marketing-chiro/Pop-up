@@ -195,6 +195,13 @@ class CF_Exit_Popup_View {
 							if ( isset( $onderwerpen[ $v['reason'] ] ) ) {
 								echo ' &middot; vraag over ' . esc_html( $onderwerpen[ $v['reason'] ] );
 							}
+
+							// Ging de melding niet de deur uit, dan staat dit verzoek
+							// alleen hier. Dat hoor je te zien op het moment dat je
+							// ernaar kijkt, niet achteraf.
+							if ( isset( $v['mailed'] ) && ! $v['mailed'] ) {
+								echo ' &middot; <span class="cf-terugbel__waarschuwing">niet gemaild</span>';
+							}
 							?>
 						</div>
 						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

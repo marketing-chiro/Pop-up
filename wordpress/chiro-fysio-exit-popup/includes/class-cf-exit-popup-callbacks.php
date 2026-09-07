@@ -30,9 +30,42 @@ class CF_Exit_Popup_Callbacks {
 	/** Na hoeveel dagen een afgehandeld verzoek vanzelf verdwijnt. */
 	const BEWAARTERMIJN = 90;
 
+	/**
+	 * Waar de verzoeken standaard heen gaan.
+	 *
+	 * Dit is het adres waar vandaan teruggebeld wordt, niet het beheeradres van
+	 * de site: een terugbelverzoek is werk voor een mens, en dat moet in de
+	 * postbus liggen van degene die de telefoon pakt.
+	 */
+	const STANDAARD_ADRES = 'marketing@chiro-fysio.nl';
+
+	/** Na hoeveel uur een openstaand verzoek een herinnering oplevert. */
+	const HERINNER_NA_UUR = 20;
+
 	public static function init() {
 		add_action( 'cf_exit_popup_cleanup', array( __CLASS__, 'opruimen' ) );
+		add_action( 'cf_exit_popup_healthcheck', array( __CLASS__, 'herinneren' ) );
 		add_action( 'admin_post_cf_exit_popup_callback_status', array( __CLASS__, 'status_wijzigen' ) );
+	}
+
+	/**
+	 * Het adres waar terugbelverzoeken heen gaan.
+	 *
+	 * Eerst het eigen adres voor terugbelverzoeken, dan het adres voor de
+	 * weekcijfers, en pas als laatste de beheerder van de site.
+	 */
+	public static function bestemming() {
+		$eigen = get_option( 'cf_exit_popup_callback_mail' );
+		if ( $eigen && is_email( $eigen ) ) {
+			return $eigen;
+		}
+
+		$meldingen = get_option( 'cf_exit_popup_mail_to' );
+		if ( $meldingen && is_email( $meldingen ) ) {
+			return $meldingen;
+		}
+
+		return get_option( 'admin_email' );
 	}
 
 	public static function table() {
@@ -57,12 +90,20 @@ class CF_Exit_Popup_Callbacks {
 			page varchar(190) NOT NULL DEFAULT '',
 			handled tinyint(1) NOT NULL DEFAULT 0,
 			handled_at datetime DEFAULT NULL,
+			mailed tinyint(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
 			KEY created_at (created_at),
 			KEY handled (handled)
 		) {$collate};";
 
 		dbDelta( $sql );
+
+		// Het adres waar vandaan teruggebeld wordt, maar alleen als er nog niets
+		// staat: een keuze die iemand zelf gemaakt heeft mag een update niet
+		// overschrijven.
+		if ( ! get_option( 'cf_exit_popup_callback_mail' ) ) {
+			update_option( 'cf_exit_popup_callback_mail', self::STANDAARD_ADRES, false );
+		}
 	}
 
 	/* --- Binnenkomen ---------------------------------------------------------- */
@@ -128,7 +169,21 @@ class CF_Exit_Popup_Callbacks {
 			return new WP_Error( 'cf_opslaan_mislukt', 'Kon het verzoek niet opslaan.' );
 		}
 
-		self::melden( $rij );
+		$id = (int) $wpdb->insert_id;
+
+		// Of de mail aankwam weten we niet - dat weet niemand - maar of hij de
+		// deur uit ging wel. Dat verschil is het hele punt: gaat het versturen
+		// mis, dan hoort dat in het dashboard te staan en niet in stilte te
+		// verdwijnen. Het verzoek zelf staat dan nog steeds in de tabel.
+		$verstuurd = self::melden( $rij );
+
+		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			self::table(),
+			array( 'mailed' => $verstuurd ? 1 : 0 ),
+			array( 'id' => $id ),
+			array( '%d' ),
+			array( '%d' )
+		);
 
 		return true;
 	}
@@ -139,12 +194,11 @@ class CF_Exit_Popup_Callbacks {
 	 * Het verzoek staat ook in het dashboard, dus als de mail niet aankomt is
 	 * het niet weg. Daarom laten we een mislukte verzending het opslaan niet
 	 * tegenhouden.
+	 *
+	 * @return bool Of de mail de deur uit ging.
 	 */
 	private static function melden( $rij ) {
-		$naar = get_option( 'cf_exit_popup_mail_to' );
-		if ( ! $naar || ! is_email( $naar ) ) {
-			$naar = get_option( 'admin_email' );
-		}
+		$naar = self::bestemming();
 
 		$onderwerpen = array(
 			'kosten'   => 'kosten of vergoeding',
@@ -174,9 +228,152 @@ class CF_Exit_Popup_Callbacks {
 		$regels[] = 'Afhandelen kan in het dashboard:';
 		$regels[] = admin_url( 'admin.php?page=cf-exit-popup' );
 
-		wp_mail(
+		return self::versturen(
 			$naar,
 			'Terugbelverzoek van ' . $rij['name'],
+			implode( "\n", $regels )
+		);
+	}
+
+	/**
+	 * Verstuurt een bericht en onthoudt wat er misging.
+	 *
+	 * wp_mail() geeft alleen true of false terug; de reden staat in een aparte
+	 * hook. Zonder die reden staat er straks "verzenden mislukt" in het
+	 * dashboard en kun je er niets mee. Nu staat de melding van de mailserver
+	 * er letterlijk bij.
+	 *
+	 * De afzendernaam zetten we ook: mail van "WordPress" komt bij een
+	 * Microsoft-postbus eerder in ongewenst terecht dan mail met de naam van de
+	 * praktijk erop. Het adres laten we ongemoeid, want dat is al het adres van
+	 * het eigen domein en dat is precies wat SPF en DMARC verwachten.
+	 *
+	 * @return bool
+	 */
+	public static function versturen( $naar, $onderwerp, $tekst ) {
+		$naam = function () {
+			return get_bloginfo( 'name' ) . ' (website)';
+		};
+
+		$fout = null;
+		$vang = function ( $wp_error ) use ( &$fout ) {
+			$fout = $wp_error->get_error_message();
+		};
+
+		add_filter( 'wp_mail_from_name', $naam, 20 );
+		add_action( 'wp_mail_failed', $vang );
+
+		$ok = wp_mail( $naar, $onderwerp, $tekst );
+
+		remove_filter( 'wp_mail_from_name', $naam, 20 );
+		remove_action( 'wp_mail_failed', $vang );
+
+		if ( $ok ) {
+			delete_option( 'cf_exit_popup_mail_error' );
+		} else {
+			update_option(
+				'cf_exit_popup_mail_error',
+				array(
+					'tijd'   => current_time( 'mysql' ),
+					'naar'   => $naar,
+					'reden'  => $fout ? $fout : 'De mailserver gaf geen reden op.',
+				),
+				false
+			);
+		}
+
+		return (bool) $ok;
+	}
+
+	/**
+	 * Stuurt een proefbericht, zodat je niet op een echt verzoek hoeft te
+	 * wachten om te weten of het werkt.
+	 *
+	 * @return true|WP_Error
+	 */
+	public static function proefbericht( $naar = '' ) {
+		$naar = $naar ? $naar : self::bestemming();
+
+		if ( ! is_email( $naar ) ) {
+			return new WP_Error( 'cf_geen_adres', 'Dat is geen geldig e-mailadres.' );
+		}
+
+		$regels = array(
+			'Dit is een proefbericht van de pop-up op ' . home_url() . '.',
+			'',
+			'Ligt dit in de postbus, dan komen terugbelverzoeken ook aan.',
+			'Zo niet, kijk dan eerst in Ongewenste e-mail en in de quarantaine',
+			'van Microsoft 365.',
+			'',
+			'Verstuurd op ' . current_time( 'd-m-Y H:i' ) . '.',
+		);
+
+		if ( ! self::versturen( $naar, 'Proefbericht van de website', implode( "\n", $regels ) ) ) {
+			$laatste = get_option( 'cf_exit_popup_mail_error' );
+			$reden   = is_array( $laatste ) && ! empty( $laatste['reden'] ) ? $laatste['reden'] : 'onbekend';
+
+			return new WP_Error( 'cf_mail_mislukt', $reden );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Herinnert aan verzoeken die blijven liggen.
+	 *
+	 * Dit is het vangnet onder de mail. Gaat een melding verloren - in de
+	 * ongewenste map, of omdat de mailserver even niet wilde - dan zou een
+	 * verzoek anders alleen in het dashboard staan, en daar kijkt niemand als
+	 * hij geen reden heeft om te kijken. Eén herinnering per dag, en alleen als
+	 * er echt iets openstaat.
+	 */
+	public static function herinneren() {
+		global $wpdb;
+
+		$table = self::table();
+		$grens = gmdate(
+			'Y-m-d H:i:s',
+			strtotime( '-' . self::HERINNER_NA_UUR . ' hours', (int) current_time( 'timestamp' ) )
+		);
+
+		$oud = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				"SELECT created_at, name, phone
+				 FROM {$table}
+				 WHERE handled = 0 AND created_at < %s
+				 ORDER BY created_at ASC
+				 LIMIT 25", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$grens
+			),
+			ARRAY_A
+		);
+
+		if ( ! $oud ) {
+			return;
+		}
+
+		$aantal = count( $oud );
+		$regels = array(
+			1 === $aantal
+				? 'Er staat nog een terugbelverzoek open dat niemand heeft afgevinkt.'
+				: 'Er staan nog ' . $aantal . ' terugbelverzoeken open die niemand heeft afgevinkt.',
+			'',
+		);
+
+		foreach ( $oud as $rij ) {
+			$regels[] = mysql2date( 'd-m H:i', $rij['created_at'] ) . '  ' .
+				$rij['name'] . '  ' . $rij['phone'];
+		}
+
+		$regels[] = '';
+		$regels[] = 'Afvinken kan in het dashboard:';
+		$regels[] = admin_url( 'admin.php?page=cf-exit-popup' );
+
+		self::versturen(
+			self::bestemming(),
+			1 === $aantal
+				? 'Nog een terugbelverzoek open'
+				: 'Nog ' . $aantal . ' terugbelverzoeken open',
 			implode( "\n", $regels )
 		);
 	}
@@ -193,7 +390,7 @@ class CF_Exit_Popup_Callbacks {
 
 		return $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->prepare(
-				"SELECT id, created_at, name, phone, reason, page
+				"SELECT id, created_at, name, phone, reason, page, mailed
 				 FROM {$table}
 				 WHERE handled = 0
 				 ORDER BY created_at DESC

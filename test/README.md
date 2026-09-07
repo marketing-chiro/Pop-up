@@ -34,9 +34,15 @@ aan de queries in `class-cf-exit-popup-storage.php`.
 | `browser-basis.js` | Verschijnen, ja/nee, sluiten, rustperiode, uitgesloten pagina's, mobiel |
 | `browser-instellingen.js` | De keuzes uit het Analytics-rapport: wachttijd, interactie-eis, hulplink |
 | `browser-menu.js` | Het menu bovenaan mag geen pop-up geven, ook niet bij voorbijschieten |
-| `browser-terugkerend.js` | Bezoekteller en de andere vraag voor wie terugkomt |
+| `browser-terugkerend.js` | Bezoekteller, de andere vraag voor wie terugkomt, en de bijbehorende antwoorden |
+| `browser-reden.js` | De tussenstap "waar ging uw vraag over?" en de knop die daarbij hoort |
+| `browser-terugbellen.js` | Het terugbelformulier aan de voorkant |
+| `terugbellen.php` | Telefoonnummers opschonen, zoals mensen ze echt opschrijven |
+| `terugbelmail.php` | Waar een terugbelverzoek heen gaat, en of een mislukte verzending zichtbaar blijft |
+| `updater.php` | De automatische update: manifest, versievergelijking, vertrouwd adres |
 | `e2e-wordpress.js` | Tegen een echte WordPress: laden, meten, wegschrijven |
 | `e2e-app.js` | De installeerbare app: manifest, iconen, offline, toegang |
 
-De eerste vier draaien tegen `dist/testpagina.html` en hebben geen server nodig.
-De laatste twee vragen een draaiende WordPress; zie hierboven.
+De browsertests draaien tegen `dist/testpagina.html` of `demo/demo.html` en hebben
+geen server nodig; de PHP-tests draaien zonder WordPress. Alleen `e2e-*.js` en
+`browser-nee-scherm.js` vragen een draaiende WordPress; zie hierboven.
